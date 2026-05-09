@@ -1,9 +1,20 @@
 package com.telemedclinic.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+
+
+@Entity
+@Table(name = "medicines")
 public class Medicine {
 
     // Attributes
-    private final String medicineId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long medicineId;
 
     private String name;
     private String description;
@@ -12,22 +23,15 @@ public class Medicine {
     private boolean requiresPrescription;
 
 
-    // Constructor
+    // Constructor Overloading
+    public Medicine(){}
+
     public Medicine(
-            String medicineId,
             String name,
             String description,
             String category,
             boolean requiresPrescription
     ) {
-
-        if (medicineId == null || medicineId.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Medicine ID cannot be empty."
-            );
-        }
-
-        this.medicineId = medicineId;
 
         setName(name);
         setDescription(description);
@@ -38,7 +42,7 @@ public class Medicine {
 
 
     // Getter
-    public String getMedicineId() {
+    public Long getMedicineId() {
         return medicineId;
     }
 

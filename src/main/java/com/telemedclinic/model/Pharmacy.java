@@ -3,10 +3,22 @@ package com.telemedclinic.model;
 import java.util.List;
 import java.util.ArrayList;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.OneToMany;
+
+
+@Entity
+@Table(name = "pharmacies")
 public class Pharmacy {
 
     // Attributes
-    private final String pharmacyId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long pharmacyId;
 
     private String name;
     private String address;
@@ -17,19 +29,20 @@ public class Pharmacy {
 
     private boolean isActive;
 
-    private List<InventoryItem> inventoryItems;
+    @OneToMany(mappedBy = "pharmacy")
+    private List<InventoryItem> inventoryItems = new ArrayList<>();
 
 
-    // Constructor
+    // Constructor overloading
+    public Pharmacy() {}
+
     public Pharmacy(
-            String pharmacyId,
             String name,
             String address,
             String phoneNumber,
             double latitude,
             double longitude
     ) {
-        this.pharmacyId = pharmacyId;
         this.name = name;
         this.address = address;
         this.phoneNumber = phoneNumber;
@@ -43,7 +56,7 @@ public class Pharmacy {
 
 
     // Getter
-    public String getPharmacyId() {
+    public Long getPharmacyId() {
         return pharmacyId;
     }
 

@@ -2,34 +2,43 @@ package com.telemedclinic.model;
 
 import java.util.Objects;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+
+@Entity
+@Table(name = "inventory_items")
 public class InventoryItem {
 
     // Attributes
-    private final String inventoryItemId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long inventoryItemId;
 
-    private final Medicine medicine;
-    private final Pharmacy pharmacy;
+    @ManyToOne
+    @JoinColumn(name = "pharmacy_id")
+    private Pharmacy pharmacy;
+
+    @ManyToOne
+    @JoinColumn(name = "medicine_id")
+    private Medicine medicine;
 
     private int stock;
     private double price;
 
+    // Constructor overloading
+    public InventoryItem(){}
 
-    // Constructor
     public InventoryItem(
-            String inventoryItemId,
             Medicine medicine,
             Pharmacy pharmacy,
             int stock,
             double price
     ) {
-
-        if (inventoryItemId == null || inventoryItemId.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Inventory item ID cannot be empty."
-            );
-        }
-
-        this.inventoryItemId = inventoryItemId;
 
         this.medicine = Objects.requireNonNull(
                 medicine,
@@ -47,7 +56,7 @@ public class InventoryItem {
 
 
     // Getter
-    public String getInventoryItemId() {
+    public Long getInventoryItemId() {
         return inventoryItemId;
     }
 

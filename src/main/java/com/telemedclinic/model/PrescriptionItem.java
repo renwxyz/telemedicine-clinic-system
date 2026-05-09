@@ -1,4 +1,4 @@
-package domain;
+package com.telemedclinic.model;
 
 public class PrescriptionItem {
     // Atribut sesuai rancangan PDF
