@@ -1,6 +1,5 @@
 package com.telemedclinic.service;
 
-import com.telemedclinic.exception.OutOfStockException;
 import com.telemedclinic.exception.PrescriptionNotFoundException;
 import com.telemedclinic.model.Medicine;
 import com.telemedclinic.model.Prescription;
