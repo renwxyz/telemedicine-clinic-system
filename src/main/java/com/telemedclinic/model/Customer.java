@@ -1,11 +1,13 @@
 package com.telemedclinic.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Column;
 
 @Entity
 public class Customer extends User {
 
     // Attributes
+    @Column(nullable = false)
     private String address;
 
 

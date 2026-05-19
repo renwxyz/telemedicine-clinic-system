@@ -1,12 +1,16 @@
 package com.telemedclinic.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Column;
 
 @Entity
 public class Doctor extends User {
 
     // Attributes
+    @Column(nullable = false)
     private String specialization;
+
+    @Column(nullable = false, unique = true)
     private String licenseNumber;
 
 
@@ -73,6 +77,10 @@ public class Doctor extends User {
 
     // Behavior methods
     public boolean isSpecialist(String specialization) {
+
+        if (specialization == null) {
+            return false;
+        }
 
         return this.specialization.equalsIgnoreCase(
                 specialization

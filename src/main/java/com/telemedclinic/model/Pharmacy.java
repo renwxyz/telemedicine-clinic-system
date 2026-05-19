@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Column;
 
 
 @Entity
@@ -20,8 +21,13 @@ public class Pharmacy {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long pharmacyId;
 
+    @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
     private String address;
+
+    @Column(nullable = false)
     private String phoneNumber;
 
     private double latitude;
@@ -43,11 +49,12 @@ public class Pharmacy {
             double latitude,
             double longitude
     ) {
-        this.name = name;
-        this.address = address;
-        this.phoneNumber = phoneNumber;
-        this.latitude = latitude;
-        this.longitude = longitude;
+
+        setName(name);
+        setAddress(address);
+        setPhoneNumber(phoneNumber);
+        setLatitude(latitude);
+        setLongitude(longitude);
 
         this.isActive = true;
 
@@ -91,14 +98,35 @@ public class Pharmacy {
 
     // Setter
     public void setName(String name) {
+
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Pharmacy name cannot be empty."
+            );
+        }
+
         this.name = name;
     }
 
     public void setAddress(String address) {
+
+        if (address == null || address.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Pharmacy address cannot be empty."
+            );
+        }
+
         this.address = address;
     }
 
     public void setPhoneNumber(String phoneNumber) {
+
+        if (phoneNumber == null || phoneNumber.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Pharmacy phone number cannot be empty."
+            );
+        }
+
         this.phoneNumber = phoneNumber;
     }
 

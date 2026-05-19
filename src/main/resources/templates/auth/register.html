@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar sebagai Pasien - KlinikKu</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-[#FDF3F0] min-h-screen flex items-center justify-center px-4 py-8">
+    <div class="bg-white w-full max-w-lg shadow-xl rounded-2xl p-8">
+        <div class="flex flex-col items-center mb-6">
+            <div class="w-12 h-12 bg-[#FAD5C8] rounded-full flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-[#D53E0F]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+            </div>
+
+            <h1 class="text-2xl font-bold text-stone-900 text-center">Daftar sebagai Pasien</h1>
+
+            <p class="text-sm text-stone-500 text-center mt-2">
+                Bergabung dan nikmati konsultasi dokter serta beli obat dengan mudah
+            </p>
+        </div>
+
+        <div th:if="${message}"
+             class="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm mb-4">
+            <span th:text="${message}">Registrasi berhasil.</span>
+        </div>
+
+        <div th:if="${error}"
+             class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm flex items-center gap-2 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span th:text="${error}">Terjadi kesalahan, periksa kembali data Anda.</span>
+        </div>
+
+        <form th:action="@{/register/customer}"
+              th:object="${customerRequest}"
+              method="post"
+              class="space-y-4">
+
+            <div>
+                <label for="name" class="font-medium text-sm text-stone-700 mb-1 block">Nama Lengkap</label>
+                <input type="text"
+                       id="name"
+                       th:field="*{name}"
+                       placeholder="Masukkan nama lengkap Anda"
+                       class="border border-stone-200 rounded-xl px-4 py-2.5 w-full text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent transition"
+                       required>
+            </div>
+
+            <div>
+                <label for="email" class="font-medium text-sm text-stone-700 mb-1 block">Email</label>
+                <input type="email"
+                       id="email"
+                       th:field="*{email}"
+                       placeholder="contoh@email.com"
+                       class="border border-stone-200 rounded-xl px-4 py-2.5 w-full text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent transition"
+                       required>
+            </div>
+
+            <div>
+                <label for="password" class="font-medium text-sm text-stone-700 mb-1 block">Password</label>
+                <div class="relative">
+                    <input type="password"
+                           id="password"
+                           th:field="*{password}"
+                           placeholder="Minimal 8 karakter"
+                           class="border border-stone-200 rounded-xl px-4 py-2.5 w-full text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent transition pr-12"
+                           required>
+
+                    <button type="button"
+                            onclick="togglePassword()"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition cursor-pointer">
+                        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <svg id="eyeOffIcon" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <label for="phoneNumber" class="font-medium text-sm text-stone-700 mb-1 block">Nomor HP</label>
+                <input type="tel"
+                       id="phoneNumber"
+                       th:field="*{phoneNumber}"
+                       placeholder="Contoh: 08123456789"
+                       class="border border-stone-200 rounded-xl px-4 py-2.5 w-full text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent transition"
+                       required>
+            </div>
+
+            <div>
+                <label for="address" class="font-medium text-sm text-stone-700 mb-1 block">Alamat Lengkap</label>
+                <textarea id="address"
+                          th:field="*{address}"
+                          rows="3"
+                          placeholder="Jl. Contoh No. 1, Kelurahan, Kecamatan, Kota"
+                          class="border border-stone-200 rounded-xl px-4 py-2.5 w-full text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent transition resize-none"
+                          required></textarea>
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-[#D53E0F] hover:bg-[#5E0006] text-white font-semibold py-3 rounded-xl transition-colors duration-200 text-sm mt-2 cursor-pointer">
+                Daftar Sekarang
+            </button>
+        </form>
+
+        <div class="border-t border-stone-100 mt-6 pt-4 text-center">
+            <p class="text-sm text-stone-500">
+                Sudah punya akun?
+                <a th:href="@{/auth/login}" class="text-[#D53E0F] hover:text-[#5E0006] font-semibold transition-colors">
+                    Masuk di sini
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eyeIcon');
+            const eyeOffIcon = document.getElementById('eyeOffIcon');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.add('hidden');
+                eyeOffIcon.classList.remove('hidden');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('hidden');
+                eyeOffIcon.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

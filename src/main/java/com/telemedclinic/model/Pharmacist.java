@@ -3,15 +3,17 @@ package com.telemedclinic.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Column;
 
 @Entity
 public class Pharmacist extends User {
 
     // Attributes
+    @Column(nullable = false, unique = true)
     private String licenseNumber;
 
-    @ManyToOne
-    @JoinColumn(name = "pharmacy_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "pharmacy_id", nullable = false)
     private Pharmacy pharmacy;
 
 
@@ -79,6 +81,14 @@ public class Pharmacist extends User {
     // Behavior methods
     public boolean isAssignedTo(Pharmacy pharmacy) {
 
-        return this.pharmacy.equals(pharmacy);
+        if (pharmacy == null) {
+            return false;
+        }
+
+        if (this.pharmacy.getPharmacyId() == null || pharmacy.getPharmacyId() == null) {
+            return this.pharmacy == pharmacy;
+        }
+
+        return this.pharmacy.getPharmacyId().equals(pharmacy.getPharmacyId());
     }
 }

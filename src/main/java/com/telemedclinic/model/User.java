@@ -5,9 +5,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
+@Table(name = "users")
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class User {
 
@@ -16,9 +20,16 @@ public abstract class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
+    @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
     private String phoneNumber;
 
 
@@ -84,6 +95,12 @@ public abstract class User {
             );
         }
 
+        if (!email.contains("@")) {
+            throw new IllegalArgumentException(
+                    "Email must contain @."
+            );
+        }
+
         this.email = email;
     }
 
@@ -122,5 +139,17 @@ public abstract class User {
 
     public void changePassword(String newPassword) {
         setPassword(newPassword);
+    }
+
+    public boolean matchesPassword(
+            String rawPassword,
+            PasswordEncoder passwordEncoder
+    ) {
+
+        if (rawPassword == null || passwordEncoder == null) {
+            return false;
+        }
+
+        return passwordEncoder.matches(rawPassword, this.password);
     }
 }
