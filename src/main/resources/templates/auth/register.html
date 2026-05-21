@@ -46,7 +46,7 @@
               class="space-y-4">
             
             <!-- CSRF Token untuk keamanan -->
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             
             <!-- Field 1: Nama Lengkap -->
             <div>

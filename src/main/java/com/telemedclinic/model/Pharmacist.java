@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 @Entity
 public class Pharmacist extends User {
@@ -18,6 +20,10 @@ public class Pharmacist extends User {
     @ManyToOne(optional = false)
     @JoinColumn(name = "pharmacy_id", nullable = false)
     private Pharmacy pharmacy;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PartnerApplicationStatus applicationStatus;
 
 
     // No-args constructor for JPA
@@ -45,6 +51,7 @@ public class Pharmacist extends User {
         setPhoneNumber(phoneNumber);
         setLicenseNumber(licenseNumber);
         setPharmacy(pharmacy);
+        this.applicationStatus = PartnerApplicationStatus.APPROVED;
     }
 
 
@@ -59,6 +66,10 @@ public class Pharmacist extends User {
 
     public Pharmacy getPharmacy() {
         return pharmacy;
+    }
+
+    public PartnerApplicationStatus getApplicationStatus() {
+        return applicationStatus;
     }
 
 
@@ -96,6 +107,17 @@ public class Pharmacist extends User {
         this.pharmacy = pharmacy;
     }
 
+    public void setApplicationStatus(PartnerApplicationStatus applicationStatus) {
+
+        if (applicationStatus == null) {
+            throw new IllegalArgumentException(
+                    "Application status cannot be null."
+            );
+        }
+
+        this.applicationStatus = applicationStatus;
+    }
+
 
     // Behavior methods
     public void updateProfile(
@@ -118,5 +140,9 @@ public class Pharmacist extends User {
         }
 
         return this.pharmacy.getPharmacyId().equals(pharmacy.getPharmacyId());
+    }
+
+    public boolean isApprovedPartner() {
+        return PartnerApplicationStatus.APPROVED.equals(applicationStatus);
     }
 }

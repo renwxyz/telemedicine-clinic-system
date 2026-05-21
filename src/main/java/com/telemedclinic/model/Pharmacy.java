@@ -68,8 +68,8 @@ public class Pharmacy {
         setLatitude(latitude);
         setLongitude(longitude);
 
-        this.isActive = false;
-        this.applicationStatus = PartnerApplicationStatus.PENDING;
+        this.isActive = true;
+        this.applicationStatus = PartnerApplicationStatus.APPROVED;
 
         this.inventoryItems = new ArrayList<>();
     }

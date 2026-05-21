@@ -30,7 +30,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    // Menampilkan halaman login customer.
+    // Menampilkan halaman login.
     @GetMapping("/login")
     public String showLoginPage(
             @RequestParam(value = "registered", required = false) Boolean registered,
@@ -46,7 +46,7 @@ public class AuthController {
         return "auth/login";
     }
 
-    // Memproses submit form login customer.
+    // Memproses submit form login dan mengarahkan user sesuai role.
     @PostMapping("/login")
     public String login(
             @Valid @ModelAttribute("loginForm") LoginForm loginForm,
@@ -67,15 +67,22 @@ public class AuthController {
                     )
             );
 
-            if (authResponse.getRole() != Role.ROLE_CUSTOMER) {
-                model.addAttribute("error", "Akun ini bukan akun customer.");
-                return "auth/login";
-            }
-
             session.setAttribute("currentUserId", authResponse.getUserId());
             session.setAttribute("currentUserName", authResponse.getName());
             session.setAttribute("currentUserEmail", authResponse.getEmail());
             session.setAttribute("currentUserRole", authResponse.getRole());
+
+            if (authResponse.getRole() == Role.ROLE_ADMIN) {
+                return "redirect:/admin/dashboard";
+            }
+
+            if (authResponse.getRole() == Role.ROLE_PHARMACIST) {
+                return "redirect:/pharmacist/dashboard";
+            }
+
+            if (authResponse.getRole() == Role.ROLE_DOCTOR) {
+                return "redirect:/doctor/dashboard";
+            }
 
             return "redirect:/customer/dashboard";
         } catch (RuntimeException exception) {
@@ -84,11 +91,18 @@ public class AuthController {
         }
     }
 
-    // Menghapus session login customer.
+    // Menghapus session login.
+    @GetMapping("/logout")
+    public String logoutWithGet(HttpSession session) {
+        session.invalidate();
+        return "redirect:/auth/login?logout=true";
+    }
+
+    // Menghapus session login.
     @PostMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/auth/login";
+        return "redirect:/auth/login?logout=true";
     }
 
     // Menampilkan halaman registrasi customer.

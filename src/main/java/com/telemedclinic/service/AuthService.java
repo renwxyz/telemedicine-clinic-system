@@ -2,6 +2,7 @@ package com.telemedclinic.service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.telemedclinic.dto.AuthResponse;
 import com.telemedclinic.dto.CreatePharmacistAccountRequest;
@@ -38,6 +39,8 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    // Mendaftarkan customer baru dengan password yang sudah di-hash.
+    @Transactional
     public AuthResponse registerCustomer(CustomerRegisterRequest request) {
         ensureEmailIsAvailable(request.getEmail());
 
@@ -56,6 +59,8 @@ public class AuthService {
         return toAuthResponse(userRepository.save(customer));
     }
 
+    // Membuat akun doctor baru dengan status aplikasi default dari domain model.
+    @Transactional
     public Doctor registerDoctor(DoctorRegisterRequest request) {
         ensureEmailIsAvailable(request.getEmail());
 
@@ -71,18 +76,30 @@ public class AuthService {
         return userRepository.save(doctor);
     }
 
+    // Menyimpan perubahan data doctor.
+    @Transactional
+    public Doctor saveDoctor(Doctor doctor) {
+        return doctorRepository.save(doctor);
+    }
+
+    // Menyetujui aplikasi doctor agar dapat digunakan sebagai partner.
+    @Transactional
     public Doctor approveDoctor(Long doctorId) {
         Doctor doctor = findDoctorById(doctorId);
         doctor.approveApplication();
         return doctorRepository.save(doctor);
     }
 
+    // Menolak aplikasi doctor agar tidak dapat digunakan sebagai partner.
+    @Transactional
     public Doctor declineDoctor(Long doctorId) {
         Doctor doctor = findDoctorById(doctorId);
         doctor.declineApplication();
         return doctorRepository.save(doctor);
     }
 
+    // Membuat akun pharmacist untuk pharmacy yang sudah approved dan aktif.
+    @Transactional
     public AuthResponse createPharmacistAccount(CreatePharmacistAccountRequest request) {
         ensureEmailIsAvailable(request.getEmail());
 
@@ -105,6 +122,7 @@ public class AuthService {
         return toAuthResponse(userRepository.save(pharmacist));
     }
 
+    // Memvalidasi kredensial login dan memastikan akun masih aktif.
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid email or password."));
@@ -113,12 +131,18 @@ public class AuthService {
             throw new IllegalArgumentException("Invalid email or password.");
         }
 
+        if (!user.isActive()) {
+            throw new IllegalStateException("User account is inactive.");
+        }
+
         if (user instanceof Doctor doctor && !doctor.isApprovedPartner()) {
             throw new IllegalStateException("Doctor account is not approved.");
         }
 
         if (user instanceof Pharmacist pharmacist
-                && (!pharmacist.getPharmacy().isApprovedPartner() || !pharmacist.getPharmacy().isActive())) {
+                && (!pharmacist.isApprovedPartner()
+                || !pharmacist.getPharmacy().isApprovedPartner()
+                || !pharmacist.getPharmacy().isActive())) {
             throw new IllegalStateException("Pharmacy account is not approved and active.");
         }
 

@@ -45,7 +45,7 @@
       
       <!-- CSRF Token -->
       <!-- Token CSRF untuk keamanan form submission -->
-      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+      <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
       <!-- Field Email -->
       <div>

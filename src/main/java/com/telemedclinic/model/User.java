@@ -37,6 +37,9 @@ public abstract class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(nullable = false)
+    private boolean active = true;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -80,6 +83,10 @@ public abstract class User {
 
     public Role getRole() {
         return role;
+    }
+
+    public boolean isActive() {
+        return active;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -138,6 +145,10 @@ public abstract class User {
         this.role = role;
     }
 
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     @PrePersist
     protected void setCreatedAtBeforePersist() {
         if (createdAt == null) {
@@ -153,6 +164,18 @@ public abstract class User {
 
     public void changePassword(String newPassword) {
         setPassword(newPassword);
+    }
+
+    public void activate() {
+        setActive(true);
+    }
+
+    public void deactivate() {
+        setActive(false);
+    }
+
+    public void toggleActiveStatus() {
+        setActive(!active);
     }
 
     public boolean matchesPassword(

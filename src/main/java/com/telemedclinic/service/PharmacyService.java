@@ -1,6 +1,7 @@
 package com.telemedclinic.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.telemedclinic.dto.PharmacyRegisterRequest;
 import com.telemedclinic.model.Pharmacy;
@@ -15,6 +16,8 @@ public class PharmacyService {
         this.pharmacyRepository = pharmacyRepository;
     }
 
+    // Mendaftarkan pharmacy baru menggunakan data input yang diterima service.
+    @Transactional
     public Pharmacy registerPharmacy(PharmacyRegisterRequest request) {
         Pharmacy pharmacy = new Pharmacy(
                 request.getName(),
@@ -28,18 +31,24 @@ public class PharmacyService {
         return pharmacyRepository.save(pharmacy);
     }
 
+    // Menyetujui aplikasi pharmacy dan mengaktifkannya.
+    @Transactional
     public Pharmacy approvePharmacy(Long pharmacyId) {
         Pharmacy pharmacy = findPharmacyById(pharmacyId);
         pharmacy.approveApplication();
         return pharmacyRepository.save(pharmacy);
     }
 
+    // Menolak aplikasi pharmacy dan menonaktifkannya.
+    @Transactional
     public Pharmacy declinePharmacy(Long pharmacyId) {
         Pharmacy pharmacy = findPharmacyById(pharmacyId);
         pharmacy.declineApplication();
         return pharmacyRepository.save(pharmacy);
     }
 
+    // Mengaktifkan pharmacy yang sudah approved.
+    @Transactional
     public void activatePharmacy(Long pharmacyId) {
         Pharmacy pharmacy = findPharmacyById(pharmacyId);
         if (!pharmacy.isApprovedPartner()) {
@@ -50,6 +59,8 @@ public class PharmacyService {
         pharmacyRepository.save(pharmacy);
     }
 
+    // Menonaktifkan pharmacy.
+    @Transactional
     public void deactivatePharmacy(Long pharmacyId) {
         Pharmacy pharmacy = findPharmacyById(pharmacyId);
         pharmacy.deactivate();

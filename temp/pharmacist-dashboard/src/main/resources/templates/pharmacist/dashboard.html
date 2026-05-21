@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Pharmacist - KlinikKu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#FDF3F0]">
+    <!-- Section: Main Layout -->
+    <div class="flex min-h-screen">
+        
+        <!-- Section: Sidebar -->
+        <aside class="w-64 flex-shrink-0 bg-white border-r border-stone-200 flex flex-col">
+            
+            <!-- Section: Logo -->
+            <div class="px-6 py-4 border-b border-stone-200">
+                <a th:href="@{/}" class="flex items-center gap-2">
+                    <svg class="w-8 h-8 text-[#D53E0F]" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/>
+                    </svg>
+                    <span class="font-bold text-stone-900 text-lg">KlinikKu</span>
+                </a>
+            </div>
+            
+            <!-- Section: Profil Pharmacist -->
+            <div class="px-6 py-4 border-b border-stone-200">
+                <div class="flex items-center gap-3">
+                    <!-- Thymeleaf: Avatar dengan inisial nama pharmacist -->
+                    <div class="rounded-full bg-[#FAD5C8] w-10 h-10 flex items-center justify-center">
+                        <span class="text-[#D53E0F] font-bold text-sm">SD</span>
+                    </div>
+                    <div>
+                        <!-- Thymeleaf: Nama pharmacist -->
+                        <p th:text="${pharmacist.name}" class="font-semibold text-stone-900 text-sm">Apt. Sari Dewi</p>
+                        <!-- Thymeleaf: Nama pharmacy -->
+                        <p th:text="${pharmacist.pharmacyName}" class="text-xs text-stone-500">Apotek Sehat Jaya</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section: Toggle Status Apotek -->
+            <div class="px-6 py-4 border-b border-stone-200">
+                <label class="text-xs font-medium text-stone-500 mb-2 block">Status Apotek</label>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs text-stone-400">Nonaktif</span>
+                    <input type="checkbox" id="statusToggle" class="hidden" checked>
+                    <label for="statusToggle" id="toggleLabel" class="w-11 h-6 rounded-full bg-[#D53E0F] cursor-pointer relative transition-colors">
+                        <div id="toggleKnob" class="w-4 h-4 bg-white rounded-full absolute top-1 transition-transform translate-x-6"></div>
+                    </label>
+                    <span id="statusTextActive" class="text-xs font-semibold text-[#D53E0F]">Aktif</span>
+                </div>
+                <!-- Thymeleaf: Badge status dinamis -->
+                <div class="mt-2">
+                    <span id="statusBadge" class="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">Aktif</span>
+                </div>
+            </div>
+            
+            <!-- Section: Menu Navigasi -->
+            <nav class="px-4 py-4 space-y-1 flex-1">
+                <!-- Menu Dashboard - AKTIF -->
+                <a th:href="@{/pharmacist/dashboard}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm bg-[#FDF3F0] text-[#D53E0F] font-semibold border-l-4 border-[#D53E0F]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    Dashboard
+                </a>
+                
+                <!-- Menu Kelola Order -->
+                <a th:href="@{/pharmacist/orders}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-stone-600 hover:bg-[#FDF3F0] hover:text-[#D53E0F] transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                    Kelola Order
+                </a>
+                
+                <!-- Menu Stok Obat -->
+                <a th:href="@{/pharmacist/medicines}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-stone-600 hover:bg-[#FDF3F0] hover:text-[#D53E0F] transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                    </svg>
+                    Stok Obat
+                </a>
+                
+                <!-- Menu Profil -->
+                <a th:href="@{/pharmacist/profile}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-stone-600 hover:bg-[#FDF3F0] hover:text-[#D53E0F] transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    Profil
+                </a>
+            </nav>
+            
+            <!-- Section: Tombol Logout -->
+            <div class="mt-auto px-4 py-4 border-t border-stone-200">
+                <a th:href="@{/auth/logout}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-500 hover:bg-red-50 transition-colors w-full">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                    Keluar
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Section: Konten Utama -->
+        <main class="flex-1 bg-[#FDF3F0] overflow-y-auto">
+            
+            <!-- Section: Header Konten -->
+            <header class="bg-white border-b border-stone-200 px-8 py-4">
+                <!-- Thymeleaf: Greeting dengan nama pharmacist -->
+                <h1 class="text-xl font-bold text-stone-900">
+                    Selamat Datang, <span th:text="${pharmacist.name}">Apt. Sari Dewi</span> 👋
+                </h1>
+                <!-- Thymeleaf: Nama pharmacy dan tanggal -->
+                <p class="text-sm text-stone-500 mt-0.5">
+                    <span th:text="${pharmacist.pharmacyName}">Apotek Sehat Jaya</span> · Kamis, 21 Mei 2026
+                </p>
+            </header>
+            
+            <!-- Section: Konten Dashboard -->
+            <div class="px-8 py-6">
+                
+                <!-- Section: Info Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    
+                    <!-- Card 1: Order Hari Ini -->
+                    <div class="bg-white rounded-2xl shadow-md p-5 border border-stone-200 flex flex-col gap-2">
+                        <div class="bg-[#FAD5C8] rounded-xl p-2 w-10 h-10 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-[#D53E0F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                            </svg>
+                        </div>
+                        <!-- Thymeleaf: Jumlah order hari ini -->
+                        <span th:text="${stats.ordersToday}" class="text-2xl font-extrabold text-stone-900">12</span>
+                        <span class="text-xs text-stone-500">Order Hari Ini</span>
+                        <span class="text-xs text-green-600 font-medium">+3 dari kemarin</span>
+                    </div>
+                    
+                    <!-- Card 2: Order Pending -->
+                    <div class="bg-white rounded-2xl shadow-md p-5 border border-stone-200 flex flex-col gap-2">
+                        <div class="bg-yellow-100 rounded-xl p-2 w-10 h-10 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <!-- Thymeleaf: Jumlah order pending -->
+                        <span th:text="${stats.ordersPending}" class="text-2xl font-extrabold text-stone-900">5</span>
+                        <span class="text-xs text-stone-500">Menunggu Diproses</span>
+                        <span class="bg-yellow-100 text-yellow-700 text-xs font-semibold px-2 py-0.5 rounded-full w-fit">Perlu Tindakan</span>
+                    </div>
+                    
+                    <!-- Card 3: Stok Menipis -->
+                    <div class="bg-white rounded-2xl shadow-md p-5 border border-stone-200 flex flex-col gap-2">
+                        <div class="bg-red-100 rounded-xl p-2 w-10 h-10 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </div>
+                        <!-- Thymeleaf: Jumlah stok menipis -->
+                        <span th:text="${stats.lowStockCount}" class="text-2xl font-extrabold text-red-600">8</span>
+                        <span class="text-xs text-stone-500">Obat Stok Menipis</span>
+                        <span class="bg-red-100 text-red-700 text-xs font-semibold px-2 py-0.5 rounded-full w-fit">Perlu Restock</span>
+                    </div>
+                    
+                    <!-- Card 4: Total Obat -->
+                    <div class="bg-white rounded-2xl shadow-md p-5 border border-stone-200 flex flex-col gap-2">
+                        <div class="bg-[#FAD5C8] rounded-xl p-2 w-10 h-10 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-[#D53E0F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                            </svg>
+                        </div>
+                        <!-- Thymeleaf: Total jenis obat -->
+                        <span th:text="${stats.totalMedicines}" class="text-2xl font-extrabold text-stone-900">143</span>
+                        <span class="text-xs text-stone-500">Total Jenis Obat</span>
+                        <span class="text-xs text-green-600 font-medium">Aktif tersedia</span>
+                    </div>
+                </div>
+                
+                <!-- Section: Dua Kolom (Order & Stok) -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    
+                    <!-- Section: Order Masuk Terbaru -->
+                    <div class="bg-white rounded-2xl shadow-md border border-stone-200">
+                        <!-- Header -->
+                        <div class="flex justify-between items-center px-6 py-4 border-b border-stone-100">
+                            <h2 class="font-bold text-stone-900">Order Masuk</h2>
+                            <a th:href="@{/pharmacist/orders}" class="text-xs text-[#D53E0F] hover:text-[#5E0006] font-medium">Lihat Semua →</a>
+                        </div>
+                        
+                        <!-- List Order -->
+                        <!-- Thymeleaf: Loop untuk setiap order -->
+                        <div class="px-6 divide-y divide-stone-100">
+                            
+                            <!-- Order Item 1 - PENDING -->
+                            <div th:each="order : ${recentOrders}" class="py-4 flex items-center justify-between">
+                                <div>
+                                    <!-- Thymeleaf: ID Order -->
+                                    <p th:text="${order.id}" class="text-sm font-semibold text-stone-900">ORD-0041</p>
+                                    <!-- Thymeleaf: Nama Customer -->
+                                    <p th:text="${order.customerName}" class="text-xs text-stone-500">Budi Santoso</p>
+                                    <p class="text-xs text-stone-400 mt-0.5">3 item · Rp 85.000</p>
+                                </div>
+                                <div class="text-right">
+                                    <!-- Thymeleaf: Status Badge -->
+                                    <span th:text="${order.status}" class="bg-yellow-100 text-yellow-700 text-xs font-semibold px-2.5 py-1 rounded-full">PENDING</span>
+                                    <p class="text-xs text-stone-400 mt-1">10 mnt lalu</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Dummy Order Items untuk preview -->
+                            <div class="py-4 flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold text-stone-900">ORD-0040</p>
+                                    <p class="text-xs text-stone-500">Ani Wijaya</p>
+                                    <p class="text-xs text-stone-400 mt-0.5">2 item · Rp 45.000</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="bg-yellow-100 text-yellow-700 text-xs font-semibold px-2.5 py-1 rounded-full">PENDING</span>
+                                    <p class="text-xs text-stone-400 mt-1">25 mnt lalu</p>
+                                </div>
+                            </div>
+                            
+                            <div class="py-4 flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold text-stone-900">ORD-0039</p>
+                                    <p class="text-xs text-stone-500">Dedi Kurniawan</p>
+                                    <p class="text-xs text-stone-400 mt-0.5">5 item · Rp 120.000</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full">IN_PROGRESS</span>
+                                    <p class="text-xs text-stone-400 mt-1">1 jam lalu</p>
+                                </div>
+                            </div>
+                            
+                            <div class="py-4 flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold text-stone-900">ORD-0038</p>
+                                    <p class="text-xs text-stone-500">Rina Permata</p>
+                                    <p class="text-xs text-stone-400 mt-0.5">1 item · Rp 25.000</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="bg-purple-100 text-purple-700 text-xs font-semibold px-2.5 py-1 rounded-full">SHIPPED</span>
+                                    <p class="text-xs text-stone-400 mt-1">2 jam lalu</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Footer -->
+                        <div class="px-6 pb-4 pt-2">
+                            <a th:href="@{/pharmacist/orders}" class="border border-[#D53E0F] text-[#D53E0F] hover:bg-[#FDF3F0] font-semibold text-sm py-2.5 rounded-xl transition-colors block text-center">
+                                Kelola Semua Order
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Section: Stok Obat Menipis -->
+                    <div class="bg-white rounded-2xl shadow-md border border-stone-200">
+                        <!-- Header -->
+                        <div class="flex justify-between items-center px-6 py-4 border-b border-stone-100">
+                            <h2 class="font-bold text-stone-900">Stok Menipis</h2>
+                            <a th:href="@{/pharmacist/medicines}" class="text-xs text-[#D53E0F] hover:text-[#5E0006] font-medium">Kelola Stok →</a>
+                        </div>
+                        
+                        <!-- List Obat Menipis -->
+                        <!-- Thymeleaf: Loop untuk setiap obat menipis -->
+                        <div class="px-6 divide-y divide-stone-100">
+                            
+                            <!-- Obat 1: Stok ≤ 5 (merah) -->
+                            <div th:each="medicine : ${lowStockMedicines}" class="py-4 flex items-center justify-between">
+                                <div>
+                                    <!-- Thymeleaf: Nama obat -->
+                                    <p th:text="${medicine.name}" class="text-sm font-semibold text-stone-900">Paracetamol 500mg</p>
+                                    <p class="text-xs text-stone-500">Analgesik</p>
+                                </div>
+                                <div class="text-right">
+                                    <!-- Thymeleaf: Stok -->
+                                    <p class="text-red-600 font-bold"><span th:text="${medicine.stock}">3</span> pcs</p>
+                                    <div class="bg-stone-100 rounded-full h-1.5 w-20 mt-1">
+                                        <div class="bg-red-500 rounded-full h-1.5" style="width: 3%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Obat 2: Stok ≤ 10 (kuning) -->
+                            <div class="py-4 flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold text-stone-900">Amoxicillin 250mg</p>
+                                    <p class="text-xs text-stone-500">Antibiotik</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-yellow-600 font-bold">7 pcs</p>
+                                    <div class="bg-stone-100 rounded-full h-1.5 w-20 mt-1">
+                                        <div class="bg-yellow-500 rounded-full h-1.5" style="width: 14%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Obat 3: Stok ≤ 10 (kuning) -->
+                            <div class="py-4 flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold text-stone-900">Antasida Doen</p>
+                                    <p class="text-xs text-stone-500">Antasida</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-yellow-600 font-bold">10 pcs</p>
+                                    <div class="bg-stone-100 rounded-full h-1.5 w-20 mt-1">
+                                        <div class="bg-yellow-500 rounded-full h-1.5" style="width: 12.5%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Obat 4: Stok ≤ 5 (merah) -->
+                            <div class="py-4 flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold text-stone-900">Vitamin C 1000mg</p>
+                                    <p class="text-xs text-stone-500">Suplemen</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-red-600 font-bold">5 pcs</p>
+                                    <div class="bg-stone-100 rounded-full h-1.5 w-20 mt-1">
+                                        <div class="bg-red-500 rounded-full h-1.5" style="width: 4.2%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Footer -->
+                        <div class="px-6 pb-4 pt-2">
+                            <a th:href="@{/pharmacist/medicines}" class="bg-[#D53E0F] hover:bg-[#5E0006] text-white font-semibold text-sm py-2.5 rounded-xl transition-colors block text-center">
+                                Upload CSV Stok
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Section: JavaScript Toggle Status -->
+    <script>
+        const statusToggle = document.getElementById('statusToggle');
+        const toggleLabel = document.getElementById('toggleLabel');
+        const toggleKnob = document.getElementById('toggleKnob');
+        const statusTextActive = document.getElementById('statusTextActive');
+        const statusBadge = document.getElementById('statusBadge');
+        
+        function updateToggleUI() {
+            if (statusToggle.checked) {
+                // Aktif
+                toggleLabel.classList.remove('bg-stone-300');
+                toggleLabel.classList.add('bg-[#D53E0F]');
+                toggleKnob.classList.remove('translate-x-1');
+                toggleKnob.classList.add('translate-x-6');
+                statusTextActive.textContent = 'Aktif';
+                statusTextActive.classList.remove('text-stone-400');
+                statusTextActive.classList.add('text-[#D53E0F]');
+                statusBadge.textContent = 'Aktif';
+                statusBadge.classList.remove('bg-stone-100', 'text-stone-500');
+                statusBadge.classList.add('bg-green-100', 'text-green-700');
+            } else {
+                // Nonaktif
+                toggleLabel.classList.remove('bg-[#D53E0F]');
+                toggleLabel.classList.add('bg-stone-300');
+                toggleKnob.classList.remove('translate-x-6');
+                toggleKnob.classList.add('translate-x-1');
+                statusTextActive.textContent = 'Aktif';
+                statusTextActive.classList.remove('text-[#D53E0F]');
+                statusTextActive.classList.add('text-stone-400');
+                statusBadge.textContent = 'Nonaktif';
+                statusBadge.classList.remove('bg-green-100', 'text-green-700');
+                statusBadge.classList.add('bg-stone-100', 'text-stone-500');
+            }
+        }
+        
+        statusToggle.addEventListener('change', updateToggleUI);
+        
+        // Initialize on page load
+        updateToggleUI();
+    </script>
+</body>
+</html>
