@@ -9,7 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 
-import com.telemedclinic.model.Role;
+import com.telemedclinic.user.entity.Role;
 
 @Configuration
 public class SecurityConfig {

@@ -6,8 +6,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.telemedclinic.model.Admin;
-import com.telemedclinic.repository.AdminRepository;
+import com.telemedclinic.user.entity.Admin;
+import com.telemedclinic.user.repository.AdminRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
