@@ -1,8 +1,13 @@
 package com.telemedclinic.customer.controller;
 
 import jakarta.servlet.http.HttpSession;
+<<<<<<< HEAD
 import java.util.Comparator;
 import java.util.List;
+=======
+
+import java.util.List; 
+>>>>>>> 103fc24b50cb519bd73eb5caeaa89c08468a9cfc
 import java.util.Map;
 import java.util.Optional;
 
