@@ -2,7 +2,7 @@ package com.telemedclinic.customer.controller;
 
 import jakarta.servlet.http.HttpSession;
 
-import java.util.List;
+import java.util.List; 
 import java.util.Map;
 
 import org.springframework.stereotype.Controller;
