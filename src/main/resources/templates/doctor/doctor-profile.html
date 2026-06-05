@@ -53,21 +53,21 @@
               <div class="w-24 h-24 bg-white rounded-2xl p-1 shadow-md">
                 <div
                   class="w-full h-full bg-orange-100 rounded-xl flex items-center justify-center text-4xl font-bold text-[#D53E0F]"
-                  th:text="${doctor != null} ? ${#strings.toUpperCase(doctor.name.substring(0,2))} : 'DR'"
+                  th:text="${doctor != null and doctor.name != null and doctor.name.length() >= 2 ? #strings.toUpperCase(doctor.name.substring(0,2)) : 'DR'}"
                 >
                   AF
                 </div>
               </div>
-              <div class="pb-1">
+              <div class="mt-14">
                 <h2
                   class="text-2xl font-extrabold text-stone-900"
-                  th:text="${doctor != null} ? 'Dr. ' + doctor.name : 'Dr. -'"
+                  th:text="${doctor != null and doctor.name != null ? doctor.name : 'Dr. -'}"
                 >
                   Dr. Ahmad Fauzi, Sp.PD
                 </h2>
                 <p
                   class="text-stone-500 font-medium"
-                  th:text="${doctor != null} ? doctor.specialization : ''"
+                  th:text="${doctor != null and doctor.specialization != null ? doctor.specialization : 'Spesialis -'}"
                 >
                   Spesialis Penyakit Dalam
                 </p>
@@ -105,7 +105,7 @@
                 >
                 <input
                   type="email"
-                  th:value="${doctor != null} ? doctor.email : ''"
+                  th:value="${doctor.email}"
                   class="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl font-medium text-stone-700 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition"
                   readonly
                 />
@@ -121,7 +121,7 @@
                 >
                 <input
                   type="text"
-                  th:value="${doctor != null} ? doctor.phoneNumber : ''"
+                  th:value="${doctor.phoneNumber}"
                   class="w-full px-4 py-2.5 bg-white border border-stone-300 rounded-xl font-medium text-stone-900 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition"
                 />
               </div>
@@ -165,7 +165,7 @@
                 >
                 <input
                   type="text"
-                  th:value="${doctor != null} ? doctor.licenseNumber : ''"
+                  th:value="${doctor.licenseNumber}"
                   class="w-full px-4 py-2.5 bg-white border border-stone-300 rounded-xl font-medium text-stone-900 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition"
                 />
               </div>
