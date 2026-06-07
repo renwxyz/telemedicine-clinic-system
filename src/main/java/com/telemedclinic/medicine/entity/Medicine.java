@@ -21,8 +21,7 @@ public class Medicine {
     private String category;
 
     private boolean requiresPrescription;
-
-
+    private String imageUrl;
     // Constructor Overloading
     public Medicine(){}
 
@@ -30,14 +29,24 @@ public class Medicine {
             String name,
             String description,
             String category,
-            boolean requiresPrescription
+            boolean requiresPrescription,
+            String imageUrl
     ) {
 
         setName(name);
         setDescription(description);
         setCategory(category);
-
         this.requiresPrescription = requiresPrescription;
+        this.imageUrl = imageUrl;
+    }
+
+    public Medicine(
+            String name,
+            String description,
+            String category,
+            boolean requiresPrescription
+    ) {
+        this(name, description, category, requiresPrescription, null);
     }
 
 
@@ -60,6 +69,10 @@ public class Medicine {
 
     public boolean isRequiresPrescription() {
         return requiresPrescription;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
     }
 
 
@@ -99,6 +112,10 @@ public class Medicine {
 
     public void setRequiresPrescription(boolean requiresPrescription) {
         this.requiresPrescription = requiresPrescription;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
 

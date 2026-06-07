@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,11 +8,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
     </style>
 </head>
+
 <body class="bg-stone-50 text-stone-900">
     <!-- Navbar -->
     <div th:replace="~{fragments/customer-navbar :: customerNavbar('consultations')}"></div>
@@ -19,106 +24,183 @@
     <!-- Main Content -->
     <div class="pt-20">
         <div class="p-8">
-                <!-- Page Header -->
-                <div class="mb-8">
-                    <h1 class="text-4xl font-bold text-stone-900 mb-2">Konsultasi Dokter</h1>
-                    <p class="text-stone-600">Kelola konsultasi Anda dengan dokter</p>
-                </div>
+            <!-- Page Header -->
+            <div class="mb-8">
+                <h1 class="text-4xl font-bold text-stone-900 mb-2">Konsultasi Dokter</h1>
+                <p class="text-stone-600">Kelola konsultasi Anda dengan dokter</p>
+            </div>
 
-                <!-- Alert Messages -->
-                <div th:if="${success}" th:replace="~{fragments/alerts :: success(${success})}"></div>
+            <!-- Alert Messages -->
+            <div th:if="${success}" th:replace="~{fragments/alerts :: success(${success})}"></div>
 
-                <!-- Tab Navigation -->
-                <div class="bg-white rounded-2xl border border-stone-200 mb-8 flex flex-wrap">
-                    <a th:href="@{/customer/consultations}" 
-                       class="px-6 py-4 font-semibold border-b-2 transition"
-                       th:classappend="${status == null || status == ''} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
-                        Semua
-                    </a>
-                    <a th:href="@{/customer/consultations(status=PENDING)}" 
-                       class="px-6 py-4 font-semibold border-b-2 transition"
-                       th:classappend="${status == 'PENDING'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
-                        Menunggu
-                    </a>
-                    <a th:href="@{/customer/consultations(status=IN_PROGRESS)}" 
-                       class="px-6 py-4 font-semibold border-b-2 transition"
-                       th:classappend="${status == 'IN_PROGRESS'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
-                        Berlangsung
-                    </a>
-                    <a th:href="@{/customer/consultations(status=COMPLETED)}" 
-                       class="px-6 py-4 font-semibold border-b-2 transition"
-                       th:classappend="${status == 'COMPLETED'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
-                        Selesai
-                    </a>
-                </div>
+            <!-- Tab Navigation -->
+            <div class="bg-white rounded-2xl border border-stone-200 mb-8 flex flex-wrap">
+                <a th:href="@{/customer/consultations}" class="px-6 py-4 font-semibold border-b-2 transition"
+                    th:classappend="${status == null || status == ''} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
+                    Semua
+                </a>
+                <a th:href="@{/customer/consultations(status=PENDING)}"
+                    class="px-6 py-4 font-semibold border-b-2 transition"
+                    th:classappend="${status == 'PENDING'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
+                    Menunggu
+                </a>
+                <a th:href="@{/customer/consultations(status=IN_PROGRESS)}"
+                    class="px-6 py-4 font-semibold border-b-2 transition"
+                    th:classappend="${status == 'IN_PROGRESS'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
+                    Berlangsung
+                </a>
+                <a th:href="@{/customer/consultations(status=COMPLETED)}"
+                    class="px-6 py-4 font-semibold border-b-2 transition"
+                    th:classappend="${status == 'COMPLETED'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
+                    Selesai
+                </a>
+            </div>
 
-                <!-- Consultations List -->
-                <div class="space-y-4 mb-8">
-                    <div th:each="consultation : ${consultations}" 
-                         class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm hover:shadow-md transition">
-                        <div class="flex gap-4">
-                            <!-- Doctor Avatar -->
-                            <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                <span class="font-bold text-orange-600 text-lg">DR</span>
+            <!-- Consultations List -->
+            <div class="space-y-4 mb-8">
+                <div th:each="consultation : ${consultations}"
+                    class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm hover:shadow-md transition-all duration-300">
+                    <div class="flex gap-4">
+                        <div
+                            class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 shadow-inner">
+                            <i class="fas fa-user-doctor text-2xl text-orange-500"></i>
+                        </div>
+
+                        <div class="flex-1">
+                            <div class="flex flex-col sm:flex-row sm:items-start justify-between mb-2 gap-2">
+                                <div>
+                                    <h3 class="text-lg font-bold text-stone-900" th:text="${consultation.doctorName}">
+                                        Dr. Ahmad Suryanto</h3>
+                                    <p class="text-sm font-medium text-stone-500 mt-0.5"><i
+                                            class="fas fa-stethoscope mr-1"></i> <span
+                                            th:text="${consultation.doctorSpecialization}">Dokter Umum</span></p>
+                                </div>
+                                <span
+                                    th:replace="~{fragments/status-badges :: consultation-status(${consultation.status.name()})}"></span>
                             </div>
 
-                            <!-- Consultation Details -->
-                            <div class="flex-1">
-                                <div class="flex items-start justify-between mb-2">
-                                    <div>
-                                        <h3 class="text-lg font-bold text-stone-900" th:text="${consultation.doctorName}">Dr. Ahmad Suryanto</h3>
-                                        <p class="text-sm text-stone-600" th:text="${consultation.doctorSpecialization}">Dokter Umum</p>
-                                    </div>
-                                    <span th:replace="~{fragments/status-badges :: consultation-status(${consultation.status})}"></span>
-                                </div>
-
-                                <p class="text-stone-600 text-sm mb-3">
-                                    <span class="font-medium">Keluhan:</span>
-                                    <span th:text="${#strings.abbreviate(consultation.complaint, 100)}">Sakit kepala yang berkelanjutan...</span>
+                            <div class="bg-stone-50 p-3 rounded-xl border border-stone-100 mb-3">
+                                <p class="text-stone-700 text-sm leading-relaxed line-clamp-2">
+                                    <span
+                                        class="font-bold text-stone-400 text-xs uppercase tracking-wider block mb-1">Keluhan
+                                        Pasien</span>
+                                    <span th:text="${consultation.complaint}">Sakit kepala yang berkelanjutan...</span>
                                 </p>
-
-                                <div class="flex items-center gap-4 text-sm text-stone-600">
-                                    <span th:text="${#temporals.format(consultation.createdAt, 'dd MMM yyyy HH:mm')}">
-                                        01 Jan 2026 14:30
-                                    </span>
-                                    <span th:if="${consultation.prescription}" class="px-3 py-1 bg-green-100 text-green-700 rounded-full font-semibold">
-                                        Resep Diterima
-                                    </span>
-                                </div>
                             </div>
 
-                            <!-- Action Button -->
-                            <div class="flex items-center gap-2">
-                                <a th:href="@{/customer/consultations/{id}(id=${consultation.id})}" 
-                                   class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-semibold text-sm whitespace-nowrap">
-                                    <span th:if="${consultation.status == 'PENDING'}">Lihat Detail</span>
-                                    <span th:if="${consultation.status == 'IN_PROGRESS'}">Lanjutkan Chat</span>
-                                    <span th:if="${consultation.status == 'COMPLETED'}">Lihat Resep</span>
-                                </a>
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between mt-4 gap-4">
+                                <div class="flex items-center gap-4 text-sm text-stone-500 font-medium">
+                                    <span><i class="far fa-calendar-alt mr-1"></i> <span
+                                            th:text="${#temporals.format(consultation.createdAt, 'dd MMM yyyy HH:mm')}">01
+                                            Jan 2026 14:30</span></span>
+                                    <span th:if="${consultation.prescription}"
+                                        class="px-2 py-1 bg-green-50 border border-green-200 text-green-600 rounded-md text-xs font-bold">
+                                        <i class="fas fa-pills mr-1"></i> Resep Diterbitkan
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center gap-2 w-full sm:w-auto">
+                                    <!-- Edit Button (Only for PENDING) -->
+                                    <button th:if="${consultation.status.name() == 'PENDING'}" type="button"
+                                        class="px-4 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl transition font-semibold text-sm flex items-center gap-2"
+                                        th:data-modal="'editModal-' + ${consultation.id}"
+                                        onclick="document.getElementById(this.getAttribute('data-modal')).classList.remove('hidden')">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+
+                                    <!-- Delete Button (Only for PENDING) -->
+                                    <form th:if="${consultation.status.name() == 'PENDING'}"
+                                        th:action="@{/customer/consultations/delete/{id}(id=${consultation.id})}"
+                                        method="post" class="inline"
+                                        onsubmit="return confirm('Apakah Anda yakin ingin membatalkan dan menghapus konsultasi ini?');">
+                                        <button type="submit"
+                                            class="px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition font-semibold text-sm flex items-center gap-2">
+                                            <i class="fas fa-trash-alt"></i> Hapus
+                                        </button>
+                                    </form>
+
+                                    <a th:href="@{/customer/consultations/{id}(id=${consultation.id})}"
+                                        class="flex-1 sm:flex-none justify-center px-5 py-2.5 rounded-xl transition font-semibold text-sm flex items-center gap-2"
+                                        th:classappend="${consultation.status.name() == 'IN_PROGRESS' or consultation.status.name() == 'PENDING'} ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-sm' : 'bg-stone-100 hover:bg-stone-200 text-stone-700'">
+
+                                        <span th:if="${consultation.status.name() == 'PENDING'}"><i
+                                                class="fas fa-clock mr-1"></i> Menunggu</span>
+                                        <span th:if="${consultation.status.name() == 'IN_PROGRESS'}"><i
+                                                class="fas fa-comments mr-1"></i> Chat Dokter</span>
+                                        <span th:if="${consultation.status.name() == 'COMPLETED'}"><i
+                                                class="fas fa-file-medical mr-1"></i> Cek Hasil</span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Empty State -->
-                    <div th:if="${#lists.isEmpty(consultations)}" class="bg-white rounded-2xl border border-stone-200 p-12 text-center">
-                        <svg class="w-24 h-24 mx-auto text-stone-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <p class="text-stone-600 text-lg font-semibold mb-4">Belum ada konsultasi</p>
-                        <a th:href="@{/customer/consultations/new}" 
-                           class="text-orange-600 font-semibold hover:underline">
-                            Mulai konsultasi pertama Anda
-                        </a>
+                    <!-- Edit Modal (Only rendered for PENDING) -->
+                    <div th:if="${consultation.status.name() == 'PENDING'}" th:id="'editModal-' + ${consultation.id}"
+                        class="hidden fixed inset-0 bg-stone-900 bg-opacity-50 z-[100] flex justify-center items-center p-4">
+                        <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-bold text-stone-900">Edit Keluhan</h3>
+                                <button type="button" class="text-stone-400 hover:text-stone-600 transition"
+                                    th:data-modal="'editModal-' + ${consultation.id}"
+                                    onclick="document.getElementById(this.getAttribute('data-modal')).classList.add('hidden')">
+                                    <i class="fas fa-times text-xl"></i>
+                                </button>
+                            </div>
+                            <form th:action="@{/customer/consultations/edit/{id}(id=${consultation.id})}" method="post">
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-stone-700 mb-2">Keluhan Utama</label>
+                                    <textarea name="complaint" rows="4" required
+                                        class="w-full rounded-xl border border-stone-200 bg-stone-50 p-4 text-stone-900 focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all outline-none resize-none"
+                                        th:text="${consultation.complaint}"></textarea>
+                                </div>
+                                <div class="mb-6">
+                                    <label class="block text-sm font-medium text-stone-700 mb-2">Informasi Tambahan
+                                        (Opsional)</label>
+                                    <textarea name="additionalInfo" rows="2"
+                                        class="w-full rounded-xl border border-stone-200 bg-stone-50 p-4 text-stone-900 focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all outline-none resize-none"
+                                        th:text="${consultation.additionalInfo}"></textarea>
+                                </div>
+                                <div class="flex gap-3 justify-end">
+                                    <button type="button"
+                                        class="px-5 py-2.5 rounded-xl font-semibold text-stone-600 bg-stone-100 hover:bg-stone-200 transition"
+                                        th:data-modal="'editModal-' + ${consultation.id}"
+                                        onclick="document.getElementById(this.getAttribute('data-modal')).classList.add('hidden')">
+                                        Batal
+                                    </button>
+                                    <button type="submit"
+                                        class="px-5 py-2.5 rounded-xl font-semibold text-white bg-orange-500 hover:bg-orange-600 shadow-sm transition">
+                                        Simpan Perubahan
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Floating Action Button -->
-                <a th:href="@{/customer/consultations/new}" 
-                   class="fixed bottom-8 right-8 w-14 h-14 bg-orange-500 text-white rounded-full flex items-center justify-center hover:bg-orange-600 transition shadow-lg text-2xl hover:scale-110">
-                    +
-                </a>
+                <div th:if="${#lists.isEmpty(consultations)}"
+                    class="bg-white rounded-2xl border border-stone-200 p-12 text-center shadow-sm">
+                    <div class="w-20 h-20 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-notes-medical text-4xl text-stone-300"></i>
+                    </div>
+                    <p class="text-stone-800 text-lg font-bold mb-2">Belum ada riwayat konsultasi</p>
+                    <p class="text-stone-500 text-sm mb-6">Jangan ragu untuk berkonsultasi dengan dokter kami jika Anda
+                        merasa kurang sehat.</p>
+                    <a th:href="@{/customer/consultations/new}"
+                        class="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 text-white font-semibold rounded-xl hover:bg-orange-600 transition shadow-sm">
+                        <i class="fas fa-plus"></i> Mulai Konsultasi Pertama
+                    </a>
+                </div>
             </div>
+
         </div>
     </div>
+
+    <!-- Floating Action Button (Moved to body end to avoid being clipped or hidden by parent containers) -->
+    <a th:href="@{/customer/consultations/new}"
+        class="fixed bottom-8 right-8 w-14 h-14 bg-orange-500 text-white rounded-full flex items-center justify-center hover:bg-orange-600 transition shadow-lg hover:shadow-orange-300/50 text-xl hover:-translate-y-1 z-50">
+        <i class="fas fa-plus"></i>
+    </a>
 </body>
+
 </html>

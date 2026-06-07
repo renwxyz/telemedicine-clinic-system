@@ -5,15 +5,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
+ 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.telemedclinic.cart.entity.CartItem;
 import com.telemedclinic.cart.repository.CartItemRepository;
@@ -31,6 +30,7 @@ import com.telemedclinic.order.entity.OrderStatus;
 import com.telemedclinic.order.entity.PaymentMethod;
 import com.telemedclinic.order.entity.PaymentStatus;
 import com.telemedclinic.order.repository.OrderRepository;
+import com.telemedclinic.payment.service.MidtransService;
 import com.telemedclinic.prescription.model.Prescription;
 import com.telemedclinic.prescription.repository.PrescriptionRepository;
 import com.telemedclinic.user.entity.Customer;
@@ -51,6 +51,12 @@ public class CustomerController {
     private final CartItemRepository cartItemRepository;
     private final OrderRepository orderRepository;
     private final ConsultationRepository consultationRepository;
+
+    @Autowired
+    private MidtransService midtransService;
+
+    @Value("${midtrans.client.key:}")
+    private String midtransClientKey;
 
     public CustomerController(
             UserRepository userRepository,
@@ -73,12 +79,9 @@ public class CustomerController {
     @ModelAttribute
     public void addCommonAttributes(HttpSession session, Model model) {
         findAuthenticatedCustomer(session).ifPresent(customer -> {
-            Map<String, String> customerInfo = new java.util.HashMap<>();
-            customerInfo.put("name", customer.getName() != null ? customer.getName() : "Pengguna");
-            customerInfo.put("email", customer.getEmail() != null ? customer.getEmail() : "-");
-            
-            model.addAttribute("customer", customerInfo);
+            model.addAttribute("customer", customer);
             model.addAttribute("cartCount", cartItemRepository.countByCustomerUserId(customer.getUserId()));
+            model.addAttribute("midtransClientKey", midtransClientKey);
         });
     }
 
@@ -103,10 +106,10 @@ public class CustomerController {
         List<Prescription> recentPrescriptions = prescriptionRepository.findTop3ByCustomerUserIdOrderByIssuedDateDesc(customerId);
 
         long activeConsultations = consultations.stream()
-                .filter(c -> c.getStatus() == ConsultationStatus.PENDING || c.getStatus() == ConsultationStatus.IN_PROGRESS)
+                .filter(c -> c.getStatus().name().equals("PENDING") || c.getStatus().name().equals("IN_PROGRESS"))
                 .count();
         long activeOrders = orders.stream()
-                .filter(o -> o.getStatus() == OrderStatus.PENDING || o.getStatus() == OrderStatus.PROCESSING || o.getStatus() == OrderStatus.SHIPPED)
+                .filter(o -> o.getStatus().name().equals("PENDING") || o.getStatus().name().equals("PROCESSING") || o.getStatus().name().equals("SHIPPED"))
                 .count();
 
         model.addAttribute("stats", Map.of(
@@ -184,6 +187,28 @@ public class CustomerController {
         return "customer/medicines";
     }
 
+    @GetMapping("/medicines/{id}")
+    public String showMedicineDetail(
+            @PathVariable Long id,
+            HttpSession session,
+            Model model
+    ) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Optional<InventoryItem> optionalItem = inventoryItemRepository.findById(id);
+        if (optionalItem.isEmpty()) {
+            return "redirect:/customer/medicines";
+        }
+
+        model.addAttribute("medicine", optionalItem.get());
+        setActiveSection(model, "medicines");
+
+        return "customer/medicine-detail";
+    }
+
     @PostMapping("/cart/add")
     public String addToCart(
             HttpSession session,
@@ -203,9 +228,14 @@ public class CustomerController {
 
         InventoryItem inventoryItem = optionalItem.get();
 
-        Optional<CartItem> optionalCartItem = cartItemRepository.findByCustomerUserIdAndInventoryItemMedicineMedicineId(customer.getUserId(), medicineId);
-        CartItem cartItem = optionalCartItem.orElseGet(() -> new CartItem(customer, inventoryItem, 0));
-        cartItem.setQuantity(cartItem.getQuantity() + quantity);
+        Optional<CartItem> optionalCartItem = cartItemRepository.findByCustomerUserIdAndInventoryItemInventoryItemId(customer.getUserId(), inventoryItem.getInventoryItemId());
+        CartItem cartItem;
+        if (optionalCartItem.isPresent()) {
+            cartItem = optionalCartItem.get();
+            cartItem.setQuantity(cartItem.getQuantity() + quantity);
+        } else {
+            cartItem = new CartItem(customer, inventoryItem, quantity);
+        }
         cartItemRepository.save(cartItem);
 
         return "redirect:/customer/cart";
@@ -306,6 +336,7 @@ public class CustomerController {
     }
 
     @PostMapping("/checkout")
+    @Transactional
     public String placeOrder(HttpSession session, @ModelAttribute CheckoutForm checkoutForm) {
         Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
         if (optionalCustomer.isEmpty()) {
@@ -326,8 +357,12 @@ public class CustomerController {
         order.setPaymentMethod(checkoutForm.getPaymentMethod() != null ? checkoutForm.getPaymentMethod() : PaymentMethod.COD);
         order.setPaymentStatus(PaymentStatus.PENDING);
 
+        Long pharmacyId = null;
         for (CartItem cartItem : cartItems) {
             InventoryItem inventoryItem = cartItem.getInventoryItem();
+            if (pharmacyId == null && inventoryItem.getPharmacy() != null) {
+                pharmacyId = inventoryItem.getPharmacy().getPharmacyId();
+            }
             order.addItem(new OrderItem(
                     inventoryItem.getMedicine().getName(),
                     inventoryItem.getPharmacy().getName(),
@@ -336,10 +371,29 @@ public class CustomerController {
                     inventoryItem.getMedicine().isRequiresPrescription()
             ));
         }
+        order.setPharmacyId(pharmacyId);
         order.setShippingFee(10000);
         order.setAdminFee(2500);
         order.setTotalAmount(order.getSubtotal() + order.getShippingFee() + order.getAdminFee());
+        
         orderRepository.save(order);
+
+        if (order.getPaymentMethod() != PaymentMethod.COD) {
+            String snapToken = midtransService.createTransaction(order);
+            if (snapToken != null) {
+                order.setSnapToken(snapToken);
+                orderRepository.save(order);
+            }
+            cartItemRepository.deleteByCustomerUserId(customer.getUserId());
+            
+            // Avoid appending "null" to the URL if snapToken failed
+            if (order.getSnapToken() != null) {
+                return "redirect:/customer/orders?payToken=" + order.getSnapToken();
+            } else {
+                return "redirect:/customer/orders";
+            }
+        }
+        
         cartItemRepository.deleteByCustomerUserId(customer.getUserId());
 
         return "redirect:/customer/orders";
@@ -366,6 +420,7 @@ public class CustomerController {
 
         model.addAttribute("orders", orders);
         model.addAttribute("status", status);
+        model.addAttribute("midtransClientKey", midtransClientKey);
         setActiveSection(model, "orders");
 
         return "customer/orders";
@@ -384,6 +439,7 @@ public class CustomerController {
         }
 
         model.addAttribute("order", optionalOrder.get());
+        model.addAttribute("midtransClientKey", midtransClientKey);
         setActiveSection(model, "orders");
         return "customer/order-detail";
     }
@@ -421,13 +477,16 @@ public class CustomerController {
             return "redirect:/auth/login";
         }
 
+        // Gunakan lambda aman untuk menghindari error pemetaan pewarisan class User
         List<Doctor> availableDoctors = doctorRepository.findAll().stream()
                 .filter(Doctor::isApprovedPartner)
+                .filter(doctor -> doctor.isActive()) 
                 .toList();
 
         model.addAttribute("availableDoctors", availableDoctors);
         model.addAttribute("consultationForm", new ConsultationForm());
         setActiveSection(model, "consultations");
+        
         return "customer/consultation-new";
     }
 
@@ -438,24 +497,29 @@ public class CustomerController {
             return "redirect:/auth/login";
         }
 
-        Customer customer = optionalCustomer.get();
         if (consultationForm.getDoctorId() == null || consultationForm.getComplaint() == null || consultationForm.getComplaint().isBlank()) {
             model.addAttribute("error", "Pilih dokter dan jelaskan keluhan Anda.");
-            model.addAttribute("availableDoctors", doctorRepository.findAll().stream().filter(Doctor::isApprovedPartner).toList());
+            model.addAttribute("availableDoctors", doctorRepository.findAll().stream()
+                    .filter(Doctor::isApprovedPartner)
+                    .filter(doctor -> doctor.isActive()).toList());
             model.addAttribute("consultationForm", consultationForm);
+            setActiveSection(model, "consultations");
             return "customer/consultation-new";
         }
 
         Optional<Doctor> optionalDoctor = doctorRepository.findById(consultationForm.getDoctorId());
         if (optionalDoctor.isEmpty()) {
             model.addAttribute("error", "Dokter tidak ditemukan.");
-            model.addAttribute("availableDoctors", doctorRepository.findAll().stream().filter(Doctor::isApprovedPartner).toList());
+            model.addAttribute("availableDoctors", doctorRepository.findAll().stream()
+                    .filter(Doctor::isApprovedPartner)
+                    .filter(doctor -> doctor.isActive()).toList());
             model.addAttribute("consultationForm", consultationForm);
+            setActiveSection(model, "consultations");
             return "customer/consultation-new";
         }
 
         Consultation consultation = new Consultation(
-                customer,
+                optionalCustomer.get(),
                 optionalDoctor.get(),
                 consultationForm.getComplaint(),
                 consultationForm.getAdditionalInfo()
@@ -515,6 +579,44 @@ public class CustomerController {
         consultationRepository.save(consultation);
 
         return "redirect:/customer/consultations/" + id;
+    }
+
+    @PostMapping("/consultations/delete/{id}")
+    public String deleteConsultation(HttpSession session, @PathVariable Long id) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Optional<Consultation> optionalConsultation = consultationRepository.findById(id);
+        if (optionalConsultation.isPresent()) {
+            Consultation consultation = optionalConsultation.get();
+            if (consultation.getCustomer().getUserId().equals(optionalCustomer.get().getUserId())
+                    && consultation.getStatus().name().equals("PENDING")) {
+                consultationRepository.delete(consultation);
+            }
+        }
+        return "redirect:/customer/consultations";
+    }
+
+    @PostMapping("/consultations/edit/{id}")
+    public String editConsultation(HttpSession session, @PathVariable Long id, @RequestParam String complaint, @RequestParam(required = false) String additionalInfo) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Optional<Consultation> optionalConsultation = consultationRepository.findById(id);
+        if (optionalConsultation.isPresent()) {
+            Consultation consultation = optionalConsultation.get();
+            if (consultation.getCustomer().getUserId().equals(optionalCustomer.get().getUserId())
+                    && consultation.getStatus().name().equals("PENDING")) {
+                consultation.setComplaint(complaint);
+                consultation.setAdditionalInfo(additionalInfo);
+                consultationRepository.save(consultation);
+            }
+        }
+        return "redirect:/customer/consultations";
     }
 
     private Optional<Customer> findAuthenticatedCustomer(HttpSession session) {

@@ -12,4 +12,6 @@ import com.telemedclinic.order.entity.OrderStatus;
 public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByCustomerUserIdOrderByCreatedAtDesc(Long customerId);
     List<Order> findByCustomerUserIdAndStatusOrderByCreatedAtDesc(Long customerId, OrderStatus status);
+    List<Order> findByStatus(OrderStatus status);
+    java.util.Optional<Order> findByOrderId(String orderId);
 }

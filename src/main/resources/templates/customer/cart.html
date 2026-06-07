@@ -54,10 +54,10 @@
                 class="bg-white rounded-2xl p-6 border border-stone-200 flex gap-4 shadow-sm"
               >
                 <!-- Medicine Image -->
-                <div
-                  class="w-24 h-24 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0"
-                >
+                <div class="w-24 h-24 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  <img th:if="${item.inventoryItem.medicine.imageUrl != null}" th:src="${item.inventoryItem.medicine.imageUrl}" th:alt="${item.inventoryItem.medicine.name}" class="w-full h-full object-cover"/>
                   <svg
+                    th:unless="${item.inventoryItem.medicine.imageUrl != null}"
                     class="w-12 h-12 text-orange-300"
                     fill="none"
                     stroke="currentColor"

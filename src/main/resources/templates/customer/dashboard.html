@@ -405,7 +405,7 @@
                     <!-- Thymeleaf: Display specialization -->
                     <p
                       class="text-xs text-stone-500"
-                      th:text="${consultation.specialization}"
+                      th:text="${consultation.doctorSpecialization}"
                     >
                       Umum
                     </p>
@@ -552,7 +552,7 @@
                   <!-- Thymeleaf: Display item summary -->
                   <p
                     class="text-xs text-stone-500 mt-0.5"
-                    th:text="${order.itemSummary}"
+                    th:text="${order.items.size() > 0 ? (order.items[0].medicineName + (order.items.size() > 1 ? ' + ' + (order.items.size() - 1) + ' lainnya' : '')) : 'Tidak ada item'}"
                   >
                     Paracetamol 500mg + 2 lainnya
                   </p>

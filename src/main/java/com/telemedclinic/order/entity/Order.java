@@ -17,6 +17,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 import com.telemedclinic.user.entity.Customer;
@@ -40,6 +41,11 @@ public class Order {
     private List<OrderItem> items = new ArrayList<>();
 
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    
+    private Long pharmacyId;
+    private String snapToken;
+    
     private double subtotal;
     private double shippingFee;
     private double adminFee;
@@ -83,6 +89,11 @@ public class Order {
         }
     }
 
+    @PreUpdate
+    protected void preUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
     public Long getId() {
         return id;
     }
@@ -101,6 +112,18 @@ public class Order {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public Long getPharmacyId() {
+        return pharmacyId;
+    }
+
+    public String getSnapToken() {
+        return snapToken;
     }
 
     public double getSubtotal() {
@@ -177,6 +200,18 @@ public class Order {
 
     public void setTrackingId(String trackingId) {
         this.trackingId = trackingId;
+    }
+
+    public void setPharmacyId(Long pharmacyId) {
+        this.pharmacyId = pharmacyId;
+    }
+
+    public void setSnapToken(String snapToken) {
+        this.snapToken = snapToken;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public void setStatus(OrderStatus status) {

@@ -120,31 +120,37 @@
               class="bg-white rounded-2xl border border-stone-200 shadow-sm hover:shadow-md transition overflow-hidden flex flex-col"
             >
               <!-- Medicine Image -->
-              <div class="bg-orange-100 h-40 flex items-center justify-center">
-                <svg
-                  class="w-16 h-16 text-orange-300"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="1.5"
-                    d="M19.5 13.5L12 20.5l-7.5-7"
-                  />
-                </svg>
-              </div>
+              <a th:href="@{/customer/medicines/{id}(id=${medicine.inventoryItemId})}" class="block">
+                <div class="bg-orange-100 h-40 flex items-center justify-center overflow-hidden">
+                  <img th:if="${medicine.medicine.imageUrl != null}" th:src="${medicine.medicine.imageUrl}" th:alt="${medicine.medicine.name}" class="w-full h-full object-cover"/>
+                  <svg
+                    th:unless="${medicine.medicine.imageUrl != null}"
+                    class="w-16 h-16 text-orange-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.5"
+                      d="M19.5 13.5L12 20.5l-7.5-7"
+                    />
+                  </svg>
+                </div>
+              </a>
 
               <!-- Medicine Details -->
               <div class="p-4 flex-1 flex flex-col">
                 <!-- Medicine Name -->
-                <h3
-                  class="font-bold text-stone-900 mb-1 line-clamp-2"
-                  th:text="${medicine.medicine.name}"
-                >
-                  Paracetamol 500mg
-                </h3>
+                <a th:href="@{/customer/medicines/{id}(id=${medicine.inventoryItemId})}" class="hover:text-orange-500 transition">
+                  <h3
+                    class="font-bold text-stone-900 mb-1 line-clamp-2"
+                    th:text="${medicine.medicine.name}"
+                  >
+                    Paracetamol 500mg
+                  </h3>
+                </a>
 
                 <!-- Pharmacy Info -->
                 <p

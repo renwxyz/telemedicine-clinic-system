@@ -11,7 +11,7 @@ import com.telemedclinic.cart.entity.CartItem;
 @Repository
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     List<CartItem> findByCustomerUserId(Long customerId);
-    Optional<CartItem> findByCustomerUserIdAndInventoryItemMedicineMedicineId(Long customerId, Long medicineId);
+    Optional<CartItem> findByCustomerUserIdAndInventoryItemInventoryItemId(Long customerId, Long inventoryItemId);
     long countByCustomerUserId(Long customerId);
     void deleteByCustomerUserId(Long customerId);
 }

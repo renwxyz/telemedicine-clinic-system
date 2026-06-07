@@ -82,8 +82,16 @@ public class Consultation {
         return complaint;
     }
 
+    public void setComplaint(String complaint) {
+        this.complaint = complaint;
+    }
+
     public String getAdditionalInfo() {
         return additionalInfo;
+    }
+
+    public void setAdditionalInfo(String additionalInfo) {
+        this.additionalInfo = additionalInfo;
     }
 
     public ConsultationStatus getStatus() {

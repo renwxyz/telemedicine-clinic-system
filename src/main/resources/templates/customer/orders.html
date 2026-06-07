@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riwayat Pesanan - KlinikKu</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" th:attr="data-client-key=${midtransClientKey}"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -101,10 +102,18 @@
                                     Rp 50.000
                                 </p>
                             </div>
-                            <a th:href="@{/customer/orders/{id}(id=${order.id})}" 
-                               class="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-semibold">
-                                Lihat Detail
-                            </a>
+                            <div class="flex gap-2">
+                                <button th:if="${order.snapToken != null and order.paymentStatus.name() == 'PENDING'}"
+                                        th:data-token="${order.snapToken}"
+                                        onclick="payWithMidtrans(this.getAttribute('data-token'))"
+                                        class="px-6 py-2 bg-stone-900 text-white rounded-lg hover:bg-stone-800 transition font-semibold">
+                                    Bayar Sekarang
+                                </button>
+                                <a th:href="@{/customer/orders/{id}(id=${order.id})}" 
+                                   class="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-semibold">
+                                    Lihat Detail
+                                </a>
+                            </div>
                         </div>
                     </div>
 
@@ -123,5 +132,37 @@
             </div>
         </div>
     </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const payToken = urlParams.get('payToken');
+            if (payToken) {
+                // Remove the token from URL so it doesn't trigger again on refresh
+                window.history.replaceState({}, document.title, window.location.pathname);
+                payWithMidtrans(payToken);
+            }
+        });
+
+        function payWithMidtrans(token) {
+            window.snap.pay(token, {
+                onSuccess: function(result) {
+                    alert("Pembayaran berhasil!");
+                    location.reload();
+                },
+                onPending: function(result) {
+                    alert("Menunggu pembayaran Anda!");
+                    location.reload();
+                },
+                onError: function(result) {
+                    alert("Pembayaran gagal!");
+                    location.reload();
+                },
+                onClose: function() {
+                    console.log('User closed the popup without finishing the payment');
+                }
+            });
+        }
+    </script>
 </body>
 </html>

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${medicine.medicine.name + ' - KlinikKu'}">Detail Obat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
+      /* Hide arrows/spinners on number inputs */
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type="number"] {
+        -moz-appearance: textfield;
+      }
+    </style>
+  </head>
+  <body class="bg-stone-50 text-stone-900">
+    <!-- Navbar -->
+    <div th:replace="~{fragments/customer-navbar :: customerNavbar('medicines')}"></div>
+
+    <!-- Main Content -->
+    <div class="pt-24 pb-12 px-4 sm:px-8 max-w-7xl mx-auto">
+      <!-- Back Button -->
+      <a th:href="@{/customer/medicines}" class="inline-flex items-center text-stone-500 hover:text-orange-500 transition mb-6 font-medium">
+        <i class="fas fa-arrow-left mr-2"></i> Kembali ke Katalog
+      </a>
+
+      <div class="bg-white rounded-3xl shadow-sm border border-stone-200 overflow-hidden">
+        <div class="grid md:grid-cols-2 gap-0">
+          
+          <!-- Product Image Area -->
+          <div class="bg-stone-100 flex items-center justify-center p-8 md:p-12 min-h-[400px]">
+             <img th:if="${medicine.medicine.imageUrl != null}" th:src="${medicine.medicine.imageUrl}" th:alt="${medicine.medicine.name}" class="w-full max-w-md h-auto rounded-xl shadow-md object-cover"/>
+             <svg th:unless="${medicine.medicine.imageUrl != null}" class="w-32 h-32 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 13.5L12 20.5l-7.5-7" />
+             </svg>
+          </div>
+
+          <!-- Product Details Area -->
+          <div class="p-8 md:p-12 flex flex-col justify-center">
+            
+            <div class="mb-4">
+              <span th:replace="~{fragments/status-badges :: medicine-type(${medicine.medicine.requiresPrescription})}"></span>
+            </div>
+
+            <h1 class="text-3xl md:text-4xl font-bold text-stone-900 mb-2" th:text="${medicine.medicine.name}">Nama Obat</h1>
+            <p class="text-lg text-stone-500 mb-6" th:text="${medicine.medicine.category}">Kategori</p>
+
+            <div class="bg-orange-50 rounded-2xl p-6 mb-8 border border-orange-100">
+              <p class="text-sm text-orange-800 font-medium mb-1">Harga</p>
+              <p class="text-4xl font-bold text-orange-600" th:text="${'Rp ' + #numbers.formatInteger(medicine.price, 0, 'COMMA')}">Rp 0</p>
+            </div>
+
+            <div class="mb-8">
+              <h3 class="text-lg font-semibold text-stone-900 mb-3">Deskripsi Obat</h3>
+              <p class="text-stone-600 leading-relaxed" th:text="${medicine.medicine.description}">
+                Deskripsi tentang obat ini akan tampil di sini.
+              </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-8">
+               <div class="border border-stone-200 rounded-xl p-4">
+                  <p class="text-xs text-stone-500 mb-1 uppercase tracking-wider font-semibold">Tersedia di</p>
+                  <p class="font-medium text-stone-900 flex items-center">
+                     <i class="fas fa-store text-orange-500 mr-2"></i>
+                     <span th:text="${medicine.pharmacy.name}">Nama Apotek</span>
+                  </p>
+               </div>
+               <div class="border border-stone-200 rounded-xl p-4">
+                  <p class="text-xs text-stone-500 mb-1 uppercase tracking-wider font-semibold">Stok Obat</p>
+                  <p class="font-medium text-stone-900 flex items-center">
+                     <i class="fas fa-box text-orange-500 mr-2"></i>
+                     <span th:text="${medicine.stock + ' Kemasan'}">0 Kemasan</span>
+                  </p>
+               </div>
+            </div>
+
+            <!-- Add to Cart Section -->
+            <div class="mt-auto pt-6 border-t border-stone-100">
+               <form th:action="@{/customer/cart/add}" method="post" class="flex flex-col sm:flex-row gap-4">
+                  <input type="hidden" name="medicineId" th:value="${medicine.inventoryItemId}" />
+                  
+                  <div class="flex items-center border border-stone-300 rounded-xl px-4 py-2 bg-white">
+                     <button type="button" onclick="if(parseInt(this.nextElementSibling.value) > 1) this.nextElementSibling.value--" class="text-stone-400 hover:text-orange-500 p-2 transition">
+                        <i class="fas fa-minus"></i>
+                     </button>
+                     <input type="number" name="quantity" value="1" min="1" th:max="${medicine.stock}" class="w-16 text-center font-bold text-stone-900 focus:outline-none bg-transparent" />
+                     <button type="button" onclick="if(parseInt(this.previousElementSibling.value) < parseInt(this.previousElementSibling.max)) this.previousElementSibling.value++" class="text-stone-400 hover:text-orange-500 p-2 transition">
+                        <i class="fas fa-plus"></i>
+                     </button>
+                  </div>
+
+                  <button type="submit" 
+                          th:disabled="${medicine.medicine.requiresPrescription || medicine.stock <= 0}" 
+                          class="flex-1 bg-orange-500 hover:bg-orange-600 disabled:bg-stone-300 disabled:cursor-not-allowed text-white rounded-xl py-4 font-bold text-lg transition flex items-center justify-center gap-2 shadow-sm">
+                     <i th:if="${!medicine.medicine.requiresPrescription && medicine.stock > 0}" class="fas fa-shopping-cart"></i>
+                     <span th:if="${!medicine.medicine.requiresPrescription && medicine.stock > 0}">Tambah ke Keranjang</span>
+                     <span th:if="${medicine.stock <= 0}">Stok Habis</span>
+                     <span th:if="${medicine.medicine.requiresPrescription && medicine.stock > 0}">Membutuhkan Resep Dokter</span>
+                  </button>
+               </form>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

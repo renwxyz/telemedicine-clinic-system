@@ -3,59 +3,59 @@
 <body>
     <!-- Konsultasi Status Badge -->
     <span th:fragment="consultation-status(status)" 
-          th:classappend="${status == 'PENDING'} ? 'bg-yellow-100 text-yellow-700' : 
-                          ${status == 'IN_PROGRESS'} ? 'bg-blue-100 text-blue-700' :
-                          ${status == 'COMPLETED'} ? 'bg-green-100 text-green-700' :
-                          'bg-stone-100 text-stone-700'"
+          th:classappend="${status == 'PENDING' ? 'bg-yellow-100 text-yellow-700' : 
+                          (status == 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700' :
+                          (status == 'COMPLETED' ? 'bg-green-100 text-green-700' :
+                          'bg-stone-100 text-stone-700'))}"
           class="inline-block px-3 py-1 rounded-full text-sm font-semibold">
-        <span th:text="${status == 'PENDING'} ? 'Menunggu' :
-                      ${status == 'IN_PROGRESS'} ? 'Berlangsung' :
-                      ${status == 'COMPLETED'} ? 'Selesai' :
-                      ${status}"></span>
+        <span th:text="${status == 'PENDING' ? 'Menunggu' :
+                      (status == 'IN_PROGRESS' ? 'Berlangsung' :
+                      (status == 'COMPLETED' ? 'Selesai' :
+                      status))}"></span>
     </span>
 
     <!-- Order Status Badge -->
     <span th:fragment="order-status(status)"
-          th:classappend="${status == 'PENDING'} ? 'bg-yellow-100 text-yellow-700' :
-                          ${status == 'PROCESSING'} ? 'bg-blue-100 text-blue-700' :
-                          ${status == 'SHIPPED'} ? 'bg-purple-100 text-purple-700' :
-                          ${status == 'COMPLETED'} ? 'bg-green-100 text-green-700' :
-                          ${status == 'CANCELLED'} ? 'bg-red-100 text-red-700' :
-                          'bg-stone-100 text-stone-700'"
+          th:classappend="${status == 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                          (status == 'PROCESSING' ? 'bg-blue-100 text-blue-700' :
+                          (status == 'SHIPPED' ? 'bg-purple-100 text-purple-700' :
+                          (status == 'COMPLETED' ? 'bg-green-100 text-green-700' :
+                          (status == 'CANCELLED' ? 'bg-red-100 text-red-700' :
+                          'bg-stone-100 text-stone-700'))))}"
           class="inline-block px-3 py-1 rounded-full text-sm font-semibold">
-        <span th:text="${status == 'PENDING'} ? 'Menunggu' :
-                      ${status == 'PROCESSING'} ? 'Diproses' :
-                      ${status == 'SHIPPED'} ? 'Dikirim' :
-                      ${status == 'COMPLETED'} ? 'Selesai' :
-                      ${status == 'CANCELLED'} ? 'Dibatalkan' :
-                      ${status}"></span>
+        <span th:text="${status == 'PENDING' ? 'Menunggu' :
+                      (status == 'PROCESSING' ? 'Diproses' :
+                      (status == 'SHIPPED' ? 'Dikirim' :
+                      (status == 'COMPLETED' ? 'Selesai' :
+                      (status == 'CANCELLED' ? 'Dibatalkan' :
+                      status))))}"></span>
     </span>
 
     <!-- Medicine Type Badge -->
     <span th:fragment="medicine-type(requiresPrescription)"
-          th:classappend="${requiresPrescription} ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'"
+          th:classappend="${requiresPrescription ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}"
           class="inline-block px-3 py-1 rounded-full text-sm font-semibold">
-        <span th:text="${requiresPrescription} ? 'Butuh Resep' : 'Bebas'"></span>
+        <span th:text="${requiresPrescription ? 'Butuh Resep' : 'Bebas'}"></span>
     </span>
 
     <!-- Payment Status Badge -->
     <span th:fragment="payment-status(status)"
-          th:classappend="${status == 'PAID'} ? 'bg-green-100 text-green-700' :
-                          ${status == 'PENDING'} ? 'bg-yellow-100 text-yellow-700' :
-                          ${status == 'FAILED'} ? 'bg-red-100 text-red-700' :
-                          'bg-stone-100 text-stone-700'"
+          th:classappend="${status == 'PAID' ? 'bg-green-100 text-green-700' :
+                          (status == 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                          (status == 'FAILED' ? 'bg-red-100 text-red-700' :
+                          'bg-stone-100 text-stone-700'))}"
           class="inline-block px-3 py-1 rounded-full text-sm font-semibold">
-        <span th:text="${status == 'PAID'} ? 'Terbayar' :
-                      ${status == 'PENDING'} ? 'Menunggu' :
-                      ${status == 'FAILED'} ? 'Gagal' :
-                      ${status}"></span>
+        <span th:text="${status == 'PAID' ? 'Terbayar' :
+                      (status == 'PENDING' ? 'Menunggu' :
+                      (status == 'FAILED' ? 'Gagal' :
+                      status))}"></span>
     </span>
 
     <!-- Doctor Availability Badge -->
     <span th:fragment="availability(isAvailable)"
-          th:classappend="${isAvailable} ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+          th:classappend="${isAvailable ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}"
           class="inline-block px-3 py-1 rounded-full text-sm font-semibold">
-        <span th:text="${isAvailable} ? 'Tersedia' : 'Tidak Tersedia'"></span>
+        <span th:text="${isAvailable ? 'Tersedia' : 'Tidak Tersedia'}"></span>
     </span>
 </body>
 </html>

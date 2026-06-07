@@ -93,6 +93,8 @@
             <span
               class="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-white"
               id="cart-count"
+              th:text="${cartItemCount != null ? cartItemCount : 0}"
+              th:classappend="${cartItemCount == null || cartItemCount == 0} ? 'hidden' : ''"
               >0</span
             >
           </a>

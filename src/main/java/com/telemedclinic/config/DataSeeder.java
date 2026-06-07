@@ -14,6 +14,10 @@ import com.telemedclinic.user.entity.Customer;
 import com.telemedclinic.user.entity.Gender;
 import com.telemedclinic.pharmacy.repository.PharmacyRepository;
 import com.telemedclinic.user.entity.Pharmacist;
+import com.telemedclinic.medicine.entity.Medicine;
+import com.telemedclinic.medicine.repository.MedicineRepository;
+import com.telemedclinic.inventory.entity.InventoryItem;
+import com.telemedclinic.inventory.repository.InventoryItemRepository;
 import com.telemedclinic.user.repository.AdminRepository;
 import com.telemedclinic.user.repository.UserRepository;
 import com.telemedclinic.user.repository.DoctorRepository;
@@ -47,6 +51,8 @@ public class DataSeeder implements ApplicationRunner {
     private final UserRepository userRepository;
     private final DoctorRepository doctorRepository;
     private final PharmacyRepository pharmacyRepository;
+    private final MedicineRepository medicineRepository;
+    private final InventoryItemRepository inventoryItemRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -57,6 +63,7 @@ public class DataSeeder implements ApplicationRunner {
         seedDefaultDoctor();
         seedDefaultPharmacy();
         seedDefaultPharmacist();
+        seedMedicines();
     }
 
     private void seedDefaultDoctor() {
@@ -181,5 +188,53 @@ public class DataSeeder implements ApplicationRunner {
 
         userRepository.save(user);
         log.info("User default berhasil dibuat");
+    }
+
+    private void seedMedicines() {
+        if (medicineRepository.count() > 0) {
+            log.info("Medicines sudah ada, skip seeding medicines");
+            return;
+        }
+
+        com.telemedclinic.pharmacy.entity.Pharmacy pharmacy = pharmacyRepository.findByLegalDocumentNumber("SIA-2024-001234")
+                .orElseThrow(() -> new IllegalStateException("Default pharmacy not found for medicine seeding."));
+
+        Medicine paracetamol = new Medicine(
+                "Paracetamol 500mg",
+                "Obat penurun panas dan pereda nyeri ringan hingga sedang.",
+                "Analgesik",
+                false,
+                "https://placehold.co/400x400/FFECD1/FF9800?text=Paracetamol"
+        );
+
+        Medicine vitaminC = new Medicine(
+                "Vitamin C 1000mg",
+                "Suplemen vitamin C untuk menjaga daya tahan tubuh.",
+                "Vitamin & Suplemen",
+                false,
+                "https://placehold.co/400x400/E8F5E9/4CAF50?text=Vitamin+C"
+        );
+
+        Medicine amoxicillin = new Medicine(
+                "Amoxicillin 500mg",
+                "Antibiotik penisilin yang digunakan untuk mengobati berbagai macam infeksi bakteri.",
+                "Antibiotik",
+                true,
+                "https://placehold.co/400x400/FFEBEE/F44336?text=Amoxicillin"
+        );
+
+        medicineRepository.save(paracetamol);
+        medicineRepository.save(vitaminC);
+        medicineRepository.save(amoxicillin);
+
+        InventoryItem item1 = new InventoryItem(paracetamol, pharmacy, 100, 15000.0);
+        InventoryItem item2 = new InventoryItem(vitaminC, pharmacy, 50, 25000.0);
+        InventoryItem item3 = new InventoryItem(amoxicillin, pharmacy, 20, 35000.0);
+
+        inventoryItemRepository.save(item1);
+        inventoryItemRepository.save(item2);
+        inventoryItemRepository.save(item3);
+
+        log.info("Dummy medicines and inventory items berhasil dibuat");
     }
 }
