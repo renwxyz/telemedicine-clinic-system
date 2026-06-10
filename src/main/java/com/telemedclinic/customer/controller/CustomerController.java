@@ -12,8 +12,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDate;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.UUID;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.telemedclinic.user.entity.Gender;
 import com.telemedclinic.cart.entity.CartItem;
 import com.telemedclinic.cart.repository.CartItemRepository;
 import com.telemedclinic.consultation.model.Consultation;
@@ -386,9 +396,9 @@ public class CustomerController {
             }
             cartItemRepository.deleteByCustomerUserId(customer.getUserId());
             
-            // Avoid appending "null" to the URL if snapToken failed
+            // Redirect ke halaman pembayaran khusus jika token ada
             if (order.getSnapToken() != null) {
-                return "redirect:/customer/orders?payToken=" + order.getSnapToken();
+                return "redirect:/customer/payment/" + order.getOrderId();
             } else {
                 return "redirect:/customer/orders";
             }
@@ -397,6 +407,31 @@ public class CustomerController {
         cartItemRepository.deleteByCustomerUserId(customer.getUserId());
 
         return "redirect:/customer/orders";
+    }
+
+    @GetMapping("/payment/{orderNumber}")
+    public String showPaymentPage(HttpSession session, Model model, @PathVariable String orderNumber) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Optional<Order> optionalOrder = orderRepository.findByOrderId(orderNumber);
+        if (optionalOrder.isEmpty() || !optionalOrder.get().getCustomer().getUserId().equals(optionalCustomer.get().getUserId())) {
+            return "redirect:/customer/orders";
+        }
+
+        Order order = optionalOrder.get();
+        if (order.getSnapToken() == null) {
+            return "redirect:/customer/orders";
+        }
+
+        model.addAttribute("order", order);
+        model.addAttribute("snapToken", order.getSnapToken());
+        model.addAttribute("midtransClientKey", midtransClientKey);
+        setActiveSection(model, "orders");
+
+        return "customer/payment-midtrans";
     }
 
     @GetMapping("/orders")
@@ -662,8 +697,56 @@ public class CustomerController {
         model.addAttribute("profileBirthDate", customer.getBirthDate());
         model.addAttribute("profileGender", customer.getGender());
         model.addAttribute("profileMemberSince", customer.getCreatedAt());
+        model.addAttribute("profilePhoto", customer.getProfilePhotoPath() != null ? customer.getProfilePhotoPath() : "");
 
         setActiveSection(model, "profile");
         return "customer/customer-profile";
+    }
+
+    @PostMapping("/profile/edit")
+    public String updateProfile(
+            HttpSession session,
+            @RequestParam String name,
+            @RequestParam String phoneNumber,
+            @RequestParam String address,
+            @RequestParam Gender gender,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate birthDate,
+            @RequestParam Double height,
+            @RequestParam Double weight,
+            @RequestParam(required = false) MultipartFile profilePhoto,
+            RedirectAttributes redirectAttributes
+    ) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Customer customer = optionalCustomer.get();
+        customer.updateProfile(name, phoneNumber, address, gender, birthDate, height, weight);
+
+        if (profilePhoto != null && !profilePhoto.isEmpty()) {
+            try {
+                String fileName = StringUtils.cleanPath(profilePhoto.getOriginalFilename());
+                String uniqueFileName = UUID.randomUUID().toString() + "_" + fileName;
+                String uploadDir = "uploads/profile-photos";
+                Path uploadPath = Paths.get(uploadDir);
+
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+
+                Path filePath = uploadPath.resolve(uniqueFileName);
+                Files.copy(profilePhoto.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                
+                customer.setProfilePhotoPath("/uploads/profile-photos/" + uniqueFileName);
+            } catch (Exception ex) {
+                redirectAttributes.addFlashAttribute("error", "Gagal mengunggah foto profil: " + ex.getMessage());
+                return "redirect:/customer/profile";
+            }
+        }
+
+        userRepository.save(customer);
+        redirectAttributes.addFlashAttribute("success", "Profil berhasil diperbarui!");
+        return "redirect:/customer/profile";
     }
 }

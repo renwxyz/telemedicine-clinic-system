@@ -1,6 +1,9 @@
 package com.telemedclinic.payment.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.telemedclinic.order.entity.Order;
+import com.telemedclinic.order.entity.OrderStatus;
+import com.telemedclinic.order.entity.PaymentStatus;
+import com.telemedclinic.order.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,86 +12,74 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.telemedclinic.order.entity.Order;
-import com.telemedclinic.order.entity.OrderStatus;
-import com.telemedclinic.order.entity.PaymentStatus;
-import com.telemedclinic.order.repository.OrderRepository;
-
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/midtrans")
 public class WebhookController {
 
+    private final OrderRepository orderRepository;
+
     @Value("${midtrans.server.key}")
     private String serverKey;
 
-    @Autowired
-    private OrderRepository orderRepository;
+    public WebhookController(OrderRepository orderRepository) {
+        this.orderRepository = orderRepository;
+    }
 
     @PostMapping("/webhook")
-    public ResponseEntity<String> handleWebhook(@RequestBody String payload) {
+    public ResponseEntity<String> handleNotification(@RequestBody Map<String, Object> payload) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode jsonNode = mapper.readTree(payload);
+            // Gunakan String.valueOf untuk menghindari ClassCastException JSON Jackson
+            String orderIdStr = String.valueOf(payload.get("order_id"));
+            String statusCode = String.valueOf(payload.get("status_code"));
+            String grossAmount = String.valueOf(payload.get("gross_amount"));
+            String signatureKey = String.valueOf(payload.get("signature_key"));
+            String transactionStatus = String.valueOf(payload.get("transaction_status"));
 
-            String orderId = jsonNode.path("order_id").asText();
-            String statusCode = jsonNode.path("status_code").asText();
-            String grossAmount = jsonNode.path("gross_amount").asText();
-            String signatureKey = jsonNode.path("signature_key").asText();
-            String transactionStatus = jsonNode.path("transaction_status").asText();
-
-            // Verify signature
-            String rawSignature = orderId + statusCode + grossAmount + serverKey;
+            // Aturan Emas 3: VALIDASI KEAMANAN SHA-512
+            String rawString = orderIdStr + statusCode + grossAmount + serverKey;
             MessageDigest digest = MessageDigest.getInstance("SHA-512");
-            byte[] hashBytes = digest.digest(rawSignature.getBytes(StandardCharsets.UTF_8));
+            byte[] hash = digest.digest(rawString.getBytes("UTF-8"));
             
             StringBuilder hexString = new StringBuilder();
-            for (byte b : hashBytes) {
+            for (byte b : hash) {
                 String hex = Integer.toHexString(0xff & b);
                 if (hex.length() == 1) hexString.append('0');
                 hexString.append(hex);
             }
-            
-            if (!hexString.toString().equals(signatureKey)) {
-                System.err.println("Midtrans Signature verification failed for order " + orderId);
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Signature");
+            String calculatedSignature = hexString.toString();
+
+            if (!calculatedSignature.equalsIgnoreCase(signatureKey)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Tanda tangan (Signature) tidak valid!");
             }
 
-            // Process status
-            if ("settlement".equals(transactionStatus) || "capture".equals(transactionStatus)) {
-                Optional<Order> orderOpt = orderRepository.findByOrderId(orderId);
-                if (orderOpt.isPresent()) {
-                    Order order = orderOpt.get();
-                    if (order.getPaymentStatus() != PaymentStatus.PAID) {
-                        order.setPaymentStatus(PaymentStatus.PAID);
-                        order.setStatus(OrderStatus.PROCESSING);
-                        orderRepository.save(order);
-                        System.out.println("Midtrans Webhook: Order " + orderId + " marked as PAID/PROCESSING");
-                    }
-                } else {
-                    System.err.println("Midtrans Webhook: Order not found: " + orderId);
-                }
-            } else if ("cancel".equals(transactionStatus) || "deny".equals(transactionStatus) || "expire".equals(transactionStatus)) {
-                Optional<Order> orderOpt = orderRepository.findByOrderId(orderId);
-                if (orderOpt.isPresent()) {
-                    Order order = orderOpt.get();
-                    order.setPaymentStatus(PaymentStatus.FAILED);
+            // Ekstrak ID Order asli dari format "TC-{id}-{timestamp}" yang kita buat tadi
+            Long actualOrderId = Long.parseLong(orderIdStr.split("-")[1]);
+            Optional<Order> optionalOrder = orderRepository.findById(actualOrderId);
+
+            if (optionalOrder.isPresent()) {
+                Order order = optionalOrder.get();
+
+                // UPDATE STATUS BERDASARKAN RESPON MIDTRANS
+                if (transactionStatus.equals("settlement") || transactionStatus.equals("capture")) {
+                    order.setPaymentStatus(PaymentStatus.PAID);
+                    order.setStatus(OrderStatus.PROCESSING); // Order langsung berpindah ke fase disiapkan oleh Apotek
+                } else if (transactionStatus.equals("expire") || transactionStatus.equals("cancel") || transactionStatus.equals("deny")) {
                     order.setStatus(OrderStatus.CANCELLED);
-                    orderRepository.save(order);
-                    System.out.println("Midtrans Webhook: Order " + orderId + " marked as FAILED/CANCELLED");
                 }
+                
+                orderRepository.save(order);
             }
 
+            // WAJIB MERESPON 200 OK AGAR MIDTRANS BERHENTI MENGIRIM NOTIFIKASI
             return ResponseEntity.ok("OK");
+
         } catch (Exception e) {
-            System.err.println("Error processing Midtrans webhook");
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing webhook");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Terjadi kesalahan internal server.");
         }
     }
 }

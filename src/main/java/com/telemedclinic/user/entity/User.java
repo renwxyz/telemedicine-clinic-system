@@ -43,6 +43,8 @@ public abstract class User {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "profile_photo_path")
+    private String profilePhotoPath;
 
     // No-args constructor for JPA
     public User() {
@@ -93,6 +95,9 @@ public abstract class User {
         return createdAt;
     }
 
+    public String getProfilePhotoPath() {
+        return profilePhotoPath;
+    }
 
     // Setter
     public void setName(String name) {
@@ -154,6 +159,10 @@ public abstract class User {
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
         }
+    }
+
+    public void setProfilePhotoPath(String profilePhotoPath) {
+        this.profilePhotoPath = profilePhotoPath;
     }
 
 

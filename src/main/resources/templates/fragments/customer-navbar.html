@@ -106,37 +106,39 @@
               th:classappend="${activePage == 'profile'} ? 'ring-2 ring-orange-500 ring-offset-2' : ''"
             >
               <div
-                class="w-9 h-9 rounded-full bg-gradient-to-tr from-orange-500 to-orange-400 flex items-center justify-center text-white font-bold text-sm shadow-md"
-                th:text="${#strings.substring(currentUserName, 0, 2)}"
+                class="w-9 h-9 rounded-full bg-gradient-to-tr from-orange-500 to-orange-400 flex items-center justify-center text-white font-bold text-sm shadow-md overflow-hidden shrink-0"
               >
-                PA
+                <img th:if="${customer != null and customer.profilePhotoPath != null and !customer.profilePhotoPath.isEmpty()}" th:src="@{${customer.profilePhotoPath}}" class="w-full h-full object-cover" alt="Profile">
+                <span th:unless="${customer != null and customer.profilePhotoPath != null and !customer.profilePhotoPath.isEmpty()}" th:text="${#strings.substring(currentUserName != null ? currentUserName : (customer != null ? customer.name : 'US'), 0, 2)}">
+                  US
+                </span>
               </div>
             </button>
 
-            <!-- Dropdown Menu -->
-            <div
-              class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-stone-200 hidden group-hover:block transition-all"
-            >
-              <a
-                th:href="@{/customer/profile}"
-                class="block px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 rounded-t-lg"
-              >
-                👤 Profil
-              </a>
-              <hr class="my-1" />
-              <form th:action="@{/auth/logout}" method="post" class="block">
-                <input
-                  type="hidden"
-                  th:name="${_csrf.parameterName}"
-                  th:value="${_csrf.token}"
-                />
-                <button
-                  type="submit"
-                  class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-stone-50 rounded-b-lg font-semibold"
+            <!-- Dropdown Menu Wrapper -->
+            <div class="absolute right-0 top-full pt-2 w-48 hidden group-hover:block transition-all z-50">
+              <div class="bg-white rounded-lg shadow-lg border border-stone-200">
+                <a
+                  th:href="@{/customer/profile}"
+                  class="block px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 rounded-t-lg"
                 >
-                  🚪 Logout
-                </button>
-              </form>
+                  👤 Profil
+                </a>
+                <hr class="my-1" />
+                <form th:action="@{/auth/logout}" method="post" class="block">
+                  <input
+                    type="hidden"
+                    th:name="${_csrf.parameterName}"
+                    th:value="${_csrf.token}"
+                  />
+                  <button
+                    type="submit"
+                    class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-stone-50 rounded-b-lg font-semibold"
+                  >
+                    🚪 Logout
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         </div>

@@ -1,514 +1,358 @@
 <!doctype html>
 <html lang="id" xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Checkout - KlinikKu</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      body {
-        font-family: "Plus Jakarta Sans", sans-serif;
-      }
-    </style>
-  </head>
-  <body class="bg-stone-50 text-stone-900">
-    <!-- Navbar -->
-    <div th:replace="~{fragments/customer-navbar :: customerNavbar('checkout')}"></div>
 
-    <!-- Main Content -->
-    <div class="pt-20">
-      <div class="p-8">
-          <!-- Page Header -->
-          <div class="mb-8">
-            <h1 class="text-4xl font-bold text-stone-900 mb-2">Checkout</h1>
-            <p class="text-stone-600">Selesaikan pembelian Anda</p>
-          </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout - KlinikKu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    body {
+      font-family: "Plus Jakarta Sans", sans-serif;
+    }
+  </style>
+</head>
 
-          <!-- Alert Messages -->
-          <div
-            th:if="${error}"
-            th:replace="~{fragments/alerts :: error(${error})}"
-          ></div>
+<body class="bg-stone-50 text-stone-900">
+  <div th:replace="~{fragments/customer-navbar :: customerNavbar('checkout')}"></div>
 
-          <div class="grid md:grid-cols-3 gap-8">
-            <!-- Checkout Form (Left Column) -->
-            <div class="md:col-span-2">
-              <form
-                th:action="@{/customer/checkout}"
-                method="post"
-                th:object="${checkoutForm}"
-              >
-                <input
-                  type="hidden"
-                  name="${_csrf.parameterName}"
-                  th:value="${_csrf.token}"
-                />
+  <div class="pt-20">
+    <div class="p-8">
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold text-stone-900 mb-2">Checkout</h1>
+        <p class="text-stone-600">Selesaikan pembelian Anda</p>
+      </div>
 
-                <!-- Delivery Address Section -->
-                <div class="bg-white rounded-2xl border border-stone-200 p-6 mb-6 shadow-sm relative">
-                  <h2 class="text-xl font-bold text-stone-900 mb-4 flex items-center gap-2">
-                    <span class="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
-                    Alamat Pengiriman
-                  </h2>
+      <div th:if="${error}" th:replace="~{fragments/alerts :: error(${error})}"></div>
 
-                  <!-- Hidden Inputs for Form Submission -->
-                  <input type="hidden" th:field="*{recipientName}" id="hiddenRecipientName" />
-                  <input type="hidden" th:field="*{recipientPhone}" id="hiddenRecipientPhone" />
-                  <input type="hidden" th:field="*{deliveryAddress}" id="hiddenDeliveryAddress" />
+      <form th:action="@{/customer/checkout}" method="post" th:object="${checkoutForm}">
+        <input type="hidden" name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <input type="hidden" name="action" value="pay" />
 
-                  <!-- Address Selection Options -->
-                  <div class="space-y-4 mb-4">
-                    <div class="flex items-center">
-                      <input type="radio" id="addr-account" name="addressType" value="ACCOUNT" class="mr-3 w-5 h-5 text-orange-500 focus:ring-orange-500" checked>
-                      <label for="addr-account" class="font-semibold text-stone-900 cursor-pointer">Gunakan Alamat Akun</label>
-                    </div>
-                    <div class="flex items-center">
-                      <input type="radio" id="addr-custom" name="addressType" value="CUSTOM" class="mr-3 w-5 h-5 text-orange-500 focus:ring-orange-500">
-                      <label for="addr-custom" class="font-semibold text-stone-900 cursor-pointer">Alamat Kustom (Lainnya)</label>
-                    </div>
-                  </div>
+        <div class="grid md:grid-cols-3 gap-8">
 
-                  <!-- Display Active Address -->
-                  <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 shadow-inner">
-                    <p class="font-bold text-stone-900 text-lg mb-1" id="displayRecipientName" th:text="${customer.name}">Nama</p>
-                    <p class="text-stone-600 text-sm mb-3 font-medium flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                      </svg>
-                      <span id="displayRecipientPhone" th:text="${customer.phoneNumber}">0812345678</span>
-                    </p>
-                    <div class="text-stone-800 bg-white p-3 border border-stone-100 rounded-lg flex gap-3">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      <p id="displayDeliveryAddress" th:text="${customer.address}" class="leading-relaxed">Alamat lengkap...</p>
-                    </div>
-                  </div>
+          <div class="md:col-span-2">
+            <div class="bg-white rounded-2xl border border-stone-200 p-6 mb-6 shadow-sm relative">
+              <h2 class="text-xl font-bold text-stone-900 mb-4 flex items-center gap-2">
+                <span
+                  class="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
+                Alamat Pengiriman
+              </h2>
+
+              <input type="hidden" th:field="*{recipientName}" id="hiddenRecipientName" />
+              <input type="hidden" th:field="*{recipientPhone}" id="hiddenRecipientPhone" />
+              <input type="hidden" th:field="*{deliveryAddress}" id="hiddenDeliveryAddress" />
+
+              <div class="space-y-4 mb-4">
+                <div class="flex items-center">
+                  <input type="radio" id="addr-account" name="addressType" value="ACCOUNT"
+                    class="mr-3 w-5 h-5 text-orange-500 focus:ring-orange-500" checked>
+                  <label for="addr-account" class="font-semibold text-stone-900 cursor-pointer">Gunakan Alamat
+                    Akun</label>
                 </div>
-
-                <!-- Custom Address Modal -->
-                <div id="customAddressModal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] opacity-0 transition-opacity duration-300">
-                  <div class="bg-white p-8 rounded-2xl w-full max-w-lg shadow-2xl m-4 transform scale-95 transition-transform duration-300" id="modalContent">
-                    <div class="flex justify-between items-center mb-6">
-                      <h3 class="text-2xl font-bold text-stone-900">Masukkan Alamat Kustom</h3>
-                      <button type="button" id="btnCloseIconModal" class="text-stone-400 hover:text-stone-600 transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                    <div class="space-y-5">
-                      <div>
-                        <label class="block text-sm font-semibold text-stone-900 mb-2">Nama Penerima</label>
-                        <input type="text" id="modalName" class="w-full px-4 py-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-shadow bg-stone-50" placeholder="Nama lengkap penerima" />
-                      </div>
-                      <div>
-                        <label class="block text-sm font-semibold text-stone-900 mb-2">Nomor Telepon</label>
-                        <input type="tel" id="modalPhone" class="w-full px-4 py-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-shadow bg-stone-50" placeholder="08xxxxxxxxxx" />
-                      </div>
-                      <div>
-                        <label class="block text-sm font-semibold text-stone-900 mb-2">Alamat Lengkap</label>
-                        <textarea id="modalAddress" class="w-full px-4 py-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-shadow bg-stone-50" rows="3" placeholder="Jalan, nomor rumah, kelurahan, kecamatan, kota, provinsi, kode pos..."></textarea>
-                      </div>
-                    </div>
-                    <div class="mt-8 flex justify-end gap-3">
-                      <button type="button" id="btnCancelModal" class="px-6 py-2.5 text-stone-600 font-semibold hover:bg-stone-100 rounded-xl transition-colors">Batal</button>
-                      <button type="button" id="btnSaveModal" class="px-6 py-2.5 bg-orange-500 text-white font-semibold rounded-xl hover:bg-orange-600 shadow-md shadow-orange-500/20 transition-all hover:shadow-lg hover:shadow-orange-500/30 active:scale-95">Simpan Alamat</button>
-                    </div>
-                  </div>
+                <div class="flex items-center">
+                  <input type="radio" id="addr-custom" name="addressType" value="CUSTOM"
+                    class="mr-3 w-5 h-5 text-orange-500 focus:ring-orange-500">
+                  <label for="addr-custom" class="font-semibold text-stone-900 cursor-pointer">Alamat Kustom
+                    (Lainnya)</label>
                 </div>
+              </div>
 
-                <!-- Delivery Method Section -->
-                <div
-                  class="bg-white rounded-2xl border border-stone-200 p-6 mb-6 shadow-sm"
-                >
-                  <h2
-                    class="text-xl font-bold text-stone-900 mb-4 flex items-center gap-2"
-                  >
-                    <span
-                      class="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold"
-                      >2</span
-                    >
-                    Metode Pengiriman
-                  </h2>
-
-                  <div class="space-y-3">
-                    <label
-                      class="block border border-stone-300 rounded-lg p-4 cursor-pointer hover:bg-orange-50 transition"
-                    >
-                      <div class="flex items-center">
-                        <input
-                          type="radio"
-                          th:field="*{deliveryMethod}"
-                          value="INSTANT"
-                          required
-                          class="mr-4"
-                        />
-                        <div class="flex-1">
-                          <p class="font-semibold text-stone-900">
-                            Instant (Hari Ini)
-                          </p>
-                          <p class="text-sm text-stone-600">
-                            Pengiriman dalam 4 jam
-                          </p>
-                        </div>
-                        <span class="font-bold text-orange-500"
-                          >+ Rp 25.000</span
-                        >
-                      </div>
-                    </label>
-
-                    <label
-                      class="block border border-stone-300 rounded-lg p-4 cursor-pointer hover:bg-orange-50 transition"
-                    >
-                      <div class="flex items-center">
-                        <input
-                          type="radio"
-                          th:field="*{deliveryMethod}"
-                          value="REGULAR"
-                          required
-                          class="mr-4"
-                        />
-                        <div class="flex-1">
-                          <p class="font-semibold text-stone-900">
-                            Reguler (2-3 Hari)
-                          </p>
-                          <p class="text-sm text-stone-600">
-                            Pengiriman standar
-                          </p>
-                        </div>
-                        <span class="font-bold text-orange-500"
-                          >+ Rp 10.000</span
-                        >
-                      </div>
-                    </label>
-                  </div>
-                  <span
-                    th:errors="*{deliveryMethod}"
-                    class="text-red-600 text-sm mt-2 block"
-                  ></span>
-                </div>
-
-                <!-- Payment Method Section -->
-                <div
-                  class="bg-white rounded-2xl border border-stone-200 p-6 mb-6 shadow-sm"
-                >
-                  <h2
-                    class="text-xl font-bold text-stone-900 mb-4 flex items-center gap-2"
-                  >
-                    <span
-                      class="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold"
-                      >3</span
-                    >
-                    Metode Pembayaran
-                  </h2>
-
-                  <div class="space-y-3">
-                    <label
-                      class="block border border-stone-300 rounded-lg p-4 cursor-pointer hover:bg-orange-50 transition"
-                    >
-                      <div class="flex items-center">
-                        <input
-                          type="radio"
-                          th:field="*{paymentMethod}"
-                          value="COD"
-                          required
-                          class="mr-4"
-                        />
-                        <div class="flex-1">
-                          <p class="font-semibold text-stone-900">
-                            Bayar di Tempat (COD)
-                          </p>
-                          <p class="text-sm text-stone-600">
-                            Bayar saat obat tiba
-                          </p>
-                        </div>
-                        <span class="text-2xl">👤</span>
-                      </div>
-                    </label>
-
-                    <label
-                      class="block border border-stone-300 rounded-lg p-4 cursor-pointer hover:bg-orange-50 transition"
-                    >
-                      <div class="flex items-center">
-                        <input
-                          type="radio"
-                          th:field="*{paymentMethod}"
-                          value="MIDTRANS"
-                          required
-                          class="mr-4"
-                        />
-                        <div class="flex-1">
-                          <p class="font-semibold text-stone-900">
-                            Pembayaran Online (Midtrans)
-                          </p>
-                          <p class="text-sm text-stone-600">
-                            Transfer Bank, E-Wallet, QRIS
-                          </p>
-                        </div>
-                        <span class="text-2xl">💳</span>
-                      </div>
-                    </label>
-                  </div>
-                  <span
-                    th:errors="*{paymentMethod}"
-                    class="text-red-600 text-sm mt-2 block"
-                  ></span>
-                </div>
-
-                <!-- Notes Section -->
-                <div
-                  class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm"
-                >
-                  <h2 class="text-xl font-bold text-stone-900 mb-4">
-                    Catatan Pesanan (Opsional)
-                  </h2>
-                  <textarea
-                    th:field="*{notes}"
-                    class="w-full px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    rows="3"
-                    placeholder="Catatan khusus untuk pesanan Anda..."
-                  ></textarea>
-                </div>
-              </form>
-            </div>
-
-            <!-- Order Summary (Right Column) -->
-            <div class="md:col-span-1">
-              <div
-                class="bg-white rounded-2xl border border-stone-200 p-6 sticky top-8 shadow-sm"
-              >
-                <h2 class="text-xl font-bold text-stone-900 mb-6">
-                  Ringkasan Pesanan
-                </h2>
-
-                <!-- Order Items -->
-                <div
-                  class="space-y-3 mb-6 pb-6 border-b border-stone-200 max-h-64 overflow-y-auto"
-                >
-                  <div
-                    th:each="item : ${orderItems}"
-                    class="flex justify-between items-start"
-                  >
-                    <div>
-                      <p
-                        class="font-medium text-stone-900 text-sm"
-                        th:text="${item.inventoryItem.medicine.name}"
-                      >
-                        Paracetamol
-                      </p>
-                      <p
-                        class="text-xs text-stone-500"
-                        th:text="${'Qty: ' + item.quantity}"
-                      >
-                        Qty: 2
-                      </p>
-                    </div>
-                    <p
-                      class="font-semibold text-stone-900 text-sm"
-                      th:text="${'Rp ' + #numbers.formatInteger(item.subtotal, 0, 'COMMA')}"
-                    >
-                      Rp 25.000
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Price Breakdown -->
-                <div class="space-y-3 mb-6">
-                  <div class="flex justify-between text-stone-600">
-                    <span>Subtotal</span>
-                    <span
-                      th:text="${'Rp ' + #numbers.formatInteger(subtotal, 0, 'COMMA')}"
-                      >Rp 37.500</span
-                    >
-                  </div>
-                  <div class="flex justify-between text-stone-600">
-                    <span>Ongkir</span>
-                    <span
-                      id="shipping-fee"
-                      th:text="${'Rp ' + #numbers.formatInteger(shippingFee, 0, 'COMMA')}"
-                      >Rp 10.000</span
-                    >
-                  </div>
-                  <div class="flex justify-between text-stone-600">
-                    <span>Biaya Admin</span>
-                    <span
-                      th:text="${'Rp ' + #numbers.formatInteger(adminFee, 0, 'COMMA')}"
-                      >Rp 2.500</span
-                    >
-                  </div>
-                </div>
-
-                <!-- Total -->
-                <div class="flex justify-between items-center mb-6 pb-6 border-b border-stone-200">
-                  <span class="text-lg font-bold">Total</span>
-                  <span id="total-amount" class="text-2xl font-bold text-orange-500" th:text="${'Rp ' + #numbers.formatInteger(totalAmount, 0, 'COMMA')}">
-                    Rp 50.000
-                  </span>
-                </div>
-
-                <!-- Prescription Warning -->
-                <div
-                  class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6"
-                >
-                  <p class="text-yellow-700 text-xs">
-                    <span class="font-semibold">⚠️ Perhatian:</span> Resep akan
-                    divalidasi setelah pembayaran.
+              <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 shadow-inner">
+                <p class="font-bold text-stone-900 text-lg mb-1" id="displayRecipientName" th:text="${customer.name}">
+                  Nama</p>
+                <p class="text-stone-600 text-sm mb-3 font-medium flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  <span id="displayRecipientPhone" th:text="${customer.phoneNumber}">0812345678</span>
+                </p>
+                <div class="text-stone-800 bg-white p-3 border border-stone-100 rounded-lg flex gap-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <p id="displayDeliveryAddress" th:text="${customer.address}" class="leading-relaxed">Alamat lengkap...
                   </p>
                 </div>
-
-                <!-- Pay Button -->
-                <form
-                  th:action="@{/customer/checkout}"
-                  method="post"
-                  th:object="${checkoutForm}"
-                >
-                  <input type="hidden" name="action" value="pay" />
-                  <input
-                    type="hidden"
-                    name="${_csrf.parameterName}"
-                    th:value="${_csrf.token}"
-                  />
-                  <button
-                    type="submit"
-                    class="w-full px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-bold text-lg"
-                  >
-                    Bayar Sekarang
-                  </button>
-                </form>
-
-                <!-- Back to Cart -->
-                <a
-                  th:href="@{/customer/cart}"
-                  class="block w-full px-4 py-3 mt-3 border border-orange-500 text-orange-600 rounded-lg hover:bg-orange-50 transition font-semibold text-center"
-                >
-                  ← Kembali ke Keranjang
-                </a>
               </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-stone-200 p-6 mb-6 shadow-sm">
+              <h2 class="text-xl font-bold text-stone-900 mb-4 flex items-center gap-2">
+                <span
+                  class="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
+                Metode Pengiriman
+              </h2>
+              <div class="space-y-3">
+                <label
+                  class="block border border-stone-300 rounded-lg p-4 cursor-pointer hover:bg-orange-50 transition">
+                  <div class="flex items-center">
+                    <input type="radio" th:field="*{deliveryMethod}" value="INSTANT" required class="mr-4" />
+                    <div class="flex-1">
+                      <p class="font-semibold text-stone-900">Instant (Hari Ini)</p>
+                      <p class="text-sm text-stone-600">Pengiriman dalam 4 jam</p>
+                    </div>
+                    <span class="font-bold text-orange-500">+ Rp 25.000</span>
+                  </div>
+                </label>
+                <label
+                  class="block border border-stone-300 rounded-lg p-4 cursor-pointer hover:bg-orange-50 transition">
+                  <div class="flex items-center">
+                    <input type="radio" th:field="*{deliveryMethod}" value="REGULAR" required class="mr-4" />
+                    <div class="flex-1">
+                      <p class="font-semibold text-stone-900">Reguler (2-3 Hari)</p>
+                      <p class="text-sm text-stone-600">Pengiriman standar</p>
+                    </div>
+                    <span class="font-bold text-orange-500">+ Rp 10.000</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-stone-200 p-6 mb-6 shadow-sm">
+              <h2 class="text-xl font-bold text-stone-900 mb-4 flex items-center gap-2">
+                <span
+                  class="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
+                Metode Pembayaran
+              </h2>
+              <div class="space-y-3">
+                <label
+                  class="block border border-stone-300 rounded-lg p-4 cursor-pointer hover:bg-orange-50 transition">
+                  <div class="flex items-center">
+                    <input type="radio" th:field="*{paymentMethod}" value="COD" required class="mr-4" />
+                    <div class="flex-1">
+                      <p class="font-semibold text-stone-900">Bayar di Tempat (COD)</p>
+                      <p class="text-sm text-stone-600">Bayar saat obat tiba</p>
+                    </div>
+                    <span class="text-2xl">👤</span>
+                  </div>
+                </label>
+                <label
+                  class="block border border-stone-300 rounded-lg p-4 cursor-pointer hover:bg-orange-50 transition">
+                  <div class="flex items-center">
+                    <input type="radio" th:field="*{paymentMethod}" value="MIDTRANS" required class="mr-4" />
+                    <div class="flex-1">
+                      <p class="font-semibold text-stone-900">Pembayaran Online (Midtrans)</p>
+                      <p class="text-sm text-stone-600">Transfer Bank, E-Wallet, QRIS</p>
+                    </div>
+                    <span class="text-2xl">💳</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+              <h2 class="text-xl font-bold text-stone-900 mb-4">Catatan Pesanan (Opsional)</h2>
+              <textarea th:field="*{notes}"
+                class="w-full px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                rows="3" placeholder="Catatan khusus untuk pesanan Anda..."></textarea>
+            </div>
+          </div>
+
+          <div class="md:col-span-1">
+            <div class="bg-white rounded-2xl border border-stone-200 p-6 sticky top-8 shadow-sm">
+              <h2 class="text-xl font-bold text-stone-900 mb-6">Ringkasan Pesanan</h2>
+
+              <div class="space-y-3 mb-6 pb-6 border-b border-stone-200 max-h-64 overflow-y-auto">
+                <div th:each="item : ${orderItems}" class="flex justify-between items-start">
+                  <div>
+                    <p class="font-medium text-stone-900 text-sm" th:text="${item.inventoryItem.medicine.name}">Obat</p>
+                    <p class="text-xs text-stone-500" th:text="${'Qty: ' + item.quantity}">Qty: 2</p>
+                  </div>
+                  <p class="font-semibold text-stone-900 text-sm"
+                    th:text="${'Rp ' + #numbers.formatInteger(item.subtotal, 0, 'COMMA')}">Rp 25.000</p>
+                </div>
+              </div>
+
+              <div class="space-y-3 mb-6">
+                <div class="flex justify-between text-stone-600">
+                  <span>Subtotal</span>
+                  <span th:text="${'Rp ' + #numbers.formatInteger(subtotal, 0, 'COMMA')}">Rp 0</span>
+                </div>
+                <div class="flex justify-between text-stone-600">
+                  <span>Ongkir</span>
+                  <span id="shipping-fee" th:text="${'Rp ' + #numbers.formatInteger(shippingFee, 0, 'COMMA')}">Rp
+                    10.000</span>
+                </div>
+                <div class="flex justify-between text-stone-600">
+                  <span>Biaya Admin</span>
+                  <span th:text="${'Rp ' + #numbers.formatInteger(adminFee, 0, 'COMMA')}">Rp 2.500</span>
+                </div>
+              </div>
+
+              <div class="flex justify-between items-center mb-6 pb-6 border-b border-stone-200">
+                <span class="text-lg font-bold">Total</span>
+                <span id="total-amount" class="text-2xl font-bold text-orange-500"
+                  th:text="${'Rp ' + #numbers.formatInteger(totalAmount, 0, 'COMMA')}">Rp 0</span>
+              </div>
+
+              <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <p class="text-yellow-700 text-xs">
+                  <span class="font-semibold">⚠️ Perhatian:</span> Resep divalidasi setelah pembayaran.
+                </p>
+              </div>
+
+              <button type="submit"
+                class="w-full px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-bold text-lg">
+                Bayar Sekarang
+              </button>
+
+              <a th:href="@{/customer/cart}"
+                class="block w-full px-4 py-3 mt-3 border border-orange-500 text-orange-600 rounded-lg hover:bg-orange-50 transition font-semibold text-center">
+                ← Kembali ke Keranjang
+              </a>
             </div>
           </div>
         </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="customAddressModal"
+    class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] opacity-0 transition-opacity duration-300">
+    <div
+      class="bg-white p-8 rounded-2xl w-full max-w-lg shadow-2xl m-4 transform scale-95 transition-transform duration-300"
+      id="modalContent">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-2xl font-bold text-stone-900">Masukkan Alamat Kustom</h3>
+        <button type="button" id="btnCloseIconModal" class="text-stone-400 hover:text-stone-600 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="space-y-5">
+        <div><label class="block text-sm font-semibold text-stone-900 mb-2">Nama Penerima</label><input type="text"
+            id="modalName"
+            class="w-full px-4 py-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500" />
+        </div>
+        <div><label class="block text-sm font-semibold text-stone-900 mb-2">Nomor Telepon</label><input type="tel"
+            id="modalPhone"
+            class="w-full px-4 py-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500" />
+        </div>
+        <div><label class="block text-sm font-semibold text-stone-900 mb-2">Alamat Lengkap</label><textarea
+            id="modalAddress"
+            class="w-full px-4 py-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+            rows="3"></textarea></div>
+      </div>
+      <div class="mt-8 flex justify-end gap-3">
+        <button type="button" id="btnCancelModal"
+          class="px-6 py-2.5 text-stone-600 font-semibold hover:bg-stone-100 rounded-xl transition-colors">Batal</button>
+        <button type="button" id="btnSaveModal"
+          class="px-6 py-2.5 bg-orange-500 text-white font-semibold rounded-xl hover:bg-orange-600 shadow-md">Simpan
+          Alamat</button>
       </div>
     </div>
+  </div>
 
-    <script th:inline="javascript">
-      // Variables from backend
-      const subtotal = [[${subtotal}]];
-      const adminFee = [[${adminFee}]];
-      const customerName = [[${customer.name}]];
-      const customerPhone = [[${customer.phoneNumber}]];
-      const customerAddress = [[${customer.address}]];
+  <script th:inline="javascript">
+    const subtotal = /*[[${subtotal}]]*/ 0;
+    const adminFee = /*[[${adminFee}]]*/ 0;
+    const customerName = /*[[${customer.name}]]*/ '';
+    const customerPhone = /*[[${customer.phoneNumber}]]*/ '';
+    const customerAddress = /*[[${customer.address}]]*/ '';
 
-      // Address Elements
-      const hiddenName = document.getElementById("hiddenRecipientName");
-      const hiddenPhone = document.getElementById("hiddenRecipientPhone");
-      const hiddenAddress = document.getElementById("hiddenDeliveryAddress");
+    const hiddenName = document.getElementById("hiddenRecipientName");
+    const hiddenPhone = document.getElementById("hiddenRecipientPhone");
+    const hiddenAddress = document.getElementById("hiddenDeliveryAddress");
+    const displayTitleName = document.getElementById("displayRecipientName");
+    const displayTitlePhone = document.getElementById("displayRecipientPhone");
+    const displayTitleAddress = document.getElementById("displayDeliveryAddress");
 
-      const displayTitleName = document.getElementById("displayRecipientName");
-      const displayTitlePhone = document.getElementById("displayRecipientPhone");
-      const displayTitleAddress = document.getElementById("displayDeliveryAddress");
+    const modal = document.getElementById("customAddressModal");
+    const modalContent = document.getElementById("modalContent");
 
-      const modal = document.getElementById("customAddressModal");
-      const modalContent = document.getElementById("modalContent");
-      const btnCancel = document.getElementById("btnCancelModal");
-      const btnCloseIcon = document.getElementById("btnCloseIconModal");
-      const btnSave = document.getElementById("btnSaveModal");
+    hiddenName.value = customerName;
+    hiddenPhone.value = customerPhone;
+    hiddenAddress.value = customerAddress;
 
-      // Set initial values
+    function updateDisplay(name, phone, address) {
+      displayTitleName.textContent = name;
+      displayTitlePhone.textContent = phone;
+      displayTitleAddress.textContent = address;
+    }
+
+    function openModal() {
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+      setTimeout(() => {
+        modal.classList.remove("opacity-0");
+        modalContent.classList.remove("scale-95");
+        modalContent.classList.add("scale-100");
+      }, 10);
+    }
+
+    function closeModal() {
+      modal.classList.add("opacity-0");
+      modalContent.classList.remove("scale-100");
+      modalContent.classList.add("scale-95");
+      setTimeout(() => {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }, 300);
+    }
+
+    function revertToAccountAddress() {
+      document.getElementById("addr-account").checked = true;
       hiddenName.value = customerName;
       hiddenPhone.value = customerPhone;
       hiddenAddress.value = customerAddress;
+      updateDisplay(customerName, customerPhone, customerAddress);
+    }
 
-      function updateDisplay(name, phone, address) {
-        displayTitleName.textContent = name;
-        displayTitlePhone.textContent = phone;
-        displayTitleAddress.textContent = address;
+    document.querySelectorAll('input[name="addressType"]').forEach((radio) => {
+      radio.addEventListener("change", function () {
+        if (this.value === "ACCOUNT") revertToAccountAddress();
+        else if (this.value === "CUSTOM") openModal();
+      });
+    });
+
+    document.getElementById("btnCancelModal").addEventListener("click", () => {
+      revertToAccountAddress();
+      closeModal();
+    });
+
+    document.getElementById("btnCloseIconModal").addEventListener("click", () => {
+      revertToAccountAddress();
+      closeModal();
+    });
+
+    document.getElementById("btnSaveModal").addEventListener("click", () => {
+      const mName = document.getElementById("modalName").value.trim();
+      const mPhone = document.getElementById("modalPhone").value.trim();
+      const mAddress = document.getElementById("modalAddress").value.trim();
+
+      if (!mName || !mPhone || !mAddress) {
+        alert("Lengkapi semua data alamat kustom terlebih dahulu.");
+        return;
       }
 
-      function openModal() {
-        modal.classList.remove("hidden");
-        modal.classList.add("flex");
-        // small delay for animation
-        setTimeout(() => {
-          modal.classList.remove("opacity-0");
-          modalContent.classList.remove("scale-95");
-          modalContent.classList.add("scale-100");
-        }, 10);
-      }
+      hiddenName.value = mName;
+      hiddenPhone.value = mPhone;
+      hiddenAddress.value = mAddress;
+      updateDisplay(mName, mPhone, mAddress);
+      closeModal();
+    });
 
-      function closeModal() {
-        modal.classList.add("opacity-0");
-        modalContent.classList.remove("scale-100");
-        modalContent.classList.add("scale-95");
-        setTimeout(() => {
-          modal.classList.add("hidden");
-          modal.classList.remove("flex");
-        }, 300);
-      }
-
-      function revertToAccountAddress() {
-        document.getElementById("addr-account").checked = true;
-        hiddenName.value = customerName;
-        hiddenPhone.value = customerPhone;
-        hiddenAddress.value = customerAddress;
-        updateDisplay(customerName, customerPhone, customerAddress);
-      }
-
-      document.querySelectorAll('input[name="addressType"]').forEach((radio) => {
-        radio.addEventListener("change", function () {
-          if (this.value === "ACCOUNT") {
-            revertToAccountAddress();
-          } else if (this.value === "CUSTOM") {
-            openModal();
-          }
-        });
+    document.querySelectorAll('input[name="deliveryMethod"]').forEach((radio) => {
+      radio.addEventListener("change", function () {
+        const fee = this.value === "INSTANT" ? 25000 : 10000;
+        document.getElementById("shipping-fee").textContent = "Rp " + fee.toLocaleString("id-ID");
+        const total = subtotal + adminFee + fee;
+        document.getElementById("total-amount").textContent = "Rp " + total.toLocaleString("id-ID");
       });
+    });
+  </script>
+</body>
 
-      btnCancel.addEventListener("click", () => {
-        revertToAccountAddress();
-        closeModal();
-      });
-
-      btnCloseIcon.addEventListener("click", () => {
-        revertToAccountAddress();
-        closeModal();
-      });
-
-      btnSave.addEventListener("click", () => {
-        const mName = document.getElementById("modalName").value.trim();
-        const mPhone = document.getElementById("modalPhone").value.trim();
-        const mAddress = document.getElementById("modalAddress").value.trim();
-
-        if (!mName || !mPhone || !mAddress) {
-          alert("Silakan lengkapi semua data alamat kustom terlebih dahulu.");
-          return;
-        }
-
-        hiddenName.value = mName;
-        hiddenPhone.value = mPhone;
-        hiddenAddress.value = mAddress;
-        updateDisplay(mName, mPhone, mAddress);
-        closeModal();
-      });
-
-      // Update shipping fee and total based on delivery method
-      document
-        .querySelectorAll('input[name="deliveryMethod"]')
-        .forEach((radio) => {
-          radio.addEventListener("change", function () {
-            const fee = this.value === "INSTANT" ? 25000 : 10000;
-            document.getElementById("shipping-fee").textContent = "Rp " + fee.toLocaleString("id-ID");
-            const total = subtotal + adminFee + fee;
-            document.getElementById("total-amount").textContent = "Rp " + total.toLocaleString("id-ID");
-          });
-        });
-    </script>
-  </body>
 </html>

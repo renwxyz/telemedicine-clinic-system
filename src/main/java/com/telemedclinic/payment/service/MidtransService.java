@@ -41,7 +41,11 @@ public class MidtransService {
             ObjectNode requestBody = objectMapper.createObjectNode();
 
             ObjectNode transactionDetails = objectMapper.createObjectNode();
-            transactionDetails.put("order_id", order.getOrderId());
+            
+            // PERBAIKAN: Tambahkan timestamp agar order_id SELALU UNIK di mata Midtrans
+            String uniqueOrderId = "TC-" + order.getOrderId() + "-" + System.currentTimeMillis();
+            transactionDetails.put("order_id", uniqueOrderId);
+            
             transactionDetails.put("gross_amount", (int) Math.round(order.getTotalAmount()));
             requestBody.set("transaction_details", transactionDetails);
 
@@ -63,8 +67,12 @@ public class MidtransService {
             }
 
         } catch (Exception e) {
+            // PERBAIKAN: Log Error yang jauh lebih mencolok agar gampang dicari
+            System.err.println("=============================================");
+            System.err.println("❌ GAGAL MENDAPATKAN TOKEN MIDTRANS");
+            System.err.println("Penyebab Error: " + e.getMessage());
+            System.err.println("=============================================");
             e.printStackTrace();
-            System.err.println("Failed to create Midtrans transaction: " + e.getMessage());
         }
         return null;
     }
