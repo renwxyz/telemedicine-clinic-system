@@ -41,13 +41,8 @@ public class OrderScheduler {
                     
                     // Release funds
                     financeService.releaseFundsToPharmacy(order);
-                    
-                } else if (now.isAfter(refTime.plusMinutes(10))) {
-                    // Update to SHIPPED
-                    order.setStatus(OrderStatus.SHIPPED);
-                    orderRepository.save(order);
-                    System.out.println("Order " + order.getOrderId() + " updated to SHIPPED.");
-                }
+                } 
+                // Auto-shipped is disabled because Pharmacist will do it manually
             }
         }
         
@@ -55,7 +50,8 @@ public class OrderScheduler {
         List<Order> shippedOrders = orderRepository.findByStatus(OrderStatus.SHIPPED);
         for (Order order : shippedOrders) {
             LocalDateTime refTime = order.getUpdatedAt() != null ? order.getUpdatedAt() : order.getCreatedAt();
-            if (refTime != null && now.isAfter(refTime.plusMinutes(10))) {
+            // [UBAH WAKTU DI SINI] - Ganti angka 1 menjadi 10, 30, atau 60 (dalam hitungan menit) untuk mengatur lama pengiriman kurir.
+            if (refTime != null && now.isAfter(refTime.plusMinutes(1))) {
                 order.setStatus(OrderStatus.DELIVERED);
                 orderRepository.save(order);
                 System.out.println("Order " + order.getOrderId() + " updated from SHIPPED to DELIVERED.");

@@ -1,9 +1,12 @@
 package com.telemedclinic.payment.controller;
 
-import com.telemedclinic.order.entity.Order;
-import com.telemedclinic.order.entity.OrderStatus;
-import com.telemedclinic.order.entity.PaymentStatus;
-import com.telemedclinic.order.repository.OrderRepository;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,38 +15,44 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.security.MessageDigest;
-import java.util.Map;
-import java.util.Optional;
+import com.telemedclinic.order.entity.Order;
+import com.telemedclinic.order.entity.OrderStatus;
+import com.telemedclinic.order.entity.PaymentStatus;
+import com.telemedclinic.order.repository.OrderRepository;
 
 @RestController
 @RequestMapping("/api/midtrans")
 public class WebhookController {
 
-    private final OrderRepository orderRepository;
+    @Autowired
+    private OrderRepository orderRepository;
 
     @Value("${midtrans.server.key}")
     private String serverKey;
 
-    public WebhookController(OrderRepository orderRepository) {
-        this.orderRepository = orderRepository;
-    }
-
     @PostMapping("/webhook")
-    public ResponseEntity<String> handleNotification(@RequestBody Map<String, Object> payload) {
+    public ResponseEntity<String> handleWebhook(@RequestBody Map<String, Object> payload) {
         try {
-            // Gunakan String.valueOf untuk menghindari ClassCastException JSON Jackson
-            String orderIdStr = String.valueOf(payload.get("order_id"));
+            // 3. EKSTRAK DATA DARI PAYLOAD
+            String orderId = String.valueOf(payload.get("order_id"));
             String statusCode = String.valueOf(payload.get("status_code"));
-            String grossAmount = String.valueOf(payload.get("gross_amount"));
-            String signatureKey = String.valueOf(payload.get("signature_key"));
-            String transactionStatus = String.valueOf(payload.get("transaction_status"));
-
-            // Aturan Emas 3: VALIDASI KEAMANAN SHA-512
-            String rawString = orderIdStr + statusCode + grossAmount + serverKey;
-            MessageDigest digest = MessageDigest.getInstance("SHA-512");
-            byte[] hash = digest.digest(rawString.getBytes("UTF-8"));
             
+            Object grossAmountObj = payload.get("gross_amount");
+            String grossAmount = String.valueOf(grossAmountObj);
+            if (!grossAmount.contains(".")) {
+                grossAmount += ".00";
+            } else if (grossAmount.endsWith(".0")) {
+                grossAmount += "0";
+            }
+            
+            String transactionStatus = String.valueOf(payload.get("transaction_status"));
+            String signatureKey = String.valueOf(payload.get("signature_key"));
+
+            // 4. VALIDASI KEAMANAN (SHA-512)
+            String payloadToHash = orderId + statusCode + grossAmount + serverKey;
+            
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            byte[] hash = digest.digest(payloadToHash.getBytes(StandardCharsets.UTF_8));
             StringBuilder hexString = new StringBuilder();
             for (byte b : hash) {
                 String hex = Integer.toHexString(0xff & b);
@@ -52,34 +61,45 @@ public class WebhookController {
             }
             String calculatedSignature = hexString.toString();
 
+            System.out.println("Midtrans Webhook Received!");
+            System.out.println("Payload to hash: " + payloadToHash);
+            System.out.println("Calculated Signature: " + calculatedSignature);
+            System.out.println("Midtrans Signature: " + signatureKey);
+
             if (!calculatedSignature.equalsIgnoreCase(signatureKey)) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Tanda tangan (Signature) tidak valid!");
+                System.err.println("❌ SIGNATURE MISMATCH!");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid signature");
             }
 
-            // Ekstrak ID Order asli dari format "TC-{id}-{timestamp}" yang kita buat tadi
-            Long actualOrderId = Long.parseLong(orderIdStr.split("-")[1]);
-            Optional<Order> optionalOrder = orderRepository.findById(actualOrderId);
+            System.out.println("✅ SIGNATURE MATCH! Processing order...");
 
-            if (optionalOrder.isPresent()) {
-                Order order = optionalOrder.get();
+            // 5. EKSTRAK ID PESANAN ASLI
+            String[] parts = orderId.split("-");
+            if (parts.length >= 3) {
+                String originalOrderId = parts[1] + "-" + parts[2];
 
-                // UPDATE STATUS BERDASARKAN RESPON MIDTRANS
-                if (transactionStatus.equals("settlement") || transactionStatus.equals("capture")) {
-                    order.setPaymentStatus(PaymentStatus.PAID);
-                    order.setStatus(OrderStatus.PROCESSING); // Order langsung berpindah ke fase disiapkan oleh Apotek
-                } else if (transactionStatus.equals("expire") || transactionStatus.equals("cancel") || transactionStatus.equals("deny")) {
-                    order.setStatus(OrderStatus.CANCELLED);
+                // 6. UPDATE DATABASE
+                Optional<Order> optionalOrder = orderRepository.findByOrderId(originalOrderId);
+                if (optionalOrder.isPresent()) {
+                    Order order = optionalOrder.get();
+                    if ("settlement".equals(transactionStatus) || "capture".equals(transactionStatus)) {
+                        order.setPaymentStatus(PaymentStatus.PAID);
+                        order.setStatus(OrderStatus.PROCESSING);
+                    } else if ("cancel".equals(transactionStatus) || "deny".equals(transactionStatus) || "expire".equals(transactionStatus)) {
+                        order.setStatus(OrderStatus.CANCELLED);
+                    } else if ("pending".equals(transactionStatus)) {
+                        order.setPaymentStatus(PaymentStatus.PENDING);
+                    }
+                    orderRepository.save(order);
                 }
-                
-                orderRepository.save(order);
             }
-
-            // WAJIB MERESPON 200 OK AGAR MIDTRANS BERHENTI MENGIRIM NOTIFIKASI
-            return ResponseEntity.ok("OK");
-
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Terjadi kesalahan internal server.");
         }
+
+        // 7. KEMBALIKAN RESPONS 200 OK APAPUN YANG TERJADI
+        return ResponseEntity.ok("OK");
     }
 }

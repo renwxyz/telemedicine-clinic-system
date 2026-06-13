@@ -39,15 +39,15 @@
 
         <div class="space-y-6">
             <!-- KARTU ORDER (Contoh Sedang Diproses) -->
-            <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+            <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm" th:each="order : ${orders}" th:if="${order.status.name() == 'PROCESSING' or order.status.name() == 'SHIPPED' or order.status.name() == 'DELIVERED'}">
                 <!-- Header Order -->
                 <div class="flex justify-between items-start mb-6">
                     <div>
                         <div class="flex items-center gap-3 mb-1">
-                            <h3 class="text-xl font-extrabold text-stone-900">#ORD-2024-0001</h3>
+                            <h3 class="text-xl font-extrabold text-stone-900" th:text="'#' + ${order.orderId}">#ORD-2024-0001</h3>
                             <span class="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-md uppercase tracking-wide">Obat Keras (Selesai Validasi)</span>
                         </div>
-                        <p class="text-stone-500 text-sm font-medium">Pemesan: Siti Nurhaliza | 19 Nov 2024, 10:30 WIB</p>
+                        <p class="text-stone-500 text-sm font-medium" th:text="'Pemesan: ' + ${order.recipientName} + ' | ' + ${#temporals.format(order.createdAt, 'dd MMM yyyy, HH:mm')} + ' WIB'">Pemesan: Siti Nurhaliza | 19 Nov 2024, 10:30 WIB</p>
                     </div>
                 </div>
 
@@ -88,12 +88,20 @@
                 <!-- Footer Order (Detail & Aksi) -->
                 <div class="bg-stone-50 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div class="text-sm font-bold text-stone-700">
-                        Total Tagihan: <span class="text-[#D53E0F] text-lg">Rp 120.000</span>
+                        Total Tagihan: <span class="text-[#D53E0F] text-lg" th:text="'Rp ' + ${order.totalAmount}">Rp 120.000</span>
                         <p class="text-xs text-stone-500 font-medium">Amoxicillin 500mg, Paracetamol 500mg</p>
                     </div>
                     <div class="flex gap-2 w-full sm:w-auto">
                         <button class="flex-1 sm:flex-none border border-stone-300 bg-white text-stone-700 font-bold px-4 py-2.5 rounded-lg hover:bg-stone-100 transition text-sm">Lihat Struk</button>
-                        <button class="flex-1 sm:flex-none bg-[#D53E0F] text-white font-bold px-6 py-2.5 rounded-lg hover:bg-[#5E0006] transition shadow-md text-sm">Update: Kurir Pickup</button>
+                        <form th:if="${order.status.name() == 'PROCESSING'}" 
+                              th:action="@{/pharmacist/orders/{id}/ship(id=${order.id})}" 
+                              method="post" 
+                              class="flex-1 sm:flex-none"
+                              onsubmit="return confirm('Apakah Anda yakin pesanan siap diserahkan ke kurir? Stok obat akan dipotong otomatis.');">
+                            <button type="submit" class="w-full bg-[#D53E0F] text-white font-bold px-6 py-2.5 rounded-lg hover:bg-[#5E0006] transition shadow-md text-sm">
+                                Update: Kurir Pickup
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

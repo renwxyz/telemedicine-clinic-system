@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riwayat Pesanan - KlinikKu</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://app.sandbox.midtrans.com/snap/snap.js" th:attr="data-client-key=${midtransClientKey}"></script>
+    <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" th:data-client-key="${midtransClientKey}"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -35,23 +35,26 @@
                             Semua
                         </a>
                         <a th:href="@{/customer/orders(status=PENDING)}" 
-                           class="px-6 py-4 font-semibold border-b-2 transition whitespace-nowrap"
+                           class="px-6 py-4 font-semibold border-b-2 transition whitespace-nowrap flex items-center"
                            th:classappend="${status == 'PENDING'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
                             Menunggu
+                            <span th:if="${pendingCount != null and pendingCount > 0}" th:text="${pendingCount}" class="bg-[#D53E0F] text-white text-xs font-bold px-2 py-0.5 rounded-full ml-1"></span>
                         </a>
                         <a th:href="@{/customer/orders(status=PROCESSING)}" 
-                           class="px-6 py-4 font-semibold border-b-2 transition whitespace-nowrap"
+                           class="px-6 py-4 font-semibold border-b-2 transition whitespace-nowrap flex items-center"
                            th:classappend="${status == 'PROCESSING'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
                             Diproses
+                            <span th:if="${processingCount != null and processingCount > 0}" th:text="${processingCount}" class="bg-[#D53E0F] text-white text-xs font-bold px-2 py-0.5 rounded-full ml-1"></span>
                         </a>
                         <a th:href="@{/customer/orders(status=SHIPPED)}" 
-                           class="px-6 py-4 font-semibold border-b-2 transition whitespace-nowrap"
+                           class="px-6 py-4 font-semibold border-b-2 transition whitespace-nowrap flex items-center"
                            th:classappend="${status == 'SHIPPED'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
                             Dikirim
+                            <span th:if="${shippedCount != null and shippedCount > 0}" th:text="${shippedCount}" class="bg-[#D53E0F] text-white text-xs font-bold px-2 py-0.5 rounded-full ml-1"></span>
                         </a>
-                        <a th:href="@{/customer/orders(status=COMPLETED)}" 
+                        <a th:href="@{/customer/orders(status=DELIVERED)}" 
                            class="px-6 py-4 font-semibold border-b-2 transition whitespace-nowrap"
-                           th:classappend="${status == 'COMPLETED'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
+                           th:classappend="${status == 'DELIVERED'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
                             Selesai
                         </a>
                         <a th:href="@{/customer/orders(status=CANCELLED)}" 

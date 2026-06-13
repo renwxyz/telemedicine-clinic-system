@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,196 +8,293 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            DEFAULT: '#D53E0F',
+                            dark: '#5E0006',
+                            light: '#FDF3F0'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-stone-50 text-stone-900">
-    <!-- Navbar -->
+
+<body class="bg-brand-light text-stone-800 font-sans antialiased">
+
     <div th:replace="~{fragments/customer-navbar :: customerNavbar('orders')}"></div>
 
-    <!-- Main Content -->
-    <div class="pt-20">
-        <div class="p-8">
-                <!-- Page Header -->
-                <div class="mb-8">
-                    <a th:href="@{/customer/orders}" class="text-orange-600 hover:text-orange-700 font-semibold mb-4 inline-block">
-                        ← Kembali ke Riwayat Pesanan
-                    </a>
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <h1 class="text-4xl font-bold text-stone-900 mb-2" th:text="${order.orderId}">ORD-0001</h1>
-                            <p class="text-stone-600" th:text="${#temporals.format(order.createdAt, 'dd MMMM yyyy HH:mm')}">01 Januari 2026 14:30</p>
+    <main class="pt-28 pb-16 max-w-6xl mx-auto px-6">
+
+        <a th:href="@{/customer/orders}"
+            class="inline-flex items-center gap-2 text-brand hover:text-brand-dark font-bold mb-6 transition-colors group">
+            <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+                </path>
+            </svg>
+            Kembali ke Riwayat
+        </a>
+
+        <div
+            class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-stone-900 flex items-center gap-3">
+                    <span th:text="${order.orderId}">ORD-0001</span>
+                </h1>
+                <p class="text-stone-500 font-medium mt-1 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                    <span th:text="${#temporals.format(order.createdAt, 'dd MMMM yyyy • HH:mm')}">01 Jan 2026</span> WIB
+                </p>
+            </div>
+            <div class="scale-110 origin-left md:origin-right">
+                <span th:replace="~{fragments/status-badges :: order-status(${order.status})}"></span>
+            </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-8">
+
+                <div class="bg-white rounded-2xl border border-stone-200 p-8 shadow-sm">
+                    <h2 class="text-xl font-extrabold text-stone-900 mb-8">Status Perjalanan Pesanan</h2>
+
+                    <div class="relative flex justify-between items-center px-2 md:px-6">
+                        <div
+                            class="absolute left-10 right-10 top-1/2 -translate-y-1/2 h-1 bg-stone-100 z-0 rounded-full">
                         </div>
-                        <span th:replace="~{fragments/status-badges :: order-status(${order.status})}"></span>
+
+                        <div class="relative z-10 flex flex-col items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white shadow-md bg-brand">
+                                ✓
+                            </div>
+                            <span class="text-xs font-bold text-stone-800 text-center w-20">Pesanan<br>Dibuat</span>
+                        </div>
+
+                        <div class="relative z-10 flex flex-col items-center gap-3">
+                            <div th:classappend="${order.status.name() != 'PENDING'} ? 'bg-brand text-white shadow-md' : 'bg-white border-2 border-stone-200 text-stone-300'"
+                                class="w-10 h-10 rounded-full flex items-center justify-center font-bold transition-colors">
+                                <span th:if="${order.status.name() != 'PENDING'}">✓</span>
+                                <span th:unless="${order.status.name() != 'PENDING'}">2</span>
+                            </div>
+                            <span
+                                th:classappend="${order.status.name() != 'PENDING'} ? 'text-stone-800 font-bold' : 'text-stone-400 font-medium'"
+                                class="text-xs text-center w-20">Sedang<br>Diproses</span>
+                        </div>
+
+                        <div class="relative z-10 flex flex-col items-center gap-3">
+                            <div th:classappend="${order.status.name() == 'SHIPPED' || order.status.name() == 'COMPLETED' || order.status.name() == 'DELIVERED'} ? 'bg-brand text-white shadow-md' : 'bg-white border-2 border-stone-200 text-stone-300'"
+                                class="w-10 h-10 rounded-full flex items-center justify-center font-bold transition-colors">
+                                <span
+                                    th:if="${order.status.name() == 'SHIPPED' || order.status.name() == 'COMPLETED' || order.status.name() == 'DELIVERED'}">✓</span>
+                                <span
+                                    th:unless="${order.status.name() == 'SHIPPED' || order.status.name() == 'COMPLETED' || order.status.name() == 'DELIVERED'}">3</span>
+                            </div>
+                            <span
+                                th:classappend="${order.status.name() == 'SHIPPED' || order.status.name() == 'COMPLETED' || order.status.name() == 'DELIVERED'} ? 'text-stone-800 font-bold' : 'text-stone-400 font-medium'"
+                                class="text-xs text-center w-20">Dalam<br>Pengiriman</span>
+                        </div>
+
+                        <div class="relative z-10 flex flex-col items-center gap-3">
+                            <div th:classappend="${order.status.name() == 'COMPLETED' || order.status.name() == 'DELIVERED'} ? 'bg-green-500 text-white shadow-md' : 'bg-white border-2 border-stone-200 text-stone-300'"
+                                class="w-10 h-10 rounded-full flex items-center justify-center font-bold transition-colors">
+                                <span
+                                    th:if="${order.status.name() == 'COMPLETED' || order.status.name() == 'DELIVERED'}">✓</span>
+                                <span
+                                    th:unless="${order.status.name() == 'COMPLETED' || order.status.name() == 'DELIVERED'}">4</span>
+                            </div>
+                            <span
+                                th:classappend="${order.status.name() == 'COMPLETED' || order.status.name() == 'DELIVERED'} ? 'text-stone-800 font-bold' : 'text-stone-400 font-medium'"
+                                class="text-xs text-center w-20">Pesanan<br>Selesai</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid lg:grid-cols-3 gap-8">
-                    <!-- Main Content (Left) -->
-                    <div class="lg:col-span-2 space-y-6">
-                        <!-- Order Progress -->
-                        <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
-                            <h2 class="text-xl font-bold text-stone-900 mb-6">Status Pesanan</h2>
-                            <div class="flex items-center justify-between">
-                                <div class="text-center">
-                                    <div class="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-2 font-bold">✓</div>
-                                    <p class="text-sm font-semibold text-stone-900">Pesanan Dibuat</p>
-                                    <p class="text-xs text-stone-500">01 Jan, 14:30</p>
-                                </div>
-                                <div class="flex-1 h-1" th:classappend="${order.status != 'PENDING'} ? 'bg-green-500' : 'bg-stone-300'" class="mx-4"></div>
-                                <div class="text-center">
-                                    <div th:classappend="${order.status != 'PENDING'} ? 'bg-green-500' : 'bg-stone-300'" class="w-12 h-12 text-white rounded-full flex items-center justify-center mx-auto mb-2 font-bold">
-                                        <span th:if="${order.status != 'PENDING'}">✓</span>
-                                    </div>
-                                    <p class="text-sm font-semibold text-stone-900">Pembayaran</p>
-                                    <p class="text-xs text-stone-500">Menunggu</p>
-                                </div>
-                                <div class="flex-1 h-1" th:classappend="${order.status == 'SHIPPED' || order.status == 'COMPLETED'} ? 'bg-green-500' : 'bg-stone-300'" class="mx-4"></div>
-                                <div class="text-center">
-                                    <div th:classappend="${order.status == 'SHIPPED' || order.status == 'COMPLETED'} ? 'bg-green-500' : 'bg-stone-300'" class="w-12 h-12 text-white rounded-full flex items-center justify-center mx-auto mb-2 font-bold">
-                                        <span th:if="${order.status == 'SHIPPED' || order.status == 'COMPLETED'}">✓</span>
-                                    </div>
-                                    <p class="text-sm font-semibold text-stone-900">Dikirim</p>
-                                    <p class="text-xs text-stone-500">Menunggu</p>
-                                </div>
-                                <div class="flex-1 h-1" th:classappend="${order.status == 'COMPLETED'} ? 'bg-green-500' : 'bg-stone-300'" class="mx-4"></div>
-                                <div class="text-center">
-                                    <div th:classappend="${order.status == 'COMPLETED'} ? 'bg-green-500' : 'bg-stone-300'" class="w-12 h-12 text-white rounded-full flex items-center justify-center mx-auto mb-2 font-bold">
-                                        <span th:if="${order.status == 'COMPLETED'}">✓</span>
-                                    </div>
-                                    <p class="text-sm font-semibold text-stone-900">Selesai</p>
-                                    <p class="text-xs text-stone-500">Menunggu</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Order Items -->
-                        <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
-                            <div class="p-6 border-b border-stone-200">
-                                <h2 class="text-xl font-bold text-stone-900">Item Pesanan</h2>
-                            </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full">
-                                    <thead>
-                                        <tr class="border-b border-stone-200 bg-stone-50">
-                                            <th class="px-6 py-4 text-left text-sm font-semibold text-stone-700">Obat</th>
-                                            <th class="px-6 py-4 text-left text-sm font-semibold text-stone-700">Apotek</th>
-                                            <th class="px-6 py-4 text-center text-sm font-semibold text-stone-700">Qty</th>
-                                            <th class="px-6 py-4 text-right text-sm font-semibold text-stone-700">Harga</th>
-                                            <th class="px-6 py-4 text-right text-sm font-semibold text-stone-700">Subtotal</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr th:each="item : ${order.items}" class="border-b border-stone-200 hover:bg-stone-50">
-                                            <td class="px-6 py-4">
-                                                <div>
-                                                    <p class="font-medium text-stone-900" th:text="${item.medicineName}">Paracetamol</p>
-                                                    <p class="text-xs text-stone-500" th:if="${item.requiresPrescription}">Butuh Resep</p>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-stone-600" th:text="${item.pharmacyName}">Apotek Sejahtera</td>
-                                            <td class="px-6 py-4 text-center text-sm text-stone-900" th:text="${item.quantity}">2</td>
-                                            <td class="px-6 py-4 text-right text-sm text-stone-900" 
-                                                th:text="${'Rp ' + #numbers.formatInteger(item.price, 0, 'COMMA')}">Rp 12.500</td>
-                                            <td class="px-6 py-4 text-right text-sm font-semibold text-stone-900" 
-                                                th:text="${'Rp ' + #numbers.formatInteger(item.subtotal, 0, 'COMMA')}">Rp 25.000</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Shipping Information -->
-                        <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
-                            <h2 class="text-xl font-bold text-stone-900 mb-6">Informasi Pengiriman</h2>
-                            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
+                    <div class="p-6 border-b border-stone-100 bg-stone-50/50">
+                        <h2 class="text-xl font-extrabold text-stone-900">Daftar Item</h2>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div th:each="item : ${order.items}"
+                            class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border border-stone-100 hover:border-brand/30 hover:bg-orange-50/30 transition-colors gap-4">
+                            <div class="flex items-start gap-4">
+                                <div
+                                    class="w-12 h-12 rounded-lg bg-stone-100 flex items-center justify-center text-xl shrink-0">
+                                    💊</div>
                                 <div>
-                                    <p class="text-sm text-stone-600 mb-2">Nama Penerima</p>
-                                    <p class="font-semibold text-stone-900" th:text="${order.recipientName}">John Doe</p>
+                                    <h3 class="font-bold text-stone-900 text-base" th:text="${item.medicineName}">Nama
+                                        Obat</h3>
+                                    <p class="text-xs font-medium text-stone-500 mb-1" th:text="${item.pharmacyName}">
+                                        Nama Apotek</p>
+                                    <span th:if="${item.requiresPrescription}"
+                                        class="inline-block bg-red-100 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide">Butuh
+                                        Resep</span>
                                 </div>
-                                <div>
-                                    <p class="text-sm text-stone-600 mb-2">Nomor Telepon</p>
-                                    <p class="font-semibold text-stone-900" th:text="${order.recipientPhone}">081234567890</p>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <p class="text-sm text-stone-600 mb-2">Alamat Pengiriman</p>
-                                    <p class="font-semibold text-stone-900" th:text="${order.deliveryAddress}">
-                                        Jalan Merdeka No. 123, Kelurahan Purwokerto, Kecamatan Purwokerto, Kab. Banyumas, Jawa Tengah 53114
+                            </div>
+                            <div
+                                class="flex items-center gap-6 sm:gap-12 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-0 pt-3 sm:pt-0 border-stone-100">
+                                <div class="text-center sm:text-right">
+                                    <p class="text-xs font-bold text-stone-400 uppercase">Harga</p>
+                                    <p class="font-semibold text-stone-900 text-sm"
+                                        th:text="${'Rp ' + #numbers.formatInteger(item.price, 0, 'COMMA')}">Rp 10.000
                                     </p>
                                 </div>
-                                <div>
-                                    <p class="text-sm text-stone-600 mb-2">Metode Pengiriman</p>
-                                    <p class="font-semibold text-stone-900" th:text="${order.deliveryMethod == 'INSTANT' ? 'Instant (Hari Ini)' : 'Reguler (2-3 Hari)'}">Instant</p>
+                                <div class="text-center sm:text-right">
+                                    <p class="text-xs font-bold text-stone-400 uppercase">Qty</p>
+                                    <p class="font-extrabold text-stone-900" th:text="${item.quantity + 'x'}">2x</p>
                                 </div>
-                                <div>
-                                    <p class="text-sm text-stone-600 mb-2">Tracking ID</p>
-                                    <p class="font-semibold text-stone-900 font-mono" th:text="${order.trackingId} ?: 'Belum ada'">JNE12345678</p>
+                                <div class="text-right">
+                                    <p class="text-xs font-bold text-stone-400 uppercase">Subtotal</p>
+                                    <p class="font-extrabold text-brand text-base"
+                                        th:text="${'Rp ' + #numbers.formatInteger(item.subtotal, 0, 'COMMA')}">Rp 20.000
+                                    </p>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Payment Information -->
-                        <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
-                            <h2 class="text-xl font-bold text-stone-900 mb-6">Informasi Pembayaran</h2>
-                            <div class="grid md:grid-cols-2 gap-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-stone-50 rounded-bl-full -z-10"></div>
+                        <h3 class="text-lg font-extrabold text-stone-900 mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z">
+                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            Info Pengiriman
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-xs font-bold text-stone-400 uppercase tracking-wide">Penerima</p>
+                                <p class="font-bold text-stone-900" th:text="${order.recipientName}">John Doe</p>
+                                <p class="text-sm font-medium text-stone-600" th:text="${order.recipientPhone}">
+                                    0812345678</p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-stone-400 uppercase tracking-wide">Alamat</p>
+                                <p class="text-sm font-medium text-stone-700 leading-relaxed"
+                                    th:text="${order.deliveryAddress}">Jl. Merdeka No. 123</p>
+                            </div>
+                            <div class="flex justify-between items-center pt-3 border-t border-stone-100">
                                 <div>
-                                    <p class="text-sm text-stone-600 mb-2">Metode Pembayaran</p>
-                                    <p class="font-semibold text-stone-900" 
-                                       th:text="${order.paymentMethod == 'COD'} ? 'Bayar di Tempat' : ${order.paymentMethod == 'BANK_TRANSFER'} ? 'Transfer Bank' : 'E-Wallet'">
-                                        COD
-                                    </p>
+                                    <p class="text-xs font-bold text-stone-400 uppercase tracking-wide">Layanan</p>
+                                    <p class="font-bold text-stone-900 text-sm"
+                                        th:text="${order.deliveryMethod == 'INSTANT' ? 'Instant Delivery' : 'Reguler Courier'}">
+                                        Reguler</p>
                                 </div>
-                                <div>
-                                    <p class="text-sm text-stone-600 mb-2">Status Pembayaran</p>
-                                    <span th:replace="~{fragments/status-badges :: payment-status(${order.paymentStatus})}"></span>
+                                <div class="text-right">
+                                    <p class="text-xs font-bold text-stone-400 uppercase tracking-wide">No Resi</p>
+                                    <p class="font-mono font-bold text-brand bg-orange-50 px-2 py-0.5 rounded text-sm mt-1"
+                                        th:text="${order.trackingId} ?: 'Belum Tersedia'">-</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Summary (Right) -->
-                    <div>
-                        <div class="bg-white rounded-2xl border border-stone-200 p-6 sticky top-8 shadow-sm">
-                            <h2 class="text-xl font-bold text-stone-900 mb-6">Ringkasan Biaya</h2>
+                    <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-stone-50 rounded-bl-full -z-10"></div>
+                        <h3 class="text-lg font-extrabold text-stone-900 mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z">
+                                </path>
+                            </svg>
+                            Info Pembayaran
+                        </h3>
+                        <div class="space-y-5">
+                            <div>
+                                <p class="text-xs font-bold text-stone-400 uppercase tracking-wide mb-1">Metode</p>
+                                <p class="font-extrabold text-stone-900 text-lg"
+                                    th:text="${order.paymentMethod.name() == 'COD'} ? 'Bayar di Tempat (COD)' : 'Transfer / E-Wallet'">
+                                    Midtrans</p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-stone-400 uppercase tracking-wide mb-2">Status
+                                    Pembayaran</p>
 
-                            <div class="space-y-3 mb-6 pb-6 border-b border-stone-200">
-                                <div class="flex justify-between">
-                                    <span class="text-stone-600">Subtotal</span>
-                                    <span class="font-semibold text-stone-900" th:text="${'Rp ' + #numbers.formatInteger(order.subtotal, 0, 'COMMA')}">Rp 37.500</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-stone-600">Ongkir</span>
-                                    <span class="font-semibold text-stone-900" th:text="${'Rp ' + #numbers.formatInteger(order.shippingFee, 0, 'COMMA')}">Rp 10.000</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-stone-600">Biaya Admin</span>
-                                    <span class="font-semibold text-stone-900" th:text="${'Rp ' + #numbers.formatInteger(order.adminFee, 0, 'COMMA')}">Rp 2.500</span>
-                                </div>
+                                <span th:if="${order.paymentMethod.name() == 'COD'}"
+                                    class="inline-block bg-orange-100 text-[#D53E0F] text-xs font-bold px-3 py-1 rounded-full border border-orange-200">
+                                    Bayar Saat Diterima
+                                </span>
+
+                                <span th:unless="${order.paymentMethod.name() == 'COD'}"
+                                    th:replace="~{fragments/status-badges :: payment-status(${order.paymentStatus})}">
+                                </span>
                             </div>
 
-                            <div class="flex justify-between items-end mb-6">
-                                <span class="text-lg font-bold">Total</span>
-                                <span class="text-2xl font-bold text-orange-500" th:text="${'Rp ' + #numbers.formatInteger(order.totalAmount, 0, 'COMMA')}">Rp 50.000</span>
-                            </div>
-
-                            <!-- Action Buttons -->
-                            <div class="space-y-3">
-                                <a th:href="@{/customer/orders}" 
-                                   class="block w-full px-4 py-3 border border-orange-500 text-orange-600 rounded-lg hover:bg-orange-50 transition font-semibold text-center">
-                                    Kembali ke Riwayat
+                            <div th:if="${order.paymentStatus.name() == 'PENDING' && order.paymentMethod.name() != 'COD'}"
+                                class="bg-yellow-50 border border-yellow-200 rounded-xl p-3">
+                                <p class="text-xs font-bold text-yellow-800 mb-2">Selesaikan pembayaran Anda</p>
+                                <a th:href="@{/customer/payment/{id}(id=${order.orderId})}"
+                                    class="block w-full text-center bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 rounded-lg text-sm transition-colors">
+                                    Bayar Sekarang
                                 </a>
-                                <button th:if="${order.status == 'COMPLETED'}"
-                                        class="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold">
-                                    ⭐ Beri Rating & Review
-                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <div class="relative">
+                <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-md sticky top-32">
+                    <h2 class="text-xl font-extrabold text-stone-900 mb-6">Rincian Pembayaran</h2>
+
+                    <div class="space-y-4 mb-6 text-sm font-medium text-stone-600">
+                        <div class="flex justify-between items-center">
+                            <span>Subtotal Produk</span>
+                            <span class="font-bold text-stone-900"
+                                th:text="${'Rp ' + #numbers.formatInteger(order.subtotal, 0, 'COMMA')}">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span>Biaya Pengiriman</span>
+                            <span class="font-bold text-stone-900"
+                                th:text="${'Rp ' + #numbers.formatInteger(order.shippingFee, 0, 'COMMA')}">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span>Biaya Layanan/Admin</span>
+                            <span class="font-bold text-stone-900"
+                                th:text="${'Rp ' + #numbers.formatInteger(order.adminFee, 0, 'COMMA')}">Rp 0</span>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-dashed border-stone-300 pt-6 mb-8">
+                        <div class="flex justify-between items-end">
+                            <span class="text-sm font-bold text-stone-500 uppercase">Total Tagihan</span>
+                            <span class="text-3xl font-black text-brand"
+                                th:text="${'Rp ' + #numbers.formatInteger(order.totalAmount, 0, 'COMMA')}">Rp 0</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+
+                        <a th:href="@{/customer/orders}"
+                            class="block w-full text-center bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold py-3.5 rounded-xl transition-colors">
+                            Kembali ke Daftar Pesanan
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+
+    </main>
 </body>
+
 </html>

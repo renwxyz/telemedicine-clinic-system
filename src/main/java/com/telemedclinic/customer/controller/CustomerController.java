@@ -402,6 +402,9 @@ public class CustomerController {
             } else {
                 return "redirect:/customer/orders";
             }
+        } else {
+            order.setStatus(OrderStatus.PROCESSING);
+            orderRepository.save(order);
         }
         
         cartItemRepository.deleteByCustomerUserId(customer.getUserId());
@@ -452,6 +455,14 @@ public class CustomerController {
         } else {
             orders = orderRepository.findByCustomerUserIdOrderByCreatedAtDesc(customer.getUserId());
         }
+
+        long pendingCount = orderRepository.findByCustomerUserIdAndStatusOrderByCreatedAtDesc(customer.getUserId(), OrderStatus.PENDING).size();
+        long processingCount = orderRepository.findByCustomerUserIdAndStatusOrderByCreatedAtDesc(customer.getUserId(), OrderStatus.PROCESSING).size();
+        long shippedCount = orderRepository.findByCustomerUserIdAndStatusOrderByCreatedAtDesc(customer.getUserId(), OrderStatus.SHIPPED).size();
+  
+        model.addAttribute("pendingCount", pendingCount);
+        model.addAttribute("processingCount", processingCount);
+        model.addAttribute("shippedCount", shippedCount);
 
         model.addAttribute("orders", orders);
         model.addAttribute("status", status);

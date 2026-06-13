@@ -12,7 +12,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
-    <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" th:attr="data-client-key=${midtransClientKey}"></script>
+    <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" th:data-client-key="${midtransClientKey}"></script>
 
     <style>
         body {
@@ -42,6 +42,8 @@
 
         <div class="space-y-3">
             <button id="pay-button"
+                th:data-token="${order.snapToken}"
+                onclick="payWithMidtrans(this.getAttribute('data-token'))"
                 class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3.5 px-4 rounded-xl transition-all shadow-sm shadow-orange-200 flex items-center justify-center gap-2 transform active:scale-95">
                 <i class="fas fa-credit-card"></i> Bayar Sekarang
             </button>
@@ -53,18 +55,15 @@
         </div>
     </div>
 
-    <script th:inline="javascript">
-        const payButton = document.getElementById('pay-button');
-        const snapToken = "[[${snapToken}]]";
-
-        function triggerSnapPayment() {
-            if (!snapToken) {
+    <script>
+        function payWithMidtrans(token) {
+            if (!token || token === 'null' || token === '') {
                 alert('Token pembayaran tidak ditemukan. Silakan hubungi admin.');
                 return;
             }
 
             // Memanggil fungsi bawaan SDK Midtrans Snap
-            window.snap.pay(snapToken, {
+            window.snap.pay(token, {
                 onSuccess: function (result) {
                     /* Pembayaran berhasil dilakukan */
                     window.location.href = '/customer/orders';
@@ -87,13 +86,13 @@
 
         // Jalankan pop-up otomatis saat halaman selesai dimuat agar user tidak perlu klik lagi
         document.addEventListener('DOMContentLoaded', function () {
-            triggerSnapPayment();
-        });
-
-        // Cadangan jika pop-up terblokir oleh browser, user bisa klik tombol manual
-        payButton.addEventListener('click', function (e) {
-            e.preventDefault();
-            triggerSnapPayment();
+            const btn = document.getElementById('pay-button');
+            if (btn) {
+                const token = btn.getAttribute('data-token');
+                if (token && token !== 'null' && token !== '') {
+                    payWithMidtrans(token);
+                }
+            }
         });
     </script>
 </body>
