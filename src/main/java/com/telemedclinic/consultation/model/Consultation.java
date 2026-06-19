@@ -45,6 +45,9 @@ public class Consultation {
 
     private boolean prescription;
 
+    @Column(length = 255)
+    private String snapToken;
+
     public Consultation() {}
 
     public Consultation(Customer customer, Doctor doctor, String complaint, String additionalInfo) {
@@ -124,5 +127,13 @@ public class Consultation {
 
     public String getDoctorSpecialization() {
         return doctor != null ? doctor.getSpecialization() : "General";
+    }
+
+    public String getSnapToken() {
+        return snapToken;
+    }
+
+    public void setSnapToken(String snapToken) {
+        this.snapToken = snapToken;
     }
 }

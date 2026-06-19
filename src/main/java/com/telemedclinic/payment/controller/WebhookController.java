@@ -19,6 +19,9 @@ import com.telemedclinic.order.entity.Order;
 import com.telemedclinic.order.entity.OrderStatus;
 import com.telemedclinic.order.entity.PaymentStatus;
 import com.telemedclinic.order.repository.OrderRepository;
+import com.telemedclinic.consultation.model.Consultation;
+import com.telemedclinic.consultation.model.ConsultationStatus;
+import com.telemedclinic.consultation.repository.ConsultationRepository;
 
 @RestController
 @RequestMapping("/api/midtrans")
@@ -26,6 +29,9 @@ public class WebhookController {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private ConsultationRepository consultationRepository;
 
     @Value("${midtrans.server.key}")
     private String serverKey;
@@ -73,24 +79,47 @@ public class WebhookController {
 
             System.out.println("✅ SIGNATURE MATCH! Processing order...");
 
-            // 5. EKSTRAK ID PESANAN ASLI
-            String[] parts = orderId.split("-");
-            if (parts.length >= 3) {
-                String originalOrderId = parts[1] + "-" + parts[2];
-
-                // 6. UPDATE DATABASE
-                Optional<Order> optionalOrder = orderRepository.findByOrderId(originalOrderId);
-                if (optionalOrder.isPresent()) {
-                    Order order = optionalOrder.get();
-                    if ("settlement".equals(transactionStatus) || "capture".equals(transactionStatus)) {
-                        order.setPaymentStatus(PaymentStatus.PAID);
-                        order.setStatus(OrderStatus.PROCESSING);
-                    } else if ("cancel".equals(transactionStatus) || "deny".equals(transactionStatus) || "expire".equals(transactionStatus)) {
-                        order.setStatus(OrderStatus.CANCELLED);
-                    } else if ("pending".equals(transactionStatus)) {
-                        order.setPaymentStatus(PaymentStatus.PENDING);
+            // 5 & 6. EKSTRAK ID DAN UPDATE DATABASE BERDASARKAN TIPE TRANSAKSI
+            if (orderId.startsWith("CONS-")) {
+                // TRANSAKSI KONSULTASI
+                String[] parts = orderId.split("-");
+                if (parts.length >= 2) {
+                    try {
+                        Long consultationId = Long.parseLong(parts[1]);
+                        Optional<Consultation> optConsultation = consultationRepository.findById(consultationId);
+                        if (optConsultation.isPresent()) {
+                            Consultation consultation = optConsultation.get();
+                            if ("settlement".equals(transactionStatus) || "capture".equals(transactionStatus)) {
+                                // Jika lunas, ubah status agar masuk antrean Dokter
+                                consultation.setStatus(ConsultationStatus.WAITING);
+                            } else if ("cancel".equals(transactionStatus) || "deny".equals(transactionStatus) || "expire".equals(transactionStatus)) {
+                                consultation.setStatus(ConsultationStatus.CANCELLED);
+                            }
+                            consultationRepository.save(consultation);
+                        }
+                    } catch (NumberFormatException e) {
+                        System.err.println("Gagal parsing ID Konsultasi: " + parts[1]);
                     }
-                    orderRepository.save(order);
+                }
+            } else {
+                // TRANSAKSI OBAT (ORDER)
+                String[] parts = orderId.split("-");
+                if (parts.length >= 3) {
+                    // Asumsi format Midtrans: TC-ORD-XXXX-Timestamp
+                    String originalOrderId = parts[1] + "-" + parts[2];
+                    Optional<Order> optionalOrder = orderRepository.findByOrderId(originalOrderId);
+                    if (optionalOrder.isPresent()) {
+                        Order order = optionalOrder.get();
+                        if ("settlement".equals(transactionStatus) || "capture".equals(transactionStatus)) {
+                            order.setPaymentStatus(PaymentStatus.PAID);
+                            order.setStatus(OrderStatus.PROCESSING);
+                        } else if ("cancel".equals(transactionStatus) || "deny".equals(transactionStatus) || "expire".equals(transactionStatus)) {
+                            order.setStatus(OrderStatus.CANCELLED);
+                        } else if ("pending".equals(transactionStatus)) {
+                            order.setPaymentStatus(PaymentStatus.PENDING);
+                        }
+                        orderRepository.save(order);
+                    }
                 }
             }
         } catch (NoSuchAlgorithmException e) {

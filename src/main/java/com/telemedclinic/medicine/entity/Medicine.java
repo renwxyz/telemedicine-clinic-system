@@ -22,6 +22,9 @@ public class Medicine {
 
     private boolean requiresPrescription;
     private String imageUrl;
+    
+    // Virtual stock field for simple hybrid implementation without inventory linkage
+    private Integer stock = 100;
     // Constructor Overloading
     public Medicine(){}
 
@@ -75,6 +78,10 @@ public class Medicine {
         return imageUrl;
     }
 
+    public Integer getStock() {
+        return stock;
+    }
+
 
     // Setter
     public void setName(String name) {
@@ -116,6 +123,13 @@ public class Medicine {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public void setStock(Integer stock) {
+        if (stock == null || stock < 0) {
+            throw new IllegalArgumentException("Stock cannot be null or negative");
+        }
+        this.stock = stock;
     }
 
 

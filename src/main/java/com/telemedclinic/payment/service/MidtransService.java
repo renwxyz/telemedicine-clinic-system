@@ -11,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.telemedclinic.order.entity.Order;
+import com.telemedclinic.consultation.model.Consultation;
 
 import java.util.Base64;
 
@@ -70,6 +71,48 @@ public class MidtransService {
             // PERBAIKAN: Log Error yang jauh lebih mencolok agar gampang dicari
             System.err.println("=============================================");
             System.err.println("❌ GAGAL MENDAPATKAN TOKEN MIDTRANS");
+            System.err.println("Penyebab Error: " + e.getMessage());
+            System.err.println("=============================================");
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public String createConsultationTransaction(Consultation consultation) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Authorization", "Basic " + Base64.getEncoder().encodeToString((serverKey + ":").getBytes()));
+
+            // Build JSON payload
+            ObjectNode requestBody = objectMapper.createObjectNode();
+
+            ObjectNode transactionDetails = objectMapper.createObjectNode();
+            
+            String uniqueOrderId = "CONS-" + consultation.getId() + "-" + System.currentTimeMillis();
+            transactionDetails.put("order_id", uniqueOrderId);
+            
+            transactionDetails.put("gross_amount", 50000);
+            requestBody.set("transaction_details", transactionDetails);
+
+            ObjectNode customerDetails = objectMapper.createObjectNode();
+            customerDetails.put("first_name", consultation.getCustomer().getName());
+            customerDetails.put("phone", consultation.getCustomer().getPhoneNumber());
+            customerDetails.put("email", consultation.getCustomer().getEmail());
+            requestBody.set("customer_details", customerDetails);
+
+            HttpEntity<String> entity = new HttpEntity<>(requestBody.toString(), headers);
+
+            ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, entity, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                ObjectNode jsonResponse = (ObjectNode) objectMapper.readTree(response.getBody());
+                return jsonResponse.get("token").asText();
+            }
+
+        } catch (Exception e) {
+            System.err.println("=============================================");
+            System.err.println("❌ GAGAL MENDAPATKAN TOKEN KONSULTASI MIDTRANS");
             System.err.println("Penyebab Error: " + e.getMessage());
             System.err.println("=============================================");
             e.printStackTrace();

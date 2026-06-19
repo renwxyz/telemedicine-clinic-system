@@ -6,5 +6,5 @@ import com.telemedclinic.medicine.entity.Medicine;
 
 @Repository
 public interface MedicineRepository extends JpaRepository<Medicine, Long> {
-
+    java.util.List<Medicine> findByNameContainingIgnoreCase(String name);
 }

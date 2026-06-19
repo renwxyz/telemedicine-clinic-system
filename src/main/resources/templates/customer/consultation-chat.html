@@ -18,278 +18,208 @@
       #messages-container {
         scroll-behavior: smooth;
       }
+      .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: #f5f5f4; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 10px; }
     </style>
   </head>
-  <body class="bg-stone-50 text-stone-900 flex flex-col h-screen">
+  <body class="bg-[#FDF3F0] font-['Plus_Jakarta_Sans'] text-stone-800 overflow-hidden">
     <!-- Navbar -->
-    <div
-      th:replace="~{fragments/customer-navbar :: customerNavbar('consultations')}"
-    ></div>
+    <div th:replace="~{fragments/customer-navbar :: customerNavbar('consultations')}"></div>
 
-    <!-- Header -->
-    <div
-      class="bg-white border-b border-stone-200 sticky top-20 z-40 px-6 py-4 shadow-sm"
-    >
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-4">
-          <a
-            th:href="@{/customer/consultations}"
-            class="text-orange-600 hover:text-orange-700 font-semibold"
-          >
-            ←
-          </a>
-          <div class="flex items-center gap-3">
-            <div
-              class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center"
-            >
-              <span class="font-bold text-orange-600">DR</span>
-            </div>
-            <div>
-              <h2
-                class="font-bold text-stone-900"
-                th:text="${consultation.doctorName}"
-              >
-                Dr. Ahmad
-              </h2>
-              <p
-                class="text-sm text-stone-600"
-                th:text="${consultation.doctorSpecialization}"
-              >
-                Dokter Umum
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-4">
-          <span
-            th:replace="~{fragments/status-badges :: consultation-status(${consultation.status})}"
-          ></span>
-          <div
-            th:if="${#authentication.principal.username == consultation.doctorId && consultation.status == 'IN_PROGRESS'}"
-            class="relative group"
-          >
-            <button
-              type="button"
-              class="text-orange-600 hover:text-orange-700 font-semibold text-sm px-4 py-2 bg-orange-50 rounded-lg"
-            >
-              Menu ▼
-            </button>
-            <div
-              class="hidden group-hover:block absolute right-0 mt-2 w-48 bg-white border border-stone-200 rounded-lg shadow-lg z-50"
-            >
-              <button
-                type="button"
-                onclick="openDiagnosisModal()"
-                class="w-full text-left px-4 py-3 hover:bg-orange-50 transition border-b border-stone-200"
-              >
-                <span class="font-semibold">📋 Buat Diagnosis & Resep</span>
-              </button>
-              <button
-                type="button"
-                onclick="endConsultation()"
-                class="w-full text-left px-4 py-3 hover:bg-red-50 transition text-red-600 font-semibold"
-              >
-                ✓ Selesaikan Konsultasi
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Messages Container -->
-    <div id="messages-container" class="flex-1 overflow-y-auto p-6 space-y-4">
-      <div
-        th:each="message : ${messages}"
-        th:classappend="${message.senderId == #authentication.principal.username} ? 'flex justify-end' : 'flex justify-start'"
-        class="flex"
-      >
-        <div
-          th:classappend="${message.senderId == #authentication.principal.username} ? 'bg-orange-500 text-white' : 'bg-stone-200 text-stone-900'"
-          class="max-w-xs lg:max-w-md px-4 py-3 rounded-2xl break-words"
-        >
-          <p th:text="${message.content}">Pesan di sini</p>
-          <p
-            th:classappend="${message.senderId == #authentication.principal.username} ? 'text-orange-100' : 'text-stone-600'"
-            class="text-xs mt-1"
-            th:text="${#temporals.format(message.createdAt, 'HH:mm')}"
-          >
-            14:30
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Input Area -->
-    <div class="bg-white border-t border-stone-200 p-6 sticky bottom-0">
-      <form
-        th:action="@{/customer/consultations/{id}/message(id=${consultation.id})}"
-        method="post"
-        class="flex gap-2"
-      >
-        <input
-          type="hidden"
-          name="${_csrf.parameterName}"
-          th:value="${_csrf.token}"
-        />
-        <input
-          type="text"
-          name="message"
-          required
-          class="flex-1 px-4 py-3 border border-stone-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500"
-          placeholder="Ketik pesan Anda..."
-        />
-        <button
-          type="submit"
-          class="px-6 py-3 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition font-semibold"
-        >
-          Kirim
-        </button>
-      </form>
-    </div>
-
-    <!-- Diagnosis Modal (for doctor only) -->
-    <div
-      id="diagnosis-modal"
-      class="hidden fixed inset-0 bg-black/50 z-50 flex items-end"
-    >
-      <div class="bg-white w-full max-h-96 rounded-t-3xl p-6 overflow-y-auto">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold text-stone-900">Diagnosis & Resep</h2>
-          <button
-            type="button"
-            onclick="closeDiagnosisModal()"
-            class="text-stone-600 hover:text-stone-900 text-2xl"
-          >
-            ×
-          </button>
-        </div>
-
-        <form
-          th:action="@{/customer/consultations/{id}/diagnosis(id=${consultation.id})}"
-          method="post"
-        >
-          <input
-            type="hidden"
-            name="${_csrf.parameterName}"
-            th:value="${_csrf.token}"
-          />
-
-          <!-- Diagnosis -->
-          <div class="mb-6">
-            <label class="block text-sm font-semibold text-stone-900 mb-2"
-              >Diagnosis</label
-            >
-            <textarea
-              name="diagnosis"
-              required
-              class="w-full px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-              rows="3"
-              placeholder="Tuliskan diagnosis..."
-            ></textarea>
-          </div>
-
-          <!-- Prescription Items -->
-          <div class="mb-6">
-            <label class="block text-sm font-semibold text-stone-900 mb-3"
-              >Resep Obat</label
-            >
-            <div id="prescriptions-list" class="space-y-4 mb-4">
-              <div class="border border-stone-300 rounded-lg p-4">
-                <input
-                  type="text"
-                  name="prescriptions[0].medicineName"
-                  placeholder="Nama Obat"
-                  required
-                  class="w-full px-3 py-2 border border-stone-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-                <input
-                  type="text"
-                  name="prescriptions[0].dosage"
-                  placeholder="Dosis (contoh: 3x sehari 1 tablet)"
-                  required
-                  class="w-full px-3 py-2 border border-stone-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-                <textarea
-                  name="prescriptions[0].instructions"
-                  placeholder="Instruksi penggunaan"
-                  class="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  rows="2"
-                ></textarea>
+    <div class="h-screen pt-[72px] sm:pt-[80px] flex flex-col w-full bg-white">
+      <div class="w-full h-full flex flex-col overflow-hidden">
+          <!-- HEADER CHAT -->
+          <div class="bg-white border-b border-stone-100 py-4 px-4 sm:px-6 md:px-12 flex justify-between items-center z-10 shadow-sm">
+              <div class="flex items-center gap-4">
+                  <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-lg font-bold text-orange-600" th:text="${!#strings.isEmpty(consultation.doctorName) ? #strings.substring(consultation.doctorName, 0, 1) : 'D'}">D</div>
+                  <div>
+                      <h2 class="font-extrabold text-stone-900" th:text="${consultation.doctorName}">Dr. Ahmad</h2>
+                      <div class="flex items-center gap-1.5 mt-0.5">
+                          <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                          <p class="text-stone-500 text-xs font-medium" th:text="${consultation.doctorSpecialization}">Dokter Umum</p>
+                      </div>
+                  </div>
               </div>
-            </div>
-
-            <button
-              type="button"
-              onclick="addPrescription()"
-              class="text-orange-600 hover:text-orange-700 font-semibold text-sm"
-            >
-              + Tambah Obat
-            </button>
+              <span th:replace="~{fragments/status-badges :: consultation-status(${consultation.status.name()})}"></span>
           </div>
 
-          <!-- Buttons -->
-          <div class="flex gap-4">
-            <button
-              type="button"
-              onclick="closeDiagnosisModal()"
-              class="flex-1 px-6 py-3 border border-stone-300 rounded-lg hover:bg-stone-50 transition font-semibold"
-            >
-              Batal
-            </button>
-            <button
-              type="submit"
-              class="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold"
-            >
-              ✓ Kirim Diagnosis & Resep
-            </button>
+          <!-- CHAT MESSAGES AREA -->
+          <div id="messages-container" class="flex-1 overflow-y-auto p-4 sm:p-6 md:px-12 space-y-6 bg-stone-50/50 custom-scrollbar">
+              
+              <!-- AUTO-REPLY SYSTEM MESSAGE (SELALU MUNCUL DI ATAS) -->
+              <div class="flex justify-center mb-6">
+                  <div class="bg-blue-50 border border-blue-100 text-blue-800 text-xs font-bold px-4 py-2 rounded-xl text-center shadow-sm max-w-md">
+                      Sekarang Anda sedang berada dalam sesi konsultasi dengan dokter. Silakan tunggu sampai dokter membalas pesan Anda.
+                  </div>
+              </div>
+
+              <!-- LOOPING PESAN -->
+                <div th:each="message : ${messages}" th:classappend="${message.senderId == currentUserEmail} ? 'flex justify-end' : 'flex justify-start'">
+                    <div th:if="${message.senderId == currentUserEmail}" class="bg-gradient-to-br from-[#D53E0F] to-[#a32e0a] text-white rounded-2xl rounded-tr-sm px-5 py-3 max-w-[85%] sm:max-w-[75%] shadow-md">
+                        <p class="text-sm" th:text="${message.content}">Isi pesan dokter</p>
+                        <p class="text-[10px] text-orange-200 font-bold mt-2 text-right" th:text="${#temporals.format(message.createdAt, 'HH:mm')}">10:32</p>
+                    </div>
+                    <div th:unless="${message.senderId == currentUserEmail}" class="bg-white border border-stone-200 text-stone-800 rounded-2xl rounded-tl-sm px-5 py-3 max-w-[85%] sm:max-w-[75%] shadow-sm">
+                      <p class="text-sm" th:text="${message.content}">Isi pesan dokter</p>
+                      <p class="text-[10px] text-stone-400 font-bold mt-2 text-right" th:text="${#temporals.format(message.createdAt, 'HH:mm')}">10:31</p>
+                  </div>
+              </div>
           </div>
-        </form>
+
+          <!-- INPUT AREA -->
+          <div id="chat-input-area" class="border-t border-stone-200 py-4 px-4 sm:px-6 md:px-12 bg-white" th:if="${consultation.status.name() == 'IN_PROGRESS'}">
+              <form id="chat-form" class="flex gap-2">
+                  <input type="hidden" name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                  <input type="text" id="chat-input" name="message" required placeholder="Ketik pesan Anda di sini..." class="flex-1 px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent outline-none text-sm font-medium" />
+                  <button type="submit" class="bg-[#D53E0F] hover:bg-[#5E0006] text-white px-6 py-3 rounded-xl font-bold transition shadow-md flex items-center gap-2">
+                      <span class="hidden sm:inline">Kirim</span>
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                  </button>
+              </form>
+          </div>
+          <!-- INFO JIKA SELESAI -->
+          <div th:if="${consultation.status.name() == 'COMPLETED'}" class="border-t border-stone-200 p-6 bg-stone-50 flex flex-col items-center justify-center gap-4">
+              <div class="w-full max-w-md bg-white border border-stone-200 rounded-xl p-6 shadow-sm text-left">
+                  <div class="border-b border-stone-100 pb-3 mb-4 text-center">
+                      <h4 class="font-extrabold text-stone-900 text-base">RESEP DIGITAL RESMI</h4>
+                      <p class="text-xs text-stone-400" th:text="'Dokter: ' + ${consultation.doctorName}">Dr. Ahmad</p>
+                  </div>
+
+                  <div th:if="${prescription != null}">
+                      <ul class="space-y-3 mb-6">
+                          <li th:each="item : ${prescription.items}" class="border-b border-stone-50 pb-2 last:border-0">
+                              <p class="font-bold text-stone-800 text-sm" th:text="${item.medicine.name}">Nama Obat</p>
+                              <p class="text-xs text-[#D53E0F] font-medium" th:text="${item.instructions}">3x Sehari</p>
+                          </li>
+                      </ul>
+                      <div th:if="${prescription.isStockAvailable}">
+                          <div class="bg-green-50 border border-green-200 rounded-xl p-3 mb-4 text-center">
+                              <p class="text-xs text-green-700 font-bold">✓ Stok obat tersedia di Apotek KlinikKu</p>
+                          </div>
+                          <button type="button" onclick="alert('Mengalihkan ke checkout Midtrans... (Tahap Selanjutnya)')" class="w-full bg-[#D53E0F] hover:bg-[#5E0006] text-white font-bold py-3 rounded-xl transition text-center shadow-md flex items-center justify-center gap-2">
+                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 0a2 2 0 100 4 2 2 0 000-4z"></path></svg>
+                              Tebus Obat Sekarang
+                          </button>
+                      </div>
+
+                      <div th:unless="${prescription.isStockAvailable}">
+                          <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+                              <div class="flex items-start gap-2">
+                                  <svg class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                  <div>
+                                      <h5 class="text-sm font-bold text-amber-800">Stok Obat Terbatas / Kosong</h5>
+                                      <p class="text-xs text-amber-700 mt-1">Mohon maaf, saat ini apotek kami tidak dapat memenuhi seluruh resep Anda. Silakan unduh resep ini untuk ditebus di apotek terdekat.</p>
+                                  </div>
+                              </div>
+                          </div>
+                          <a th:href="@{/customer/prescription/download/{id}(id=${prescription.id})}" target="_blank" onclick="alert('Mesin PDF sedang dirakit (Tahap Selanjutnya)!'); return false;" class="w-full bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-300 font-bold py-3 rounded-xl transition text-center shadow-sm flex items-center justify-center gap-2">
+                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                              Unduh Copy Resep (PDF)
+                          </a>
+                      </div>
+                  </div>
+
+                  <div th:unless="${prescription != null}" class="text-center py-4">
+                      <p class="text-sm font-medium text-stone-500 italic">Dokter sedang meracik resep obat untuk Anda. Mohon tunggu sebentar...</p>
+                  </div>
+              </div>
+          </div>
+          <div id="session-ended-info" class="border-t border-stone-200 p-4 bg-stone-100 text-center" style="display: none;">
+              <p class="text-sm font-bold text-stone-500">Sesi konsultasi ini telah diakhiri oleh dokter.</p>
+          </div>
       </div>
-    </div>
+  </div>
 
-    <script>
-      // Auto scroll to bottom
-      const messagesContainer = document.getElementById("messages-container");
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <script th:inline="javascript">
+      var consultationId = /*[[${consultation.id}]]*/ null;
+      var currentUsername = /*[[${currentUserEmail}]]*/ '';
+      var stompClient = null;
 
-      function openDiagnosisModal() {
-        document.getElementById("diagnosis-modal").classList.remove("hidden");
-      }
-
-      function closeDiagnosisModal() {
-        document.getElementById("diagnosis-modal").classList.add("hidden");
-      }
-
-      let prescriptionCount = 1;
-      function addPrescription() {
-        const prescriptionsList = document.getElementById("prescriptions-list");
-        const newPrescription = document.createElement("div");
-        newPrescription.className = "border border-stone-300 rounded-lg p-4";
-        newPrescription.innerHTML = `
-                <input type="text" name="prescriptions[${prescriptionCount}].medicineName" placeholder="Nama Obat" required
-                       class="w-full px-3 py-2 border border-stone-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-orange-500">
-                <input type="text" name="prescriptions[${prescriptionCount}].dosage" placeholder="Dosis" required
-                       class="w-full px-3 py-2 border border-stone-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-orange-500">
-                <textarea name="prescriptions[${prescriptionCount}].instructions" placeholder="Instruksi" 
-                         class="w-full px-3 py-2 border border-stone-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                         rows="2"></textarea>
-                <button type="button" onclick="this.parentElement.remove()" class="text-red-600 text-sm font-semibold">Hapus</button>
-            `;
-        prescriptionsList.appendChild(newPrescription);
-        prescriptionCount++;
-      }
-
-      function endConsultation() {
-        if (confirm("Yakin ingin mengakhiri konsultasi ini?")) {
-          fetch("", {
-            method: "POST",
-            headers: { "X-Requested-With": "XMLHttpRequest" },
+      function connect() {
+          var socket = new SockJS('/ws-chat');
+          stompClient = Stomp.over(socket);
+          stompClient.connect({}, function (frame) {
+              stompClient.subscribe('/topic/consultation/' + consultationId, function (message) {
+                  showMessage(JSON.parse(message.body));
+              });
           });
-          location.reload();
-        }
       }
-    </script>
-  </body>
+
+      function sendMessage(e) {
+          e.preventDefault();
+          var input = document.getElementById('chat-input');
+          var content = input.value.trim();
+          if (content && stompClient) {
+              var chatMessage = { senderId: currentUsername, content: content };
+              stompClient.send("/app/chat/" + consultationId + "/sendMessage", {}, JSON.stringify(chatMessage));
+              input.value = '';
+          }
+      }
+
+      function showMessage(message) {
+          if (message.senderRole === 'SYSTEM' && message.content === 'SESSION_ENDED') {
+              var inputArea = document.getElementById('chat-input-area');
+              if (inputArea) inputArea.style.display = 'none';
+
+              var endInfo = document.getElementById('session-ended-info');
+              if (endInfo) endInfo.style.display = 'block';
+
+              stompClient.disconnect(); // Putuskan koneksi agar aman
+              return; // Hentikan fungsi agar tidak membuat bubble chat
+          }
+          
+          if (message.senderRole === 'SYSTEM' && message.content === 'PRESCRIPTION_READY') {
+              // Ubah teks status menjadi sedang memuat resep
+              var endInfo = document.getElementById('session-ended-info');
+              if (endInfo) {
+                  endInfo.innerHTML = '<p class="text-sm font-bold text-[#D53E0F]">Memuat resep digital Anda...</p>';
+              }
+              
+              // Lakukan silent reload setelah jeda 1.5 detik agar mulus
+              setTimeout(function() {
+                  window.location.reload();
+              }, 1500);
+              
+              return; // Hentikan fungsi agar tidak membuat bubble chat
+          }
+          
+          var messagesContainer = document.getElementById('messages-container');
+          var isSelf = message.senderId === currentUsername;
+          
+          var divFlex = document.createElement('div');
+          divFlex.className = isSelf ? 'flex justify-end' : 'flex justify-start';
+          
+          var divBubble = document.createElement('div');
+          divBubble.className = isSelf 
+              ? 'bg-gradient-to-br from-[#D53E0F] to-[#a32e0a] text-white rounded-2xl rounded-tr-sm px-5 py-3 max-w-[85%] sm:max-w-[75%] shadow-md' 
+              : 'bg-white border border-stone-200 text-stone-800 rounded-2xl rounded-tl-sm px-5 py-3 max-w-[85%] sm:max-w-[75%] shadow-sm';
+          
+          var pContent = document.createElement('p');
+          pContent.className = 'text-sm';
+          pContent.innerText = message.content;
+          
+          var pTime = document.createElement('p');
+          pTime.className = isSelf ? 'text-[10px] text-orange-200 font-bold mt-2 text-right' : 'text-[10px] text-stone-400 font-bold mt-2 text-right';
+          var d = new Date();
+          pTime.innerText = d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+          
+          divBubble.appendChild(pContent);
+          divBubble.appendChild(pTime);
+          divFlex.appendChild(divBubble);
+          messagesContainer.appendChild(divFlex);
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      var chatForm = document.getElementById('chat-form');
+      if (chatForm) {
+          chatForm.addEventListener('submit', sendMessage);
+      }
+      connect();
+      var msgs = document.getElementById('messages-container');
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+  </script>
+</body>
 </html>

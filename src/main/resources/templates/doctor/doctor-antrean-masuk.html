@@ -59,45 +59,43 @@
 
             <!-- Patient Queue Cards -->
             <div class="space-y-4">
-                <!-- Patient 1 -->
-                <div class="patient-card bg-white rounded-xl border border-stone-200 p-6 hover:border-[#D53E0F]">
+                <div class="patient-card bg-white rounded-xl border border-stone-200 p-6 hover:border-[#D53E0F]" th:each="consultation : ${queue}">
                     <div class="flex justify-between items-start mb-4">
                         <div class="flex items-center gap-4">
-                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center text-2xl font-bold text-[#D53E0F]">
+                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center text-2xl font-bold text-[#D53E0F]" th:text="${#strings.substring(consultation.customer.name, 0, 2).toUpperCase()}">
                                 SN
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold text-gray-900">Siti Nurhaliza</h3>
-                                <p class="text-gray-600 text-sm">ID: PAT-2024-00123</p>
+                                <h3 class="text-xl font-bold text-gray-900" th:text="${consultation.customer.name}">Nama Pasien</h3>
+                                <p class="text-gray-600 text-sm" th:text="'ID: PAT-' + ${consultation.customer.userId}">ID: PAT-2024-00123</p>
                                 <div class="flex gap-2 mt-2">
-                                    <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">Baru Masuk</span>
-                                    <span class="text-xs text-gray-500">Tunggu: 2 menit</span>
+                                    <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">Menunggu</span>
                                 </div>
                             </div>
                         </div>
                         <div class="text-right">
                             <p class="text-sm text-gray-600">Kelompok Umur:</p>
-                            <p class="text-lg font-bold text-gray-900">28 Tahun</p>
+                            <p class="text-lg font-bold text-gray-900" th:text="${consultation.customer.birthDate != null ? T(java.time.Period).between(consultation.customer.birthDate, T(java.time.LocalDate).now()).getYears() + ' Tahun' : '-'}">28 Tahun</p>
                         </div>
                     </div>
 
                     <div class="bg-stone-50 rounded-lg p-4 mb-4">
                         <p class="text-sm text-gray-600 mb-2"><strong>Keluhan Utama:</strong></p>
-                        <p class="text-gray-900">Demam tinggi selama 3 hari disertai batuk dan sakit kepala. Sudah minum paracetamol tapi tidak ada perbaikan.</p>
+                        <p class="text-gray-900" th:text="${consultation.complaint}">Demam tinggi selama 3 hari.</p>
                     </div>
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                         <div class="bg-stone-100 rounded-lg p-3">
                             <p class="text-xs text-gray-600">Berat Badan</p>
-                            <p class="font-bold text-gray-900">60 kg</p>
+                            <p class="font-bold text-gray-900" th:text="${consultation.customer.weight != null ? consultation.customer.weight + ' kg' : '-'}">60 kg</p>
                         </div>
                         <div class="bg-stone-100 rounded-lg p-3">
                             <p class="text-xs text-gray-600">Tinggi Badan</p>
-                            <p class="font-bold text-gray-900">165 cm</p>
+                            <p class="font-bold text-gray-900" th:text="${consultation.customer.height != null ? consultation.customer.height + ' cm' : '-'}">165 cm</p>
                         </div>
                         <div class="bg-stone-100 rounded-lg p-3">
                             <p class="text-xs text-gray-600">Tekanan Darah</p>
-                            <p class="font-bold text-gray-900">120/80</p>
+                            <p class="font-bold text-gray-900">-</p>
                         </div>
                         <div class="bg-stone-100 rounded-lg p-3">
                             <p class="text-xs text-gray-600">Alergi</p>
@@ -106,121 +104,19 @@
                     </div>
 
                     <div class="flex gap-3">
-                        <button onclick="window.location.href='doctor-live-konsultasi.html'" class="flex-1 bg-[#D53E0F] hover:bg-[#5E0006] text-white font-bold py-3 rounded-lg transition">
-                            Terima Konsultasi
-                        </button>
-                        <button class="px-6 py-3 border border-stone-300 text-gray-700 font-medium rounded-lg hover:bg-stone-50 transition">
-                            Tolak
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Patient 2 -->
-                <div class="patient-card bg-white rounded-xl border border-stone-200 p-6 hover:border-[#D53E0F]">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-2xl font-bold text-blue-600">
-                                BW
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-900">Bambang Wisata</h3>
-                                <p class="text-gray-600 text-sm">ID: PAT-2024-00124</p>
-                                <div class="flex gap-2 mt-2">
-                                    <span class="px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">Menunggu</span>
-                                    <span class="text-xs text-gray-500">Tunggu: 8 menit</span>
-                                </div>
-                            </div>
+                        <div th:if="${consultation.status.name() == 'IN_PROGRESS'}" class="flex-1">
+                            <a th:href="@{/doctor/live-konsultasi/{id}(id=${consultation.id})}" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition text-center block w-full">Kembali ke Sesi Konsultasi</a>
                         </div>
-                        <div class="text-right">
-                            <p class="text-sm text-gray-600">Kelompok Umur:</p>
-                            <p class="text-lg font-bold text-gray-900">45 Tahun</p>
+                        <div th:if="${consultation.status.name() == 'WAITING'}" class="flex-1">
+                            <!-- Jika dokter sudah punya sesi aktif, disable tombol ini -->
+                            <button th:if="${activeConsultationId != null}" type="button" onclick="alert('Selesaikan sesi konsultasi saat ini untuk memulai konsultasi baru!')" class="flex-1 bg-stone-300 text-stone-500 font-bold py-3 px-4 rounded-lg cursor-not-allowed w-full">Terima Konsultasi</button>
+                            
+                            <!-- Jika tidak ada sesi aktif, gunakan form POST untuk menerima pasien -->
+                            <form th:unless="${activeConsultationId != null}" th:action="@{/doctor/accept-consultation/{id}(id=${consultation.id})}" method="post" class="w-full">
+                                <input type="hidden" name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <button type="submit" class="w-full bg-[#D53E0F] hover:bg-[#5E0006] text-white font-bold py-3 px-4 rounded-lg transition text-center block">Terima Konsultasi</button>
+                            </form>
                         </div>
-                    </div>
-
-                    <div class="bg-stone-50 rounded-lg p-4 mb-4">
-                        <p class="text-sm text-gray-600 mb-2"><strong>Keluhan Utama:</strong></p>
-                        <p class="text-gray-900">Nyeri di daerah perut bagian bawah selama seminggu. Tidak ada demam. Nafsu makan berkurang.</p>
-                    </div>
-
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                        <div class="bg-stone-100 rounded-lg p-3">
-                            <p class="text-xs text-gray-600">Berat Badan</p>
-                            <p class="font-bold text-gray-900">72 kg</p>
-                        </div>
-                        <div class="bg-stone-100 rounded-lg p-3">
-                            <p class="text-xs text-gray-600">Tinggi Badan</p>
-                            <p class="font-bold text-gray-900">175 cm</p>
-                        </div>
-                        <div class="bg-stone-100 rounded-lg p-3">
-                            <p class="text-xs text-gray-600">Tekanan Darah</p>
-                            <p class="font-bold text-gray-900">130/85</p>
-                        </div>
-                        <div class="bg-stone-100 rounded-lg p-3">
-                            <p class="text-xs text-gray-600">Alergi</p>
-                            <p class="font-bold text-gray-900">Penisilin</p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-3">
-                        <button onclick="window.location.href='doctor-live-konsultasi.html'" class="flex-1 bg-[#D53E0F] hover:bg-[#5E0006] text-white font-bold py-3 rounded-lg transition">
-                            Terima Konsultasi
-                        </button>
-                        <button class="px-6 py-3 border border-stone-300 text-gray-700 font-medium rounded-lg hover:bg-stone-50 transition">
-                            Tolak
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Patient 3 -->
-                <div class="patient-card bg-white rounded-xl border border-stone-200 p-6 hover:border-[#D53E0F]">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-pink-200 flex items-center justify-center text-2xl font-bold text-pink-600">
-                                RI
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-900">Rini Irawan</h3>
-                                <p class="text-gray-600 text-sm">ID: PAT-2024-00125</p>
-                                <div class="flex gap-2 mt-2">
-                                    <span class="px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">Menunggu</span>
-                                    <span class="text-xs text-gray-500">Tunggu: 15 menit</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-sm text-gray-600">Kelompok Umur:</p>
-                            <p class="text-lg font-bold text-gray-900">32 Tahun</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-stone-50 rounded-lg p-4 mb-4">
-                        <p class="text-sm text-gray-600 mb-2"><strong>Keluhan Utama:</strong></p>
-                        <p class="text-gray-900">Pusing dan vertigo ketika bangun dari tidur. Disertai mual-mual. Berlangsung selama 2 hari terakhir.</p>
-                    </div>
-
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                        <div class="bg-stone-100 rounded-lg p-3">
-                            <p class="text-xs text-gray-600">Berat Badan</p>
-                            <p class="font-bold text-gray-900">55 kg</p>
-                        </div>
-                        <div class="bg-stone-100 rounded-lg p-3">
-                            <p class="text-xs text-gray-600">Tinggi Badan</p>
-                            <p class="font-bold text-gray-900">160 cm</p>
-                        </div>
-                        <div class="bg-stone-100 rounded-lg p-3">
-                            <p class="text-xs text-gray-600">Tekanan Darah</p>
-                            <p class="font-bold text-gray-900">100/65</p>
-                        </div>
-                        <div class="bg-stone-100 rounded-lg p-3">
-                            <p class="text-xs text-gray-600">Alergi</p>
-                            <p class="font-bold text-gray-900">-</p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-3">
-                        <button onclick="window.location.href='doctor-live-konsultasi.html'" class="flex-1 bg-[#D53E0F] hover:bg-[#5E0006] text-white font-bold py-3 rounded-lg transition">
-                            Terima Konsultasi
-                        </button>
                         <button class="px-6 py-3 border border-stone-300 text-gray-700 font-medium rounded-lg hover:bg-stone-50 transition">
                             Tolak
                         </button>

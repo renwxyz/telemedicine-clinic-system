@@ -14,4 +14,6 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Stri
     long countByCustomerUserIdAndIsUsedFalse(Long customerId);
 
     List<Prescription> findTop3ByCustomerUserIdOrderByIssuedDateDesc(Long customerId);
+
+    java.util.Optional<Prescription> findByConsultationId(Long consultationId);
 }

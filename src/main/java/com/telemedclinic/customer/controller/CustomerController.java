@@ -12,12 +12,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.Base64;
 import java.time.LocalDate;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+import com.lowagie.text.Document;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.pdf.PdfWriter;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -65,8 +75,14 @@ public class CustomerController {
     @Autowired
     private MidtransService midtransService;
 
+    @Autowired
+    private com.telemedclinic.consultation.repository.ChatMessageRepository chatMessageRepository;
+
     @Value("${midtrans.client.key:}")
     private String midtransClientKey;
+
+    @Value("${midtrans.server.key:}")
+    private String midtransServerKey;
 
     public CustomerController(
             UserRepository userRepository,
@@ -517,10 +533,21 @@ public class CustomerController {
     }
 
     @GetMapping("/consultations/new")
-    public String showConsultationForm(HttpSession session, Model model) {
+    public String showConsultationForm(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
         Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
         if (optionalCustomer.isEmpty()) {
             return "redirect:/auth/login";
+        }
+
+        Customer customer = optionalCustomer.get();
+        boolean hasActiveConsultation = consultationRepository.existsByCustomer_UserIdAndStatusIn(
+            customer.getUserId(),
+            java.util.Arrays.asList(com.telemedclinic.consultation.model.ConsultationStatus.WAITING, com.telemedclinic.consultation.model.ConsultationStatus.IN_PROGRESS)
+        );
+        
+        if (hasActiveConsultation) {
+            redirectAttributes.addFlashAttribute("error", "Selesaikan atau batalkan sesi konsultasi Anda yang sedang berjalan sebelum membuat jadwal baru.");
+            return "redirect:/customer/consultations";
         }
 
         // Gunakan lambda aman untuk menghindari error pemetaan pewarisan class User
@@ -537,10 +564,21 @@ public class CustomerController {
     }
 
     @PostMapping("/consultations/new")
-    public String submitConsultationForm(HttpSession session, Model model, @ModelAttribute ConsultationForm consultationForm) {
+    public String submitConsultationForm(HttpSession session, Model model, @ModelAttribute ConsultationForm consultationForm, RedirectAttributes redirectAttributes) {
         Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
         if (optionalCustomer.isEmpty()) {
             return "redirect:/auth/login";
+        }
+
+        Customer customer = optionalCustomer.get();
+        boolean hasActiveConsultation = consultationRepository.existsByCustomer_UserIdAndStatusIn(
+            customer.getUserId(),
+            java.util.Arrays.asList(com.telemedclinic.consultation.model.ConsultationStatus.WAITING, com.telemedclinic.consultation.model.ConsultationStatus.IN_PROGRESS)
+        );
+        
+        if (hasActiveConsultation) {
+            redirectAttributes.addFlashAttribute("error", "Selesaikan atau batalkan sesi konsultasi Anda yang sedang berjalan sebelum membuat jadwal baru.");
+            return "redirect:/customer/consultations";
         }
 
         if (consultationForm.getDoctorId() == null || consultationForm.getComplaint() == null || consultationForm.getComplaint().isBlank()) {
@@ -572,7 +610,37 @@ public class CustomerController {
         );
         consultationRepository.save(consultation);
 
+        String snapToken = midtransService.createConsultationTransaction(consultation);
+        if (snapToken != null) {
+            consultation.setSnapToken(snapToken);
+            consultationRepository.save(consultation);
+            return "redirect:/customer/consultations/payment/" + consultation.getId();
+        }
+
         return "redirect:/customer/consultations";
+    }
+
+    @GetMapping("/consultations/payment/{id}")
+    public String showConsultationPaymentPage(HttpSession session, Model model, @PathVariable Long id) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) return "redirect:/auth/login";
+
+        Optional<Consultation> optionalConsultation = consultationRepository.findById(id);
+        if (optionalConsultation.isEmpty() || !optionalConsultation.get().getCustomer().getUserId().equals(optionalCustomer.get().getUserId())) {
+            return "redirect:/customer/consultations";
+        }
+
+        Consultation consultation = optionalConsultation.get();
+        if (consultation.getSnapToken() == null || consultation.getStatus() != ConsultationStatus.PENDING) {
+            return "redirect:/customer/consultations";
+        }
+
+        model.addAttribute("consultation", consultation);
+        model.addAttribute("snapToken", consultation.getSnapToken());
+        model.addAttribute("midtransClientKey", midtransClientKey);
+        setActiveSection(model, "consultations");
+
+        return "customer/payment-midtrans-consultation";
     }
 
     @GetMapping("/consultations/{id}")
@@ -587,8 +655,15 @@ public class CustomerController {
             return "redirect:/customer/consultations";
         }
 
-        model.addAttribute("consultation", optionalConsultation.get());
-        model.addAttribute("messages", List.of());
+        Consultation consultation = optionalConsultation.get();
+        model.addAttribute("consultation", consultation);
+        java.util.List<com.telemedclinic.consultation.model.ChatMessage> messages = chatMessageRepository.findByConsultation_IdOrderByCreatedAtAsc(consultation.getId());
+        model.addAttribute("messages", messages);
+        model.addAttribute("currentUserEmail", session.getAttribute("currentUserEmail"));
+        
+        Optional<com.telemedclinic.prescription.model.Prescription> prescription = prescriptionRepository.findByConsultationId(consultation.getId());
+        prescription.ifPresent(value -> model.addAttribute("prescription", value));
+        
         setActiveSection(model, "consultations");
         return "customer/consultation-chat";
     }
@@ -627,40 +702,58 @@ public class CustomerController {
         return "redirect:/customer/consultations/" + id;
     }
 
-    @PostMapping("/consultations/delete/{id}")
-    public String deleteConsultation(HttpSession session, @PathVariable Long id) {
-        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
-        if (optionalCustomer.isEmpty()) {
-            return "redirect:/auth/login";
-        }
-
-        Optional<Consultation> optionalConsultation = consultationRepository.findById(id);
-        if (optionalConsultation.isPresent()) {
-            Consultation consultation = optionalConsultation.get();
-            if (consultation.getCustomer().getUserId().equals(optionalCustomer.get().getUserId())
-                    && consultation.getStatus().name().equals("PENDING")) {
-                consultationRepository.delete(consultation);
+    @PostMapping("/consultations/{id}/check-status")
+    public String checkMidtransStatusManual(@PathVariable Long id, HttpSession session, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        Optional<com.telemedclinic.consultation.model.Consultation> opt = consultationRepository.findById(id);
+        if (opt.isPresent()) {
+            com.telemedclinic.consultation.model.Consultation consultation = opt.get();
+            try {
+                // Panggil API Status Midtrans Sandbox
+                String orderId = "CONS-" + consultation.getId();
+                String authString = midtransServerKey + ":";
+                String encodedAuth = Base64.getEncoder().encodeToString(authString.getBytes());
+                
+                URL url = new URL("https://api.sandbox.midtrans.com/v2/" + orderId + "/status");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Authorization", "Basic " + encodedAuth);
+                conn.setRequestProperty("Content-Type", "application/json");
+                
+                int responseCode = conn.getResponseCode();
+                if (responseCode == 200) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    String inputLine;
+                    StringBuilder response = new StringBuilder();
+                    while ((inputLine = in.readLine()) != null) { response.append(inputLine); }
+                    in.close();
+                    
+                    String resBody = response.toString();
+                    if (resBody.contains("\"transaction_status\":\"settlement\"") || resBody.contains("\"transaction_status\":\"capture\"")) {
+                        consultation.setStatus(com.telemedclinic.consultation.model.ConsultationStatus.WAITING);
+                        consultationRepository.save(consultation);
+                        redirectAttributes.addFlashAttribute("success", "Pembayaran terverifikasi! Menunggu konfirmasi dokter.");
+                    } else if (resBody.contains("\"transaction_status\":\"expire\"") || resBody.contains("\"transaction_status\":\"cancel\"")) {
+                        consultation.setStatus(com.telemedclinic.consultation.model.ConsultationStatus.CANCELLED);
+                        consultationRepository.save(consultation);
+                        redirectAttributes.addFlashAttribute("error", "Transaksi telah kedaluwarsa atau dibatalkan di Midtrans.");
+                    } else {
+                        redirectAttributes.addFlashAttribute("info", "Midtrans menyatakan pembayaran Anda masih belum masuk.");
+                    }
+                } else {
+                    redirectAttributes.addFlashAttribute("error", "Gagal menghubungi server pembayaran.");
+                }
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("error", "Terjadi kesalahan sistem saat mengecek pembayaran.");
             }
         }
         return "redirect:/customer/consultations";
     }
 
-    @PostMapping("/consultations/edit/{id}")
-    public String editConsultation(HttpSession session, @PathVariable Long id, @RequestParam String complaint, @RequestParam(required = false) String additionalInfo) {
-        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
-        if (optionalCustomer.isEmpty()) {
-            return "redirect:/auth/login";
-        }
-
-        Optional<Consultation> optionalConsultation = consultationRepository.findById(id);
-        if (optionalConsultation.isPresent()) {
-            Consultation consultation = optionalConsultation.get();
-            if (consultation.getCustomer().getUserId().equals(optionalCustomer.get().getUserId())
-                    && consultation.getStatus().name().equals("PENDING")) {
-                consultation.setComplaint(complaint);
-                consultation.setAdditionalInfo(additionalInfo);
-                consultationRepository.save(consultation);
-            }
+    @PostMapping("/consultations/{id}/delete")
+    public String deleteConsultation(@PathVariable Long id, HttpSession session) {
+        Optional<com.telemedclinic.consultation.model.Consultation> opt = consultationRepository.findById(id);
+        if (opt.isPresent() && (opt.get().getStatus() == com.telemedclinic.consultation.model.ConsultationStatus.CANCELLED || opt.get().getStatus() == com.telemedclinic.consultation.model.ConsultationStatus.PENDING)) {
+            consultationRepository.delete(opt.get());
         }
         return "redirect:/customer/consultations";
     }
@@ -760,4 +853,82 @@ public class CustomerController {
         redirectAttributes.addFlashAttribute("success", "Profil berhasil diperbarui!");
         return "redirect:/customer/profile";
     }
+
+  @GetMapping("/prescription/download/{id}")
+  public void downloadPrescriptionPdf(@PathVariable Long id, HttpServletResponse response) {
+      try {
+          // Cari resep berdasarkan ID
+          Optional<com.telemedclinic.prescription.model.Prescription> optPrescription = prescriptionRepository.findById(String.valueOf(id));
+          if (optPrescription.isEmpty()) return;
+          
+          com.telemedclinic.prescription.model.Prescription prescription = optPrescription.get();
+          com.telemedclinic.consultation.model.Consultation consultation = prescription.getConsultation();
+
+          // Set response headers agar browser mendownload file
+          response.setContentType("application/pdf");
+          String headerKey = "Content-Disposition";
+          String headerValue = "attachment; filename=Resep_KlinikKu_" + consultation.getId() + ".pdf";
+          response.setHeader(headerKey, headerValue);
+
+          // Inisialisasi Dokumen PDF
+          Document document = new Document();
+          PdfWriter.getInstance(document, response.getOutputStream());
+          document.open();
+
+          // Styling Font
+          com.lowagie.text.Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18);
+          com.lowagie.text.Font subTitleFont = FontFactory.getFont(FontFactory.HELVETICA, 12);
+          com.lowagie.text.Font textFont = FontFactory.getFont(FontFactory.HELVETICA, 10);
+          com.lowagie.text.Font boldTextFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10);
+
+          // Tulis Header Klinik
+          Paragraph title = new Paragraph("KLINIKKU - RESEP DIGITAL", titleFont);
+          title.setAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+          document.add(title);
+          
+          Paragraph subTitle = new Paragraph("Layanan Konsultasi Telemedicine Terpercaya", subTitleFont);
+          subTitle.setAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+          document.add(subTitle);
+          
+          document.add(new Paragraph(" ")); // Spasi kosong
+          document.add(new Paragraph("---------------------------------------------------------------------------------------------------"));
+
+          // Tulis Info Pasien & Dokter
+          document.add(new Paragraph("ID Konsultasi : CONS-" + consultation.getId(), boldTextFont));
+          document.add(new Paragraph("Dokter        : " + consultation.getDoctorName(), textFont));
+          document.add(new Paragraph("Spesialisasi  : " + consultation.getDoctorSpecialization(), textFont));
+          document.add(new Paragraph("Keluhan       : " + consultation.getComplaint(), textFont));
+          
+          document.add(new Paragraph("---------------------------------------------------------------------------------------------------"));
+          document.add(new Paragraph(" "));
+
+          // Tulis Daftar Obat
+          Paragraph medicineTitle = new Paragraph("DAFTAR OBAT YANG DIRESEPKAN:", boldTextFont);
+          document.add(medicineTitle);
+          document.add(new Paragraph(" "));
+
+          for (com.telemedclinic.prescription.model.PrescriptionItem item : prescription.getItems()) {
+              String medName = item.getMedicine().getName();
+              String instructions = item.getInstructions();
+              Integer qty = item.getQuantity();
+              
+              Paragraph medPara = new Paragraph("- " + medName + " (" + qty + " pcs)", boldTextFont);
+              Paragraph instPara = new Paragraph("  Aturan Pakai: " + instructions, textFont);
+              
+              document.add(medPara);
+              document.add(instPara);
+              document.add(new Paragraph(" ")); // Spasi antar obat
+          }
+
+          document.add(new Paragraph("---------------------------------------------------------------------------------------------------"));
+          Paragraph footer = new Paragraph("Resep ini di-generate secara otomatis oleh sistem KlinikKu dan sah untuk digunakan di apotek luar.", com.lowagie.text.FontFactory.getFont(com.lowagie.text.FontFactory.HELVETICA_OBLIQUE, 9));
+          footer.setAlignment(com.lowagie.text.Element.ALIGN_CENTER);
+          document.add(footer);
+
+          // Tutup dokumen
+          document.close();
+      } catch (Exception e) {
+          e.printStackTrace();
+      }
+  }
 }

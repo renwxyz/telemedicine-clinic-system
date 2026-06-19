@@ -42,7 +42,11 @@ public class PrescriptionItem {
         this.prescription = prescription;
     }
 
-    // --- GETTER ---
+    // --- GETTER & SETTER ---
+    public void setMedicine(Medicine medicine) { this.medicine = medicine; }
+    public void setInstructions(String instructions) { this.instructions = instructions; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
+    
     public Long getId() { return id; }
     public Prescription getPrescription() { return prescription; }
     public Medicine getMedicine() { return medicine; }

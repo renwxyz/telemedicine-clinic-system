@@ -18,116 +18,289 @@
     <div th:replace="~{fragments/doctor-navbar :: doctorNavbar('live')}"></div>
 
 
-    <div class="h-screen pt-[60px] pb-4 px-4 flex gap-4 max-w-screen-2xl mx-auto">
+    <div th:unless="${noActiveSession}" class="h-screen pt-[60px] pb-4 px-4 flex gap-4 max-w-screen-2xl mx-auto">
         
         <div class="w-full lg:w-[55%] bg-white rounded-2xl shadow-sm border border-stone-200 flex flex-col overflow-hidden">
             <div class="bg-white border-b border-stone-100 p-4 flex justify-between items-center z-10 shadow-sm">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center text-lg font-bold text-stone-600">SN</div>
+                    <div class="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center text-lg font-bold text-stone-600" th:text="${#strings.substring(patient.name, 0, 2).toUpperCase()}">SN</div>
                     <div>
-                        <h2 class="font-extrabold text-stone-900">Siti Nurhaliza</h2>
+                        <h2 class="font-extrabold text-stone-900" th:text="${patient.name}">Siti Nurhaliza</h2>
                         <div class="flex items-center gap-1.5 mt-0.5">
                             <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                            <p class="text-stone-500 text-xs font-medium">Sedang Online • ID: PT-00123</p>
+                            <p class="text-stone-500 text-xs font-medium" th:text="'Sedang Online | ID: PAT-' + ${patient.userId}">Sedang Online • ID: PT-00123</p>
                         </div>
                     </div>
                 </div>
-                <button class="text-[#D53E0F] font-bold bg-orange-50 hover:bg-orange-100 px-4 py-2 rounded-xl transition text-sm border border-orange-200">
-                    Akhiri Sesi
-                </button>
-            </div>
-
-            <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-stone-50/50 custom-scrollbar">
-                <div class="flex justify-center"><span class="bg-stone-200 text-stone-600 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">Sesi Konsultasi Dimulai - 10:30 WIB</span></div>
-
-                <div class="flex justify-start">
-                    <div class="bg-white border border-stone-200 text-stone-800 rounded-2xl rounded-tl-sm px-5 py-3 max-w-[75%] shadow-sm">
-                        <p class="text-sm">Halo Dokter, saya merasa demam tinggi dan batuk sejak 3 hari yang lalu. Kepala juga pusing.</p>
-                        <p class="text-[10px] text-stone-400 font-bold mt-2 text-right">10:31</p>
-                    </div>
-                </div>
-
-                <div class="flex justify-end">
-                    <div class="bg-gradient-to-br from-[#D53E0F] to-[#a32e0a] text-white rounded-2xl rounded-tr-sm px-5 py-3 max-w-[75%] shadow-md">
-                        <p class="text-sm">Selamat pagi Ibu Siti. Saya catat keluhannya. Apakah sudah minum obat warung atau paracetamol sebelumnya?</p>
-                        <p class="text-[10px] text-orange-200 font-bold mt-2 text-right">10:32</p>
-                    </div>
+                <div class="flex items-center gap-3">
+                    <span th:replace="~{fragments/status-badges :: consultation-status(${consultation.status.name()})}"></span>
+                    <form th:if="${consultation.status.name() == 'IN_PROGRESS'}" th:action="@{/doctor/live-konsultasi/{id}/end(id=${consultation.id})}" method="post" onsubmit="return confirm('Apakah Anda yakin ingin mengakhiri sesi ini? Pasien tidak akan bisa membalas pesan lagi.');">
+                        <input type="hidden" name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <button type="submit" class="bg-red-100 hover:bg-red-200 text-red-700 font-bold px-4 py-2 rounded-lg text-sm transition">Akhiri Sesi</button>
+                    </form>
                 </div>
             </div>
 
-            <div class="border-t border-stone-200 p-4 bg-white">
-                <div class="flex gap-2">
-                    <button class="p-3 text-stone-400 hover:text-[#D53E0F] transition bg-stone-50 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg></button>
-                    <input type="text" placeholder="Ketik pesan untuk pasien..." class="flex-1 px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent outline-none text-sm font-medium">
-                    <button class="bg-[#D53E0F] hover:bg-[#5E0006] text-white px-5 py-3 rounded-xl font-bold transition shadow-md flex items-center gap-2">
+            <div id="messages-container" class="flex-1 overflow-y-auto p-6 space-y-6 bg-stone-50/50 custom-scrollbar">
+                <div class="flex justify-center"><span class="bg-stone-200 text-stone-600 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full" th:text="'Sesi Konsultasi Dimulai - ' + ${#temporals.format(consultation.createdAt, 'HH:mm')} + ' WIB'">Sesi Konsultasi Dimulai - 10:30 WIB</span></div>
+
+                <div th:each="message : ${messages}" th:classappend="${message.senderId == currentUserEmail} ? 'flex justify-end' : 'flex justify-start'">
+                    <div th:if="${message.senderId == currentUserEmail}" class="bg-gradient-to-br from-[#D53E0F] to-[#a32e0a] text-white rounded-2xl rounded-tr-sm px-5 py-3 max-w-[75%] shadow-md">
+                        <p class="text-sm" th:text="${message.content}">Isi pesan dokter</p>
+                        <p class="text-[10px] text-orange-200 font-bold mt-2 text-right" th:text="${#temporals.format(message.createdAt, 'HH:mm')}">10:32</p>
+                    </div>
+                    <div th:unless="${message.senderId == currentUserEmail}" class="bg-white border border-stone-200 text-stone-800 rounded-2xl rounded-tl-sm px-5 py-3 max-w-[75%] shadow-sm">
+                        <p class="text-sm" th:text="${message.content}">Isi pesan pasien</p>
+                        <p class="text-[10px] text-stone-400 font-bold mt-2 text-right" th:text="${#temporals.format(message.createdAt, 'HH:mm')}">10:31</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-stone-200 p-4 bg-white" th:if="${consultation.status.name() == 'IN_PROGRESS'}">
+                <form id="chat-form" class="flex gap-2 w-full">
+                    <button type="button" class="p-3 text-stone-400 hover:text-[#D53E0F] transition bg-stone-50 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg></button>
+                    <input type="text" id="chat-input" placeholder="Ketik pesan untuk pasien..." class="flex-1 px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent outline-none text-sm font-medium">
+                    <button type="submit" class="bg-[#D53E0F] hover:bg-[#5E0006] text-white px-5 py-3 rounded-xl font-bold transition shadow-md flex items-center gap-2">
                         <span>Kirim</span>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                     </button>
-                </div>
+                </form>
+            </div>
+            <div th:if="${consultation.status.name() == 'COMPLETED'}" class="border-t border-stone-200 p-6 bg-stone-50 text-center flex flex-col items-center justify-center gap-3">
+                <p class="text-sm font-bold text-stone-500">Sesi konsultasi ini telah berakhir.</p>
             </div>
         </div>
 
         <div class="hidden lg:flex w-[45%] bg-white rounded-2xl shadow-sm border border-stone-200 flex-col overflow-hidden">
             
-            <div class="p-5 border-b border-stone-100 bg-stone-50/50">
+            <div class="flex-1 overflow-y-auto p-5 border-b border-stone-100 bg-stone-50/50 custom-scrollbar">
                 <h3 class="font-extrabold text-stone-900 mb-3 flex items-center gap-2">
                     <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     Rekam Medis Singkat
                 </h3>
                 <div class="grid grid-cols-4 gap-2 mb-3">
-                    <div class="bg-white border border-stone-200 p-2 rounded-lg text-center"><p class="text-[10px] text-stone-500 font-bold uppercase">Usia</p><p class="font-extrabold text-stone-800 text-sm">28</p></div>
-                    <div class="bg-white border border-stone-200 p-2 rounded-lg text-center"><p class="text-[10px] text-stone-500 font-bold uppercase">Berat</p><p class="font-extrabold text-stone-800 text-sm">60kg</p></div>
-                    <div class="bg-white border border-stone-200 p-2 rounded-lg text-center"><p class="text-[10px] text-stone-500 font-bold uppercase">Tinggi</p><p class="font-extrabold text-stone-800 text-sm">165cm</p></div>
-                    <div class="bg-red-50 border border-red-100 p-2 rounded-lg text-center"><p class="text-[10px] text-red-500 font-bold uppercase">Alergi</p><p class="font-extrabold text-red-700 text-sm">Penisilin</p></div>
-                </div>
-            </div>
-
-            <div class="flex-1 overflow-y-auto p-5 custom-scrollbar">
-                <h3 class="font-extrabold text-stone-900 mb-4 flex items-center gap-2 text-lg">
-                    Form Resep Digital 💊
-                </h3>
-                
-                <div class="mb-5">
-                    <label class="block text-xs font-bold text-stone-700 uppercase tracking-wide mb-2">Diagnosis Akhir</label>
-                    <textarea placeholder="Contoh: Faringitis Akut..." class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-[#D53E0F] outline-none text-sm font-medium" rows="2"></textarea>
+                    <div class="bg-white border border-stone-200 p-2 rounded-lg text-center"><p class="text-[10px] text-stone-500 font-bold uppercase">Usia</p><p class="font-extrabold text-stone-800 text-sm" th:text="${patient.birthDate != null ? #temporals.format(patient.birthDate, 'dd-MM-yyyy') : '-'}">28</p></div>
+                    <div class="bg-white border border-stone-200 p-2 rounded-lg text-center"><p class="text-[10px] text-stone-500 font-bold uppercase">Berat</p><p class="font-extrabold text-stone-800 text-sm" th:text="${patient.weight != null ? patient.weight + ' kg' : '-'}">60kg</p></div>
+                    <div class="bg-white border border-stone-200 p-2 rounded-lg text-center"><p class="text-[10px] text-stone-500 font-bold uppercase">Tinggi</p><p class="font-extrabold text-stone-800 text-sm" th:text="${patient.height != null ? patient.height + ' cm' : '-'}">165cm</p></div>
+                    <div class="bg-red-50 border border-red-100 p-2 rounded-lg text-center"><p class="text-[10px] text-red-500 font-bold uppercase">Alergi</p><p class="font-extrabold text-red-700 text-sm">-</p></div>
                 </div>
 
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <label class="block text-xs font-bold text-stone-700 uppercase tracking-wide">Daftar Obat</label>
-                        <button class="text-xs font-bold text-[#D53E0F] hover:underline">+ Tambah Obat</button>
+                <div th:if="${consultation.status.name() == 'IN_PROGRESS'}" class="mt-6 border-t border-stone-200 pt-6">
+                    <h3 class="font-extrabold text-stone-900 mb-3 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-[#D53E0F]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        Catatan Medis Sementara
+                    </h3>
+                    <textarea rows="6" class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent outline-none text-sm font-medium resize-none custom-scrollbar" placeholder="Ketik catatan diagnosis, gejala, atau alergi pasien di sini..."></textarea>
+                    <p class="text-[10px] text-stone-400 mt-2 font-medium">*Catatan ini hanya untuk bantuan dokter (tidak tersimpan ke database).</p>
+                </div>
+
+                <div th:if="${consultation.status.name() == 'COMPLETED' and prescription == null}" class="mt-6 border-t border-stone-200 pt-6 bg-orange-50/30 -mx-6 px-6 pb-6 rounded-b-2xl border-x-0 relative">
+                    <h3 class="font-extrabold text-[#D53E0F] mb-4 flex items-center gap-2">Buat Resep Obat</h3>
+                    <div class="relative mb-4">
+                        <label class="block text-xs font-bold text-stone-600 mb-1">Cari & Tambah Obat</label>
+                        <input type="text" id="med-search-input" placeholder="Ketik nama obat..." class="w-full px-4 py-3 bg-white border border-stone-200 rounded-xl focus:ring-2 focus:ring-[#D53E0F] outline-none text-sm font-medium transition">
+                        <ul id="med-search-results" class="absolute z-50 w-full bg-white border border-stone-200 rounded-xl mt-1 shadow-xl max-h-48 overflow-y-auto hidden custom-scrollbar"></ul>
                     </div>
+                    <form th:action="@{/doctor/prescription/create}" method="post" id="prescription-form">
+                        <input type="hidden" name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <input type="hidden" name="consultationId" th:value="${consultation.id}" />
+                        <div id="selected-meds-container" class="space-y-3 mb-6 max-h-64 overflow-y-auto custom-scrollbar pr-1"></div>
+                        <button type="submit" id="submit-prescription-btn" class="w-full bg-[#D53E0F] hover:bg-[#5E0006] text-white font-bold py-3 rounded-xl transition text-center shadow-md disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            Kirim Resep ke Pasien
+                        </button>
+                    </form>
+                </div>
 
-                    <div class="border border-stone-200 rounded-xl p-4 bg-white shadow-sm relative group">
-                        <button class="absolute top-3 right-3 text-stone-400 hover:text-red-500 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-                        
-                        <input type="text" placeholder="Cari Nama Obat..." value="Amoxicillin 500mg" class="w-full font-bold text-stone-900 mb-3 focus:outline-none placeholder-stone-400 bg-transparent border-b border-transparent focus:border-[#D53E0F] transition">
-                        
-                        <div class="grid grid-cols-2 gap-3 mb-3">
-                            <div>
-                                <label class="text-[10px] font-bold text-stone-500 uppercase">Jumlah</label>
-                                <input type="number" value="10" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm font-bold mt-1 outline-none focus:border-[#D53E0F]">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-stone-500 uppercase">Aturan Pakai</label>
-                                <select class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm font-bold mt-1 outline-none focus:border-[#D53E0F]">
-                                    <option>3x1 Sesudah Makan</option>
-                                    <option>2x1 Sesudah Makan</option>
-                                </select>
-                            </div>
+                <div th:if="${consultation.status.name() == 'COMPLETED' and prescription != null}" class="mt-6 border-t border-stone-200 pt-6">
+                    <div class="bg-white border border-stone-200 rounded-xl p-5 shadow-sm text-left">
+                        <div class="border-b border-stone-100 pb-3 mb-4 flex items-center justify-between">
+                            <h4 class="font-extrabold text-stone-900 text-sm">Resep Obat Terkirim</h4>
+                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         </div>
-                        <input type="text" placeholder="Catatan tambahan (opsional)..." class="w-full text-xs px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg outline-none focus:border-[#D53E0F]">
+                        <ul class="space-y-3">
+                            <li th:each="item : ${prescription.items}" class="border-b border-stone-50 pb-2 last:border-0">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-bold text-stone-800 text-sm" th:text="${item.medicine.name}">Nama Obat</p>
+                                        <p class="text-xs text-stone-500 font-medium" th:text="${item.instructions}">Aturan Pakai</p>
+                                    </div>
+                                    <span class="text-xs font-bold text-[#D53E0F] bg-orange-50 px-2 py-1 rounded-md" th:text="${item.quantity} + ' pcs'">2 pcs</span>
+                                </div>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-            </div>
-
-            <div class="p-5 border-t border-stone-100 bg-white">
-                <button class="w-full bg-[#D53E0F] hover:bg-[#5E0006] text-white font-extrabold py-4 rounded-xl shadow-lg shadow-orange-200 transition text-sm flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Terbitkan Resep & Selesai
-                </button>
             </div>
         </div>
     </div>
+
+    <div th:if="${noActiveSession}" class="h-screen pt-[80px] pb-4 px-4 flex items-center justify-center max-w-screen-2xl mx-auto">
+        <div class="text-center bg-white p-12 rounded-2xl border border-stone-200 shadow-sm">
+            <div class="w-24 h-24 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-12 h-12 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+            </div>
+            <h2 class="text-2xl font-bold text-stone-900 mb-2">Tidak ada sesi konsultasi aktif</h2>
+            <p class="text-stone-500 mb-6">Silakan masuk ke menu Antrean untuk menerima pasien baru.</p>
+            <a th:href="@{/doctor/antrean}" class="bg-[#D53E0F] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#5E0006] transition">Lihat Antrean</a>
+        </div>
+    </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <script th:inline="javascript">
+      var consultationId = /*[[${consultation != null ? consultation.id : null}]]*/ null;
+      var currentUsername = /*[[${currentUserEmail}]]*/ '';
+      var stompClient = null;
+
+      function connect() {
+          if (!consultationId) return;
+          var socket = new SockJS('/ws-chat');
+          stompClient = Stomp.over(socket);
+          stompClient.connect({}, function (frame) {
+              stompClient.subscribe('/topic/consultation/' + consultationId, function (message) {
+                  showMessage(JSON.parse(message.body));
+              });
+          });
+      }
+
+      function sendMessage(e) {
+          e.preventDefault();
+          var input = document.getElementById('chat-input');
+          var content = input.value.trim();
+          if (content && stompClient) {
+              var chatMessage = { senderId: currentUsername, content: content };
+              stompClient.send("/app/chat/" + consultationId + "/sendMessage", {}, JSON.stringify(chatMessage));
+              input.value = '';
+          }
+      }
+
+      function showMessage(message) {
+          var messagesContainer = document.getElementById('messages-container');
+          if (!messagesContainer) return;
+          var isSelf = message.senderId === currentUsername;
+          
+          var divFlex = document.createElement('div');
+          divFlex.className = isSelf ? 'flex justify-end' : 'flex justify-start';
+          
+          var divBubble = document.createElement('div');
+          divBubble.className = isSelf 
+              ? 'bg-gradient-to-br from-[#D53E0F] to-[#a32e0a] text-white rounded-2xl rounded-tr-sm px-5 py-3 max-w-[75%] shadow-md' 
+              : 'bg-white border border-stone-200 text-stone-800 rounded-2xl rounded-tl-sm px-5 py-3 max-w-[75%] shadow-sm';
+          
+          var pContent = document.createElement('p');
+          pContent.className = 'text-sm';
+          pContent.innerText = message.content;
+          
+          var pTime = document.createElement('p');
+          pTime.className = isSelf ? 'text-[10px] text-orange-200 font-bold mt-2 text-right' : 'text-[10px] text-stone-400 font-bold mt-2 text-right';
+          var d = new Date();
+          pTime.innerText = d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+          
+          divBubble.appendChild(pContent);
+          divBubble.appendChild(pTime);
+          divFlex.appendChild(divBubble);
+          messagesContainer.appendChild(divFlex);
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      var chatForm = document.getElementById('chat-form');
+      if (chatForm) {
+          chatForm.addEventListener('submit', sendMessage);
+      }
+      connect();
+      var msgs = document.getElementById('messages-container');
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+  </script>
+<script th:inline="javascript">
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('med-search-input');
+    const searchResults = document.getElementById('med-search-results');
+    const selectedContainer = document.getElementById('selected-meds-container');
+    const submitBtn = document.getElementById('submit-prescription-btn');
+
+    let typingTimer;
+    const doneTypingInterval = 300; // Debounce 300ms
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(typingTimer);
+            const query = this.value.trim();
+            if (query.length >= 2) {
+                typingTimer = setTimeout(() => fetchMedicines(query), doneTypingInterval);
+            } else {
+                searchResults.innerHTML = '';
+                searchResults.classList.add('hidden');
+            }
+        });
+
+        // Sembunyikan dropdown saat klik di luar
+        document.addEventListener('click', function(e) {
+            if (e.target !== searchInput && e.target !== searchResults) {
+                searchResults.classList.add('hidden');
+            }
+        });
+    }
+
+    function fetchMedicines(query) {
+        fetch('/api/medicines/search?query=' + encodeURIComponent(query))
+            .then(response => response.json())
+            .then(data => {
+                searchResults.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(med => {
+                        const li = document.createElement('li');
+                        li.className = 'px-4 py-3 hover:bg-orange-50 cursor-pointer text-sm font-medium text-stone-800 border-b border-stone-100 last:border-0 transition';
+                        li.innerText = med.name;
+                        const actualId = med.id || med.medicineId || med.idMedicine;
+                        li.onclick = () => addMedicine(actualId, med.name);
+                        searchResults.appendChild(li);
+                    });
+                    searchResults.classList.remove('hidden');
+                } else {
+                    searchResults.innerHTML = '<li class="px-4 py-3 text-sm text-stone-500 italic">Obat tidak ditemukan.</li>';
+                    searchResults.classList.remove('hidden');
+                }
+            })
+            .catch(err => console.error('Error fetching medicines:', err));
+    }
+
+    function addMedicine(id, name) {
+        // Reset pencarian
+        searchInput.value = '';
+        searchResults.classList.add('hidden');
+
+        // Buat Card Obat
+        const card = document.createElement('div');
+        card.className = 'bg-white p-4 rounded-xl border border-stone-200 shadow-sm relative group';
+
+        card.innerHTML = `
+            <div class="flex justify-between items-start mb-2">
+                <h4 class="font-bold text-stone-800 text-sm w-3/4 leading-tight">${name}</h4>
+                <button type="button" class="text-stone-400 hover:text-red-500 transition" onclick="this.closest('.bg-white').remove(); checkFormValidity();">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="flex gap-2 items-center mb-2">
+                <label class="text-[10px] font-bold text-stone-500 w-12">Jumlah:</label>
+                <div class="flex items-center border border-stone-200 rounded-md bg-stone-50 overflow-hidden">
+                    <button type="button" class="px-2 py-1 text-stone-600 hover:bg-stone-200 font-bold" onclick="const inp = this.nextElementSibling; if(inp.value > 1) inp.value--;">-</button>
+                    <input type="number" name="quantities" value="1" min="1" readonly class="w-8 text-center text-xs font-bold outline-none bg-transparent appearance-none">
+                    <button type="button" class="px-2 py-1 text-stone-600 hover:bg-stone-200 font-bold" onclick="this.previousElementSibling.value++;">+</button>
+                </div>
+            </div>
+            <input type="hidden" name="medicineIds" value="${id}" />
+            <input type="text" name="instructions" required placeholder="Catatan (Contoh: 3x Sehari)" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:ring-2 focus:ring-[#D53E0F] outline-none text-xs font-medium">
+        `;
+
+        selectedContainer.appendChild(card);
+        checkFormValidity();
+    }
+
+    // Aktifkan/Nonaktifkan tombol submit
+    window.checkFormValidity = function() {
+        const medCount = document.querySelectorAll('input[name="medicineIds"]').length;
+        submitBtn.disabled = medCount === 0;
+    }
+});
+</script>
 </body>
 </html>

@@ -26,12 +26,17 @@ public class Prescription {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
+    @OneToOne
+    @JoinColumn(name = "consultation_id")
+    private com.telemedclinic.consultation.model.Consultation consultation;
+
     // Relasi: 1 Resep punya Banyak Obat (Cascade ALL: Jika resep dihapus, itemnya ikut terhapus)
     @OneToMany(mappedBy = "prescription", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PrescriptionItem> items;
 
     private LocalDateTime issuedDate;
     private boolean isUsed;
+    private Boolean isStockAvailable = true;
 
     // Default constructor wajib untuk JPA (Spring Boot)
     public Prescription() {
@@ -57,6 +62,18 @@ public class Prescription {
         return items;
     }
 
+    public void setItems(List<PrescriptionItem> items) {
+        this.items = items;
+    }
+
+    public void setConsultation(com.telemedclinic.consultation.model.Consultation consultation) {
+        this.consultation = consultation;
+    }
+
+    public com.telemedclinic.consultation.model.Consultation getConsultation() {
+        return consultation;
+    }
+
     public boolean isValid() {
         return !isUsed && !items.isEmpty();
     }
@@ -71,4 +88,7 @@ public class Prescription {
     public Customer getCustomer() { return customer; }
     public LocalDateTime getIssuedDate() { return issuedDate; }
     public boolean isUsed() { return isUsed; }
+    
+    public Boolean getIsStockAvailable() { return isStockAvailable; }
+    public void setIsStockAvailable(Boolean isStockAvailable) { this.isStockAvailable = isStockAvailable; }
 }
