@@ -25,7 +25,7 @@
             class="text-3xl font-extrabold text-stone-900 mb-1"
             th:text="${doctor != null} ? 'Selamat Datang, ' + ${doctor.name} + ' 👋' : 'Selamat Datang'"
           >
-            Selamat Datang, Dr. Ahmad Fauzi 👋
+            Selamat Datang,
           </h1>
           <p class="text-stone-500 font-medium">
             Ringkasan aktivitas dan antrean pasien Anda hari ini.
@@ -71,10 +71,11 @@
             </div>
           </div>
           <div
-            class="text-4xl font-extrabold text-stone-900 mb-1 relative z-10"
-          >
-            248
-          </div>
+  class="text-4xl font-extrabold text-stone-900 mb-1 relative z-10"
+  th:text="${totalPatients}"
+>
+  0
+</div>
           <p
             class="text-xs text-green-500 font-bold flex items-center gap-1 relative z-10"
           >
@@ -125,9 +126,12 @@
               </svg>
             </div>
           </div>
-          <div class="text-4xl font-extrabold text-white mb-1 relative z-10">
-            5
-          </div>
+         <div
+  class="text-4xl font-extrabold text-white mb-1 relative z-10"
+  th:text="${waitingQueue}"
+>
+  0
+</div>
           <p class="text-xs text-orange-100 font-medium relative z-10">
             Harap segera direspons
           </p>
@@ -202,9 +206,12 @@
                 </svg>
                 Buka Live Konsultasi</span
               >
-              <span class="bg-white text-[#D53E0F] text-xs px-2 py-1 rounded-md"
-                >5 Antrean</span
-              >
+              <span
+  class="bg-white text-[#D53E0F] text-xs px-2 py-1 rounded-md"
+  th:text="${waitingQueue} + ' Antrean'"
+>
+  0 Antrean
+</span>
             </a>
             <a
               th:href="@{/doctor/profile}"
