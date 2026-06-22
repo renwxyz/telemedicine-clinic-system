@@ -30,51 +30,73 @@
                 <p class="text-stone-600">Kelola konsultasi Anda dengan dokter</p>
             </div>
 
-            <!-- Alert Messages -->
-            <div th:if="${success}" th:replace="~{fragments/alerts :: success(${success})}"></div>
+
 
             <!-- Tab Navigation -->
-            <div class="bg-white rounded-2xl border border-stone-200 mb-8 flex flex-wrap">
-                <a th:href="@{/customer/consultations}" class="px-6 py-4 font-semibold border-b-2 transition"
-                    th:classappend="${status == null || status == ''} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
-                    Semua
-                </a>
-                <a th:href="@{/customer/consultations(status=PENDING)}"
-                    class="px-6 py-4 font-semibold border-b-2 transition"
-                    th:classappend="${status == 'PENDING'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
-                    Menunggu
-                </a>
-                <a th:href="@{/customer/consultations(status=IN_PROGRESS)}"
-                    class="px-6 py-4 font-semibold border-b-2 transition"
-                    th:classappend="${status == 'IN_PROGRESS'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
-                    Berlangsung
-                </a>
-                <a th:href="@{/customer/consultations(status=COMPLETED)}"
-                    class="px-6 py-4 font-semibold border-b-2 transition"
-                    th:classappend="${status == 'COMPLETED'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
-                    Selesai
-                </a>
+            <div class="bg-white rounded-2xl border border-stone-200 mb-8 overflow-x-auto">
+                <div class="flex">
+                    <a th:href="@{/customer/consultations}" 
+                       class="px-6 py-4 font-semibold border-b-2 transition whitespace-nowrap"
+                       th:classappend="${status == null || status == ''} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
+                        Semua
+                    </a>
+                    <a th:href="@{/customer/consultations(status='WAITING')}" 
+                       class="px-6 py-4 font-semibold border-b-2 transition whitespace-nowrap flex items-center"
+                       th:classappend="${status == 'WAITING'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
+                        Menunggu
+                        <span th:if="${countWaiting != null and countWaiting > 0}" th:text="${countWaiting}" class="bg-[#D53E0F] text-white text-xs font-bold px-2 py-0.5 rounded-full ml-1"></span>
+                    </a>
+                    <a th:href="@{/customer/consultations(status='IN_PROGRESS')}" 
+                       class="px-6 py-4 font-semibold border-b-2 transition whitespace-nowrap flex items-center"
+                       th:classappend="${status == 'IN_PROGRESS'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
+                        Berlangsung
+                        <span th:if="${countInProgress != null and countInProgress > 0}" th:text="${countInProgress}" class="bg-[#D53E0F] text-white text-xs font-bold px-2 py-0.5 rounded-full ml-1"></span>
+                    </a>
+                    <a th:href="@{/customer/consultations(status='COMPLETED')}" 
+                       class="px-6 py-4 font-semibold border-b-2 transition whitespace-nowrap"
+                       th:classappend="${status == 'COMPLETED'} ? 'border-orange-500 text-orange-600' : 'border-transparent text-stone-600 hover:text-orange-600'">
+                        Selesai
+                    </a>
+                </div>
             </div>
 
             <!-- Consultations List -->
             <div class="space-y-4 mb-8">
-                <div th:each="consultation : ${consultations}" class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm transition hover:shadow-md mb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div th:each="consultation : ${consultations}"
+                    class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm transition hover:shadow-md mb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div class="space-y-2 flex-1">
                         <div class="flex items-center gap-3 flex-wrap">
-                            <h3 class="font-extrabold text-stone-900 text-lg" th:text="${consultation.doctorName}">Nama Dokter</h3>
+                            <h3 class="font-extrabold text-stone-900 text-lg" th:text="${consultation.doctorName}">Nama
+                                Dokter</h3>
 
-                            <span th:if="${consultation.status.name() == 'PENDING'}" class="px-3 py-1 text-xs font-bold rounded-full bg-yellow-50 text-yellow-700 border border-yellow-200">Belum Bayar</span>
-                            <span th:if="${consultation.status.name() == 'WAITING'}" class="px-3 py-1 text-xs font-bold rounded-full bg-purple-50 text-purple-700 border border-purple-200">Menunggu Dokter</span>
-                            <span th:if="${consultation.status.name() == 'IN_PROGRESS'}" class="px-3 py-1 text-xs font-bold rounded-full bg-blue-50 text-blue-700 border border-blue-200">Sedang Berlangsung</span>
-                            <span th:if="${consultation.status.name() == 'COMPLETED'}" class="px-3 py-1 text-xs font-bold rounded-full bg-green-50 text-green-700 border border-green-200">Selesai</span>
-                            <span th:if="${consultation.status.name() == 'CANCELLED'}" class="px-3 py-1 text-xs font-bold rounded-full bg-red-50 text-red-700 border border-red-200">Kedaluwarsa</span>
+                            <span th:if="${consultation.status.name() == 'PENDING'}"
+                                class="px-3 py-1 text-xs font-bold rounded-full bg-yellow-50 text-yellow-700 border border-yellow-200">Belum
+                                Bayar</span>
+                            <span th:if="${consultation.status.name() == 'WAITING'}"
+                                class="px-3 py-1 text-xs font-bold rounded-full bg-purple-50 text-purple-700 border border-purple-200">Menunggu
+                                Dokter</span>
+                            <span th:if="${consultation.status.name() == 'IN_PROGRESS'}"
+                                class="px-3 py-1 text-xs font-bold rounded-full bg-blue-50 text-blue-700 border border-blue-200">Sedang
+                                Berlangsung</span>
+                            <span th:if="${consultation.status.name() == 'COMPLETED'}"
+                                class="px-3 py-1 text-xs font-bold rounded-full bg-green-50 text-green-700 border border-green-200">Selesai</span>
+                            <span th:if="${consultation.status.name() == 'CANCELLED'}"
+                                class="px-3 py-1 text-xs font-bold rounded-full bg-red-50 text-red-700 border border-red-200">Kedaluwarsa</span>
                         </div>
 
-                        <p class="text-sm text-stone-500 font-medium" th:text="${consultation.doctorSpecialization}">Spesialisasi</p>
-                        <p class="text-sm text-stone-700 bg-stone-50 p-3 rounded-xl border border-stone-100 italic" th:text="'Keluhan: ' + ${consultation.complaint}">Keluhan Pasien</p>
+                        <p class="text-sm text-stone-500 font-medium" th:text="${consultation.doctorSpecialization}">
+                            Spesialisasi</p>
+                        <p class="text-sm text-stone-700 bg-stone-50 p-3 rounded-xl border border-stone-100 italic"
+                            th:text="'Keluhan: ' + ${consultation.complaint}">Keluhan Pasien</p>
 
-                        <div th:if="${consultation.status.name() == 'PENDING'}" class="flex items-center gap-2 text-xs font-bold text-amber-600 bg-amber-50 px-3 py-2 rounded-lg border border-amber-100 w-fit custom-timer-container" th:data-created="${consultation.createdAt}">
-                            <svg class="w-4 h-4 animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div th:if="${consultation.status.name() == 'PENDING'}"
+                            class="flex items-center gap-2 text-xs font-bold text-amber-600 bg-amber-50 px-3 py-2 rounded-lg border border-amber-100 w-fit custom-timer-container"
+                            th:data-created="${consultation.createdAt}">
+                            <svg class="w-4 h-4 animate-spin-slow" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
                             <span>Sisa Waktu Pembayaran: <span class="countdown-timer">Mengecek...</span></span>
                         </div>
                     </div>
@@ -82,30 +104,46 @@
                     <div class="flex items-center gap-2 w-full md:w-auto justify-end">
 
                         <div th:if="${consultation.status.name() == 'PENDING'}" class="flex gap-2 w-full md:w-auto">
-                            <form th:action="@{/customer/consultations/{id}/check-status(id=${consultation.id})}" method="post">
+                            <form th:action="@{/customer/consultations/{id}/check-status(id=${consultation.id})}"
+                                method="post">
                                 <input type="hidden" name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                <button type="submit" class="bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold px-4 py-3 rounded-xl transition shadow-sm">Cek Status</button>
+                                <button type="submit"
+                                    class="bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold px-4 py-3 rounded-xl transition shadow-sm">Cek
+                                    Status</button>
                             </form>
-                            <a th:href="@{/customer/consultations/payment/{id}(id=${consultation.id})}" class="bg-[#D53E0F] hover:bg-[#5E0006] text-white text-xs font-bold px-4 py-3 rounded-xl transition text-center shadow-sm block">Bayar Sekarang</a>
+                            <a th:href="@{/customer/consultations/payment/{id}(id=${consultation.id})}"
+                                class="bg-[#D53E0F] hover:bg-[#5E0006] text-white text-xs font-bold px-4 py-3 rounded-xl transition text-center shadow-sm block">Bayar
+                                Sekarang</a>
                         </div>
 
-                        <div th:if="${consultation.status.name() == 'WAITING'}" class="text-xs text-stone-400 font-bold italic bg-stone-50 border border-stone-200 px-4 py-3 rounded-xl cursor-not-allowed">
+                        <div th:if="${consultation.status.name() == 'WAITING'}"
+                            class="text-xs text-stone-400 font-bold italic bg-stone-50 border border-stone-200 px-4 py-3 rounded-xl cursor-not-allowed">
                             Mohon tunggu di ruang antrean dokter...
                         </div>
 
                         <div th:if="${consultation.status.name() == 'IN_PROGRESS'}">
-                            <a th:href="@{/customer/consultations/{id}(id=${consultation.id})}" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-5 py-3 rounded-xl transition text-center shadow-sm block">Masuk Live Chat</a>
+                            <a th:href="@{/customer/consultations/{id}(id=${consultation.id})}"
+                                class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-5 py-3 rounded-xl transition text-center shadow-sm block">Masuk
+                                Live Chat</a>
                         </div>
 
                         <div th:if="${consultation.status.name() == 'COMPLETED'}">
-                            <a th:href="@{/customer/consultations/{id}(id=${consultation.id})}" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-5 py-3 rounded-xl transition text-center shadow-sm block">Cek Hasil & Resep</a>
+                            <a th:href="@{/customer/consultations/{id}(id=${consultation.id})}"
+                                class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-5 py-3 rounded-xl transition text-center shadow-sm block">Cek
+                                Hasil & Resep</a>
                         </div>
 
                         <div th:if="${consultation.status.name() == 'CANCELLED'}">
-                            <form th:action="@{/customer/consultations/{id}/delete(id=${consultation.id})}" method="post" onsubmit="return confirm('Hapus riwayat kadaluwarsa ini dari daftar?');">
+                            <form th:action="@{/customer/consultations/{id}/delete(id=${consultation.id})}"
+                                method="post" onsubmit="return confirm('Hapus riwayat kadaluwarsa ini dari daftar?');">
                                 <input type="hidden" name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                <button type="submit" class="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold px-4 py-3 rounded-xl transition border border-red-100 shadow-sm flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                <button type="submit"
+                                    class="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold px-4 py-3 rounded-xl transition border border-red-100 shadow-sm flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                        </path>
+                                    </svg>
                                     Hapus
                                 </button>
                             </form>
@@ -137,40 +175,40 @@
         <i class="fas fa-plus"></i>
     </a>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const containers = document.querySelectorAll('.custom-timer-container');
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const containers = document.querySelectorAll('.custom-timer-container');
 
-    containers.forEach(container => {
-        const createdTimeStr = container.getAttribute('data-created'); // Mengambil LocalDateTime format dari Spring
-        if (!createdTimeStr) return;
+            containers.forEach(container => {
+                const createdTimeStr = container.getAttribute('data-created'); // Mengambil LocalDateTime format dari Spring
+                if (!createdTimeStr) return;
 
-        const createdAt = new Date(createdTimeStr);
-        // Kita set batas waktu bayar adalah 30 Menit sejak dibuat
-        const expiryTime = new Date(createdAt.getTime() + (30 * 60 * 1000)); 
-        const timerDisplay = container.querySelector('.countdown-timer');
+                const createdAt = new Date(createdTimeStr);
+                // Kita set batas waktu bayar adalah 30 Menit sejak dibuat
+                const expiryTime = new Date(createdAt.getTime() + (30 * 60 * 1000));
+                const timerDisplay = container.querySelector('.countdown-timer');
 
-        function updateTimer() {
-            const now = new Date();
-            const diff = expiryTime - now;
+                function updateTimer() {
+                    const now = new Date();
+                    const diff = expiryTime - now;
 
-            if (diff <= 0) {
-                timerDisplay.innerText = "Kedaluwarsa";
-                timerDisplay.closest('.custom-timer-container').className = "flex items-center gap-2 text-xs font-bold text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-100 w-fit";
-                clearInterval(interval);
-                // Opsi tambahan: reload halaman untuk merubah status secara visual jika sudah habis
-            } else {
-                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-                timerDisplay.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            }
-        }
+                    if (diff <= 0) {
+                        timerDisplay.innerText = "Kedaluwarsa";
+                        timerDisplay.closest('.custom-timer-container').className = "flex items-center gap-2 text-xs font-bold text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-100 w-fit";
+                        clearInterval(interval);
+                        // Opsi tambahan: reload halaman untuk merubah status secara visual jika sudah habis
+                    } else {
+                        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                        timerDisplay.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                }
 
-        updateTimer();
-        const interval = setInterval(updateTimer, 1000);
-    });
-});
-</script>
+                updateTimer();
+                const interval = setInterval(updateTimer, 1000);
+            });
+        });
+    </script>
 </body>
 
 </html>

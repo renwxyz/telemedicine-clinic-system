@@ -35,7 +35,7 @@ public class PrescriptionService {
         Prescription prescription = getPrescriptionById(prescriptionId);
         
         // Cek apakah resep sudah pernah dipakai
-        if (prescription.isUsed()) {
+        if (prescription.getIsUsed()) {
             throw new IllegalStateException("Gagal! Resep ini sudah pernah ditebus sebelumnya.");
         }
         

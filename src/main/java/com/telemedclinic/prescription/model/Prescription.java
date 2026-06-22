@@ -35,7 +35,7 @@ public class Prescription {
     private List<PrescriptionItem> items;
 
     private LocalDateTime issuedDate;
-    private boolean isUsed;
+    private Boolean isUsed = false;
     private Boolean isStockAvailable = true;
 
     // Default constructor wajib untuk JPA (Spring Boot)
@@ -87,7 +87,8 @@ public class Prescription {
     public Doctor getDoctor() { return doctor; }
     public Customer getCustomer() { return customer; }
     public LocalDateTime getIssuedDate() { return issuedDate; }
-    public boolean isUsed() { return isUsed; }
+    public Boolean getIsUsed() { return isUsed; }
+    public void setIsUsed(Boolean isUsed) { this.isUsed = isUsed; }
     
     public Boolean getIsStockAvailable() { return isStockAvailable; }
     public void setIsStockAvailable(Boolean isStockAvailable) { this.isStockAvailable = isStockAvailable; }

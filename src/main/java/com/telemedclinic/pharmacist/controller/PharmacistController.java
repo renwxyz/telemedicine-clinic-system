@@ -30,11 +30,13 @@ public class PharmacistController {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final InventoryItemRepository inventoryItemRepository;
+    private final com.telemedclinic.prescription.repository.PrescriptionRepository prescriptionRepository;
 
-    public PharmacistController(UserRepository userRepository, OrderRepository orderRepository, InventoryItemRepository inventoryItemRepository) {
+    public PharmacistController(UserRepository userRepository, OrderRepository orderRepository, InventoryItemRepository inventoryItemRepository, com.telemedclinic.prescription.repository.PrescriptionRepository prescriptionRepository) {
         this.userRepository = userRepository;
         this.orderRepository = orderRepository;
         this.inventoryItemRepository = inventoryItemRepository;
+        this.prescriptionRepository = prescriptionRepository;
     }
 
     private Optional<Pharmacist> findAuthenticatedPharmacist(HttpSession session) {
@@ -85,15 +87,40 @@ public class PharmacistController {
         return "pharmacist/pharmacy-profile-v2";
     }
 
-    @GetMapping("/validasi")
-    public String validasi(HttpSession session, Model model) {
+    @GetMapping("/validasi-resep")
+    public String showPrescriptionValidation(HttpSession session, Model model) {
         Optional<Pharmacist> optionalPharmacist = findAuthenticatedPharmacist(session);
         if (optionalPharmacist.isEmpty()) {
             return "redirect:/auth/login";
         }
 
+        java.util.List<Order> orders = orderRepository.findByStatusAndPrescriptionIdIsNotNull(OrderStatus.PROCESSING);
+        java.util.Map<String, com.telemedclinic.prescription.model.Prescription> prescriptionMap = new java.util.HashMap<>();
+        for(Order o : orders) {
+            java.util.Optional<com.telemedclinic.prescription.model.Prescription> p = prescriptionRepository.findById(o.getPrescriptionId());
+            p.ifPresent(val -> prescriptionMap.put(o.getPrescriptionId(), val));
+        }
+
+        model.addAttribute("orders", orders);
+        model.addAttribute("prescriptionMap", prescriptionMap);
+
         model.addAttribute("pharmacist", optionalPharmacist.get());
         return "pharmacist/pharmacy-validasi-resep";
+    }
+
+    @PostMapping("/validasi-resep/{id}/approve")
+    public String approvePrescriptionOrder(@PathVariable String id, RedirectAttributes redirectAttributes) {
+        Optional<Order> optOrder = orderRepository.findByOrderId(id);
+
+        if (optOrder.isPresent()) {
+            Order order = optOrder.get();
+            // Ubah status jadi SHIPPED (atau status pengiriman di sistemmu)
+            order.setStatus(OrderStatus.SHIPPED);
+            orderRepository.save(order);
+            redirectAttributes.addFlashAttribute("success", "Resep berhasil divalidasi dan masuk ke antrean pengiriman!");
+        }
+
+        return "redirect:/pharmacist/validasi-resep";
     }
 
     @GetMapping("/tracking")

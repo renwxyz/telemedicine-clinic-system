@@ -18,683 +18,139 @@
     </style>
   </head>
   <body class="bg-[#FDF3F0]">
-    <!-- Navbar -->
     <div th:replace="~{fragments/customer-navbar :: customerNavbar('dashboard')}"></div>
 
-    <!-- Section: Main Content -->
-    <main class="min-h-screen pt-20">
-      <div
-        th:if="${successMessage}"
-        class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
-        role="alert"
-      >
-        <span class="block sm:inline" th:text="${successMessage}"></span>
-      </div>
-      <div
-        th:if="${errorMessage}"
-        class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
-        role="alert"
-      >
-        <span class="block sm:inline" th:text="${errorMessage}"></span>
-      </div>
-
-
-
-
-
-    <!-- Section: Main Content -->
-    <main class="min-h-screen">
-      <div class="max-w-5xl mx-auto px-6 py-8">
-        <!-- Section: Greeting -->
+    <main class="min-h-screen pt-20 pb-12">
+      <div class="max-w-5xl mx-auto px-6">
+        
         <div class="mb-8">
-          <!-- Thymeleaf: Display greeting with customer name -->
-          <h1
-            class="text-2xl font-bold text-stone-900"
-            th:text="'Halo, ' + ${customer.name != null ? customer.name : 'Budi Santoso'} + '! 👋'"
-          >
-            Halo, Budi Santoso! 👋
-          </h1>
-          <p class="text-stone-500 text-sm mt-1">
-            Semoga hari Anda menyenangkan. Ada yang bisa kami bantu?
-          </p>
+          <h1 class="text-3xl font-bold text-stone-900" th:text="'Halo, ' + ${customer.name != null ? customer.name : 'Pasien'} + '! 👋'">Halo, Pasien! 👋</h1>
+          <p class="text-stone-500 text-sm mt-1">Semoga hari Anda menyenangkan. Ada yang bisa kami bantu hari ini?</p>
         </div>
 
-        <div
-          th:if="${successMessage}"
-          class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-r-lg shadow-sm"
-        >
-          <div class="flex">
-            <div class="flex-shrink-0">
-              <svg
-                class="h-5 w-5 text-green-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </div>
-            <div class="ml-3">
-              <p
-                class="text-sm text-green-700 font-medium"
-                th:text="${successMessage}"
-              ></p>
-            </div>
-          </div>
-        </div>
-        <div
-          th:if="${errorMessage}"
-          class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg shadow-sm"
-        >
-          <div class="flex">
-            <div class="flex-shrink-0">
-              <svg
-                class="h-5 w-5 text-red-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </div>
-            <div class="ml-3">
-              <p
-                class="text-sm text-red-700 font-medium"
-                th:text="${errorMessage}"
-              ></p>
-            </div>
-          </div>
-        </div>
-
-        <div
-          class="bg-white rounded-2xl shadow-md p-6 border border-stone-200 mb-8 flex flex-col md:flex-row items-center justify-between gap-4"
-        >
-          <div>
-            <h3 class="font-bold text-stone-900 text-lg">
-              Punya Resep dari Dokter?
-            </h3>
-            <p class="text-stone-500 text-sm mt-1">
-              Masukkan ID resep Anda di sini untuk langsung menebus obat.
-            </p>
-          </div>
-
-          <form
-            th:action="@{/prescription/redeem}"
-            method="post"
-            class="flex w-full md:w-auto gap-2"
-          >
-            <!-- Dihapus karena CSRF didisable di konfigurasi backend -->
-            <input
-              type="text"
-              name="prescriptionId"
-              placeholder="Misal: RX-1234"
-              class="border border-stone-300 rounded-lg px-4 py-2 text-sm w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent"
-              required
-            />
-            <button
-              type="submit"
-              class="px-5 py-2 bg-[#D53E0F] text-white rounded-lg hover:bg-[#5E0006] transition font-semibold text-sm whitespace-nowrap"
-            >
-              Tebus
-            </button>
-          </form>
-        </div>
-
-        <!-- Section: Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          <div
-            class="bg-white rounded-2xl shadow-md p-5 border border-stone-200 flex flex-col gap-1"
-          >
-            <div class="flex items-start justify-between">
-              <div>
-                <p
-                  class="text-2xl font-extrabold text-stone-900"
-                  th:text="${stats != null ? stats['unusedPrescriptions'] : '0'}"
-                >
-                  0
-                </p>
-                <p class="text-xs text-stone-500">Resep Belum Ditebus</p>
-                <p class="text-xs text-yellow-600 font-medium mt-1">
-                  Segera tebus obat Anda
-                </p>
-              </div>
-              <div
-                class="bg-yellow-100 rounded-xl p-2 w-10 h-10 flex items-center justify-center"
-              >
-                <svg
-                  class="w-6 h-6 text-yellow-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  ></path>
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="bg-white rounded-2xl shadow-md p-5 border border-stone-200 flex flex-col gap-1"
-          >
-            <div class="flex items-start justify-between">
-              <div>
-                <p
-                  class="text-2xl font-extrabold text-stone-900"
-                  th:text="${stats != null ? stats['totalPrescriptions'] : '0'}"
-                >
-                  0
-                </p>
-                <p class="text-xs text-stone-500">Total Resep Dokter</p>
-                <a
-                  th:href="@{/customer/orders}"
-                  class="text-xs text-[#D53E0F] font-medium mt-1 inline-block"
-                  >Lihat semua riwayat →</a
-                >
-              </div>
-              <div
-                class="bg-purple-100 rounded-xl p-2 w-10 h-10 flex items-center justify-center"
-              >
-                <svg
-                  class="w-6 h-6 text-purple-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                  ></path>
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid md:grid-cols-1 gap-6">
-          <div class="bg-white rounded-2xl shadow-md border border-stone-200">
-            <div
-              class="px-6 py-4 border-b border-stone-100 flex justify-between items-center"
-            >
-              <h3 class="font-bold text-stone-900">Riwayat Resep Terbaru</h3>
-            </div>
-
-            <div class="px-6 divide-y divide-stone-100">
-              <div
-                th:if="${recentPrescriptions == null or recentPrescriptions.isEmpty()}"
-                class="py-6 text-center"
-              >
-                <p class="text-sm text-stone-500">Belum ada riwayat resep.</p>
-              </div>
-
-              <div
-                th:each="prescription : ${recentPrescriptions}"
-                class="py-4 flex items-center justify-between"
-              >
-                <div class="flex items-center gap-4">
-                  <div
-                    class="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center"
-                  >
-                    <svg
-                      class="w-5 h-5 text-stone-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      ></path>
-                    </svg>
-                  </div>
-                  <div>
-                    <p
-                      class="text-sm font-bold text-stone-900"
-                      th:text="${prescription.prescriptionId}"
-                    >
-                      RX-0000
-                    </p>
-                    <p
-                      class="text-xs text-stone-600 mt-0.5"
-                      th:text="'Oleh: ' + ${prescription.doctorName}"
-                    >
-                      Oleh: Dr. Nama Dokter
-                    </p>
-                    <p
-                      class="text-xs text-stone-400 mt-0.5"
-                      th:text="${prescription.issuedDate}"
-                    >
-                      2026-05-29
-                    </p>
-                  </div>
+        <div th:if="${activeConsultation != null}" class="bg-orange-100 border border-orange-300 rounded-2xl p-4 md:p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between shadow-sm gap-4">
+            <div class="flex items-center gap-4">
+                <div class="bg-[#D53E0F] text-white p-3 rounded-full flex-shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                 </div>
-
                 <div>
-                  <span
-                    th:if="${prescription.isUsed}"
-                    class="bg-stone-100 text-stone-600 text-xs font-semibold px-3 py-1 rounded-full"
-                  >
-                    Sudah Ditebus
-                  </span>
-                  <span
-                    th:unless="${prescription.isUsed}"
-                    class="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full"
-                  >
-                    Belum Ditebus
-                  </span>
+                    <h3 class="font-bold text-[#5E0006] text-base">Sesi Konsultasi Aktif!</h3>
+                    <p class="text-orange-900 text-sm mt-0.5">Dokter sedang menunggumu di ruang chat.</p>
                 </div>
-              </div>
             </div>
-          </div>
+            <a th:href="@{/customer/consultations}" class="bg-[#D53E0F] hover:bg-[#5E0006] text-white px-5 py-2.5 rounded-xl text-sm font-bold transition w-full md:w-auto text-center whitespace-nowrap">Masuk Ruangan</a>
         </div>
 
-        <!-- Section: CTA Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          <!-- CTA 1: Consultation -->
-          <a
-            th:href="@{/customer/consultations}"
-            class="bg-[#D53E0F] rounded-2xl p-6 text-white hover:bg-[#5E0006] transition-colors block"
-          >
-            <svg
-              class="w-8 h-8 text-white/80 mb-3"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-              ></path>
-            </svg>
-            <h3 class="font-bold text-xl">Mulai Konsultasi</h3>
-            <p class="text-white/70 text-sm mt-1">
-              Chat langsung dengan dokter berpengalaman
-            </p>
-            <span class="text-white font-semibold text-sm mt-4 inline-block"
-              >Konsultasi Sekarang →</span
-            >
+          <a th:href="@{/customer/consultations}" class="bg-[#D53E0F] rounded-2xl p-6 text-white hover:bg-[#5E0006] transition-colors shadow-md group">
+            <svg class="w-8 h-8 text-white/80 mb-3 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+            <h3 class="font-bold text-xl">Mulai Konsultasi Baru</h3>
+            <p class="text-white/70 text-sm mt-1">Chat langsung dengan dokter berpengalaman kami.</p>
           </a>
 
-          <!-- CTA 2: Medicine Shop -->
-          <a
-            th:href="@{/customer/medicines}"
-            class="bg-white rounded-2xl p-6 border-2 border-[#D53E0F] hover:bg-[#FDF3F0] transition-colors block"
-          >
-            <svg
-              class="w-8 h-8 text-[#D53E0F] mb-3"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-              ></path>
-            </svg>
-            <h3 class="font-bold text-xl text-stone-900">Beli Obat</h3>
-            <p class="text-stone-500 text-sm mt-1">
-              Pesan obat dan dikirim langsung ke rumah Anda
-            </p>
-            <span class="text-[#D53E0F] font-semibold text-sm mt-4 inline-block"
-              >Lihat Katalog →</span
-            >
+          <a th:href="@{/customer/medicines}" class="bg-white rounded-2xl p-6 border-2 border-[#D53E0F] hover:bg-[#FDF3F0] transition-colors shadow-md group">
+            <svg class="w-8 h-8 text-[#D53E0F] mb-3 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            <h3 class="font-bold text-xl text-stone-900">Beli Obat & Apotek</h3>
+            <p class="text-stone-500 text-sm mt-1">Pesan obat bebas dan tebus resep dengan mudah.</p>
           </a>
         </div>
 
-        <!-- Section: Activity Two Columns -->
+        <div class="bg-teal-600 rounded-2xl shadow-md p-6 mb-8 flex items-center gap-5 relative overflow-hidden">
+            <div class="absolute right-0 top-0 opacity-10">
+                <svg class="w-32 h-32 transform translate-x-8 -translate-y-8" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+                </svg>
+            </div>
+            
+            <div class="bg-white/20 p-4 rounded-full flex-shrink-0 backdrop-blur-sm z-10">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+            </div>
+            <div class="z-10">
+                <h3 class="font-bold text-xl mb-1 text-white">Tip Kesehatan Hari Ini</h3>
+                <p class="text-teal-50 text-sm md:text-base leading-relaxed">
+                    Jaga hidrasi tubuh Anda! Minum minimal 8 gelas air putih sehari untuk membantu proses penyembuhan dan menjaga konsentrasi tetap maksimal.
+                </p>
+            </div>
+        </div>
+
         <div class="grid md:grid-cols-2 gap-6">
-          <!-- Column Left: Recent Consultations -->
-          <div class="bg-white rounded-2xl shadow-md border border-stone-200">
-            <!-- Header -->
-            <div
-              class="px-6 py-4 border-b border-stone-100 flex justify-between items-center"
-            >
-              <h3 class="font-bold text-stone-900">Konsultasi Terbaru</h3>
-              <a
-                th:href="@{/customer/consultations}"
-                class="text-xs text-[#D53E0F] font-medium"
-                >Lihat Semua →</a
-              >
+          
+          <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden flex flex-col">
+            <div class="px-6 py-4 border-b border-stone-100 flex justify-between items-center bg-stone-50">
+              <h3 class="font-bold text-stone-900">Konsultasi Terakhir</h3>
+              <a th:href="@{/customer/consultations}" class="text-xs text-[#D53E0F] font-bold hover:underline">Semua →</a>
             </div>
-
-            <!-- List Items -->
-            <div class="px-6 divide-y divide-stone-100">
-              <!-- Thymeleaf: Loop recent consultations -->
-              <div
-                th:each="consultation : ${recentConsultations}"
-                class="py-4 flex items-center justify-between"
-              >
+            <div class="px-6 divide-y divide-stone-100 flex-1">
+              <div th:if="${recentConsultations == null or recentConsultations.isEmpty()}" class="py-8 text-center">
+                <p class="text-sm text-stone-400">Belum ada riwayat konsultasi.</p>
+              </div>
+              <div th:each="consultation : ${recentConsultations}" class="py-4 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <!-- Doctor Avatar -->
-                  <div
-                    class="w-9 h-9 rounded-full bg-[#FAD5C8] flex items-center justify-center"
-                  >
-                    <!-- Thymeleaf: Display doctor initial -->
-                    <span
-                      class="text-xs font-bold text-[#D53E0F]"
-                      th:text="${!#strings.isEmpty(consultation.doctorName) ? #strings.substring(consultation.doctorName,0,1) : 'D'}"
-                      >A</span
-                    >
+                  <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                    <span class="text-sm font-bold text-[#D53E0F]" th:text="${!#strings.isEmpty(consultation.doctorName) ? #strings.substring(consultation.doctorName,0,1) : 'D'}">D</span>
                   </div>
                   <div>
-                    <!-- Thymeleaf: Display doctor name -->
-                    <p
-                      class="text-sm font-semibold text-stone-900"
-                      th:text="${consultation.doctorName}"
-                    >
-                      Dr. Ahmad Fauzi
-                    </p>
-                    <!-- Thymeleaf: Display specialization -->
-                    <p
-                      class="text-xs text-stone-500"
-                      th:text="${consultation.doctorSpecialization}"
-                    >
-                      Umum
-                    </p>
+                    <p class="text-sm font-bold text-stone-900" th:text="${consultation.doctorName}">Dr. Nama</p>
+                    <p class="text-xs text-stone-500" th:text="${#temporals.format(consultation.createdAt, 'dd MMM yyyy')}">Tanggal</p>
                   </div>
                 </div>
-                <!-- Status Badge -->
-                <div th:switch="${consultation.status}">
-                  <!-- PENDING -->
-                  <span
-                    th:case="'PENDING'"
-                    class="bg-yellow-100 text-yellow-700 text-xs font-semibold px-2.5 py-1 rounded-full"
-                    >Menunggu</span
-                  >
-                  <!-- IN_PROGRESS -->
-                  <span
-                    th:case="'IN_PROGRESS'"
-                    class="bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full"
-                    >Berlangsung</span
-                  >
-                  <!-- COMPLETED -->
-                  <span
-                    th:case="'COMPLETED'"
-                    class="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full"
-                    >Selesai</span
-                  >
-                  <!-- Default fallback -->
-                  <span
-                    th:case="*"
-                    class="bg-stone-100 text-stone-700 text-xs font-semibold px-2.5 py-1 rounded-full"
-                    th:text="${consultation.status}"
-                    >Status</span
-                  >
-                </div>
+                <span th:if="${consultation.status.name() == 'WAITING'}" class="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase">Menunggu</span>
+                <span th:if="${consultation.status.name() == 'IN_PROGRESS'}" class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase">Aktif</span>
+                <span th:if="${consultation.status.name() == 'COMPLETED'}" class="bg-stone-100 text-stone-600 text-[10px] font-bold px-2 py-1 rounded-md uppercase">Selesai</span>
               </div>
-
-              <!-- Dummy Consultations (if recentConsultations is empty) -->
-              <div
-                th:if="${recentConsultations == null or recentConsultations.isEmpty()}"
-                class="py-4 flex items-center justify-between"
-              >
-                <div class="flex items-center gap-3">
-                  <div
-                    class="w-9 h-9 rounded-full bg-[#FAD5C8] flex items-center justify-center"
-                  >
-                    <span class="text-xs font-bold text-[#D53E0F]">A</span>
-                  </div>
-                  <div>
-                    <p class="text-sm font-semibold text-stone-900">
-                      Dr. Ahmad Fauzi
-                    </p>
-                    <p class="text-xs text-stone-500">Umum</p>
-                  </div>
-                </div>
-                <span
-                  class="bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full"
-                  >Berlangsung</span
-                >
-              </div>
-              <div
-                th:if="${recentConsultations == null or recentConsultations.isEmpty()}"
-                class="py-4 flex items-center justify-between"
-              >
-                <div class="flex items-center gap-3">
-                  <div
-                    class="w-9 h-9 rounded-full bg-[#FAD5C8] flex items-center justify-center"
-                  >
-                    <span class="text-xs font-bold text-[#D53E0F]">R</span>
-                  </div>
-                  <div>
-                    <p class="text-sm font-semibold text-stone-900">
-                      Dr. Rina Marlina
-                    </p>
-                    <p class="text-xs text-stone-500">Dermatologi</p>
-                  </div>
-                </div>
-                <span
-                  class="bg-yellow-100 text-yellow-700 text-xs font-semibold px-2.5 py-1 rounded-full"
-                  >Menunggu</span
-                >
-              </div>
-              <div
-                th:if="${recentConsultations == null or recentConsultations.isEmpty()}"
-                class="py-4 flex items-center justify-between"
-              >
-                <div class="flex items-center gap-3">
-                  <div
-                    class="w-9 h-9 rounded-full bg-[#FAD5C8] flex items-center justify-center"
-                  >
-                    <span class="text-xs font-bold text-[#D53E0F]">H</span>
-                  </div>
-                  <div>
-                    <p class="text-sm font-semibold text-stone-900">
-                      Dr. Hadi Susanto
-                    </p>
-                    <p class="text-xs text-stone-500">Gizi</p>
-                  </div>
-                </div>
-                <span
-                  class="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full"
-                  >Selesai</span
-                >
-              </div>
-            </div>
-
-            <!-- Footer Button -->
-            <div class="px-6 pb-4">
-              <a
-                th:href="@{/customer/consultations/new}"
-                class="w-full block text-center bg-[#D53E0F] hover:bg-[#5E0006] text-white font-semibold text-sm py-2.5 rounded-xl transition-colors"
-                >Konsultasi Baru</a
-              >
             </div>
           </div>
 
-          <!-- Column Right: Recent Orders -->
-          <div class="bg-white rounded-2xl shadow-md border border-stone-200">
-            <!-- Header -->
-            <div
-              class="px-6 py-4 border-b border-stone-100 flex justify-between items-center"
-            >
-              <h3 class="font-bold text-stone-900">Order Terbaru</h3>
-              <a
-                th:href="@{/customer/orders}"
-                class="text-xs text-[#D53E0F] font-medium"
-                >Lihat Semua →</a
-              >
+          <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden flex flex-col">
+            <div class="px-6 py-4 border-b border-stone-100 flex justify-between items-center bg-stone-50">
+              <h3 class="font-bold text-stone-900">Pesanan Terakhir</h3>
+              <a th:href="@{/customer/orders}" class="text-xs text-[#D53E0F] font-bold hover:underline">Semua →</a>
             </div>
-
-            <!-- List Items -->
-            <div class="px-6 divide-y divide-stone-100">
-              <!-- Thymeleaf: Loop recent orders -->
-              <div
-                th:each="order : ${recentOrders}"
-                class="py-4 flex items-center justify-between"
-              >
-                <div>
-                  <!-- Thymeleaf: Display order ID -->
-                  <p
-                    class="text-sm font-semibold text-stone-900"
-                    th:text="${order.id}"
-                  >
-                    ORD-0021
-                  </p>
-                  <!-- Thymeleaf: Display item summary -->
-                  <p
-                    class="text-xs text-stone-500 mt-0.5"
-                    th:text="${order.items.size() > 0 ? (order.items[0].medicineName + (order.items.size() > 1 ? ' + ' + (order.items.size() - 1) + ' lainnya' : '')) : 'Tidak ada item'}"
-                  >
-                    Paracetamol 500mg + 2 lainnya
-                  </p>
-                  <!-- Thymeleaf: Display total price -->
-                  <p
-                    class="text-xs font-medium text-stone-700 mt-0.5"
-                    th:text="${order.totalAmount}"
-                  >
-                    Rp 85.000
-                  </p>
-                </div>
-                <!-- Status Badge -->
-                <div th:switch="${order.status}">
-                  <!-- PENDING -->
-                  <span
-                    th:case="'PENDING'"
-                    class="bg-yellow-100 text-yellow-700 text-xs font-semibold px-2.5 py-1 rounded-full"
-                    >Menunggu</span
-                  >
-                  <!-- IN_PROGRESS -->
-                  <span
-                    th:case="'IN_PROGRESS'"
-                    class="bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full"
-                    >Diproses</span
-                  >
-                  <!-- SHIPPED -->
-                  <span
-                    th:case="'SHIPPED'"
-                    class="bg-purple-100 text-purple-700 text-xs font-semibold px-2.5 py-1 rounded-full"
-                    >Dikirim</span
-                  >
-                  <!-- COMPLETED -->
-                  <span
-                    th:case="'COMPLETED'"
-                    class="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full"
-                    >Selesai</span
-                  >
-                  <!-- Default fallback -->
-                  <span
-                    th:case="*"
-                    class="bg-stone-100 text-stone-700 text-xs font-semibold px-2.5 py-1 rounded-full"
-                    th:text="${order.status}"
-                    >Status</span
-                  >
-                </div>
+            <div class="px-6 divide-y divide-stone-100 flex-1">
+              <div th:if="${recentOrders == null or recentOrders.isEmpty()}" class="py-8 text-center">
+                <p class="text-sm text-stone-400">Belum ada pesanan obat.</p>
               </div>
-
-              <!-- Dummy Orders (if recentOrders is empty) -->
-              <div
-                th:if="${recentOrders == null or recentOrders.isEmpty()}"
-                class="py-4 flex items-center justify-between"
-              >
+              <div th:each="order : ${recentOrders}" class="py-4 flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-semibold text-stone-900">ORD-0021</p>
-                  <p class="text-xs text-stone-500 mt-0.5">
-                    Paracetamol 500mg + 2 lainnya
-                  </p>
-                  <p class="text-xs font-medium text-stone-700 mt-0.5">
-                    Rp 85.000
-                  </p>
+                  <p class="text-sm font-bold text-stone-900" th:text="${order.orderId}">ORD-XXX</p>
+                  <p class="text-xs text-stone-500 mt-0.5 font-medium">Rp <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}">0</span></p>
                 </div>
-                <span
-                  class="bg-purple-100 text-purple-700 text-xs font-semibold px-2.5 py-1 rounded-full"
-                  >Dikirim</span
-                >
+                <span th:if="${order.status.name() == 'PENDING'}" class="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase">Bayar</span>
+                <span th:if="${order.status.name() == 'PROCESSING' or order.status.name() == 'SHIPPED'}" class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase">Proses</span>
+                <span th:if="${order.status.name() == 'DELIVERED'}" class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase">Terkirim</span>
               </div>
-              <div
-                th:if="${recentOrders == null or recentOrders.isEmpty()}"
-                class="py-4 flex items-center justify-between"
-              >
-                <div>
-                  <p class="text-sm font-semibold text-stone-900">ORD-0018</p>
-                  <p class="text-xs text-stone-500 mt-0.5">Vitamin C 1000mg</p>
-                  <p class="text-xs font-medium text-stone-700 mt-0.5">
-                    Rp 25.000
-                  </p>
-                </div>
-                <span
-                  class="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full"
-                  >Selesai</span
-                >
-              </div>
-              <div
-                th:if="${recentOrders == null or recentOrders.isEmpty()}"
-                class="py-4 flex items-center justify-between"
-              >
-                <div>
-                  <p class="text-sm font-semibold text-stone-900">ORD-0015</p>
-                  <p class="text-xs text-stone-500 mt-0.5">
-                    Amoxicillin 250mg + 1 lainnya
-                  </p>
-                  <p class="text-xs font-medium text-stone-700 mt-0.5">
-                    Rp 42.000
-                  </p>
-                </div>
-                <span
-                  class="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full"
-                  >Selesai</span
-                >
-              </div>
-            </div>
-
-            <!-- Footer Button -->
-            <div class="px-6 pb-4">
-              <a
-                th:href="@{/customer/medicines}"
-                class="w-full block text-center border border-[#D53E0F] text-[#D53E0F] hover:bg-[#FDF3F0] font-semibold text-sm py-2.5 rounded-xl transition-colors"
-                >Beli Obat</a
-              >
             </div>
           </div>
+
         </div>
       </div>
     </main>
 
-    <!-- Script: Vanilla JS for Interactivity -->
     <script>
-      // Profile dropdown toggle
+      // Profile dropdown toggle (dipertahankan dari kode asli)
       const profileBtn = document.getElementById("profileBtn");
       const dropdownMenu = document.getElementById("dropdownMenu");
-
-      profileBtn.addEventListener("click", function () {
-        dropdownMenu.classList.toggle("hidden");
-      });
-
-      // Close dropdown when clicking outside
-      document.addEventListener("click", function (event) {
-        if (
-          !profileBtn.contains(event.target) &&
-          !dropdownMenu.contains(event.target)
-        ) {
-          dropdownMenu.classList.add("hidden");
-        }
-      });
+      if(profileBtn && dropdownMenu) {
+          profileBtn.addEventListener("click", function () {
+            dropdownMenu.classList.toggle("hidden");
+          });
+          document.addEventListener("click", function (event) {
+            if (!profileBtn.contains(event.target) && !dropdownMenu.contains(event.target)) {
+              dropdownMenu.classList.add("hidden");
+            }
+          });
+      }
 
       // Mobile menu toggle
       const mobileMenuBtn = document.getElementById("mobileMenuBtn");
       const mobileMenu = document.getElementById("mobileMenu");
-
-      mobileMenuBtn.addEventListener("click", function () {
-        mobileMenu.classList.toggle("hidden");
-      });
+      if(mobileMenuBtn && mobileMenu) {
+          mobileMenuBtn.addEventListener("click", function () {
+            mobileMenu.classList.toggle("hidden");
+          });
+      }
     </script>
   </body>
 </html>

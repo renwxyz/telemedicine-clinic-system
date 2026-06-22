@@ -361,6 +361,128 @@ public class CustomerController {
         return "customer/checkout";
     }
 
+    @GetMapping("/prescription/{id}/checkout")
+    public String showPrescriptionCheckout(HttpSession session, Model model, @PathVariable String id, RedirectAttributes redirectAttributes) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Optional<com.telemedclinic.prescription.model.Prescription> optPrescription = prescriptionRepository.findById(id);
+        if (optPrescription.isEmpty() || !optPrescription.get().getConsultation().getCustomer().getUserId().equals(optionalCustomer.get().getUserId())) {
+            return "redirect:/customer/consultations";
+        }
+
+        com.telemedclinic.prescription.model.Prescription prescription = optPrescription.get();
+
+        // Pastikan resep belum ditebus sebelumnya
+        if (prescription.getIsUsed() != null && prescription.getIsUsed()) {
+            redirectAttributes.addFlashAttribute("error", "Resep ini sudah pernah ditebus.");
+            return "redirect:/customer/consultations";
+        }
+
+        // Konversi Item Resep menjadi format yang bisa dibaca oleh UI checkout.html (menggunakan class CartItem sebagai DTO sementara untuk tampilan)
+        List<CartItem> pseudoCartItems = new java.util.ArrayList<>();
+        double subtotal = 0;
+
+        for (com.telemedclinic.prescription.model.PrescriptionItem pItem : prescription.getItems()) {
+            // Cari harga obat dari Inventory
+            List<InventoryItem> inventoryItems = inventoryItemRepository.findByMedicine_NameContainingIgnoreCase(pItem.getMedicine().getName());
+            if (!inventoryItems.isEmpty()) {
+                InventoryItem invItem = inventoryItems.get(0); // Ambil stok pertama yang cocok
+
+                CartItem pseudoItem = new CartItem(optionalCustomer.get(), invItem, pItem.getQuantity());
+                pseudoCartItems.add(pseudoItem);
+
+                subtotal += (invItem.getPrice() * pItem.getQuantity());
+            }
+        }
+
+        model.addAttribute("checkoutForm", new CheckoutForm());
+        model.addAttribute("orderItems", pseudoCartItems);
+        model.addAttribute("subtotal", subtotal);
+        model.addAttribute("shippingFee", 10000);
+        model.addAttribute("adminFee", 2500);
+        model.addAttribute("totalAmount", subtotal + 10000 + 2500);
+        model.addAttribute("isPrescriptionCheckout", true);
+        model.addAttribute("prescriptionId", prescription.getPrescriptionId());
+        setActiveSection(model, "consultations");
+
+        return "customer/checkout";
+    }
+
+    @PostMapping("/prescription/{id}/checkout")
+    @Transactional
+    public String placePrescriptionOrder(HttpSession session, @PathVariable String id, @ModelAttribute CheckoutForm checkoutForm) {
+        Optional<Customer> optionalCustomer = findAuthenticatedCustomer(session);
+        if (optionalCustomer.isEmpty()) return "redirect:/auth/login";
+        
+        Customer customer = optionalCustomer.get();
+        Optional<com.telemedclinic.prescription.model.Prescription> optPrescription = prescriptionRepository.findById(id);
+        if (optPrescription.isEmpty() || !optPrescription.get().getConsultation().getCustomer().getUserId().equals(customer.getUserId())) {
+            return "redirect:/customer/consultations";
+        }
+        
+        com.telemedclinic.prescription.model.Prescription prescription = optPrescription.get();
+        if (prescription.getIsUsed() != null && prescription.getIsUsed()) {
+            return "redirect:/customer/consultations";
+        }
+        
+        Order order = new Order(customer);
+        order.setRecipientName(checkoutForm.getRecipientName());
+        order.setRecipientPhone(checkoutForm.getRecipientPhone());
+        order.setDeliveryAddress(checkoutForm.getDeliveryAddress());
+        order.setDeliveryMethod(checkoutForm.getDeliveryMethod() != null ? checkoutForm.getDeliveryMethod() : DeliveryMethod.REGULAR);
+        order.setPaymentMethod(checkoutForm.getPaymentMethod() != null ? checkoutForm.getPaymentMethod() : PaymentMethod.COD);
+        order.setPaymentStatus(PaymentStatus.PENDING);
+        order.setPrescriptionId(prescription.getPrescriptionId());
+        
+        Long pharmacyId = null;
+        double subtotal = 0;
+        for (com.telemedclinic.prescription.model.PrescriptionItem pItem : prescription.getItems()) {
+            List<InventoryItem> inventoryItems = inventoryItemRepository.findByMedicine_NameContainingIgnoreCase(pItem.getMedicine().getName());
+            if (!inventoryItems.isEmpty()) {
+                InventoryItem invItem = inventoryItems.get(0);
+                if (pharmacyId == null && invItem.getPharmacy() != null) {
+                    pharmacyId = invItem.getPharmacy().getPharmacyId();
+                }
+                order.addItem(new OrderItem(
+                    invItem.getMedicine().getName(),
+                    invItem.getPharmacy().getName(),
+                    pItem.getQuantity(),
+                    invItem.getPrice(),
+                    invItem.getMedicine().isRequiresPrescription()
+                ));
+                subtotal += (invItem.getPrice() * pItem.getQuantity());
+            }
+        }
+        
+        order.setPharmacyId(pharmacyId);
+        order.setShippingFee(10000);
+        order.setAdminFee(2500);
+        order.setTotalAmount(subtotal + order.getShippingFee() + order.getAdminFee());
+        
+        orderRepository.save(order);
+        
+        // Tandai resep sudah digunakan
+        prescription.setIsUsed(true);
+        prescriptionRepository.save(prescription);
+        
+        if (order.getPaymentMethod() != PaymentMethod.COD) {
+            String snapToken = midtransService.createTransaction(order);
+            if (snapToken != null) {
+                order.setSnapToken(snapToken);
+                orderRepository.save(order);
+                return "redirect:/customer/payment/" + order.getOrderId();
+            }
+        } else {
+            order.setStatus(OrderStatus.PROCESSING);
+            orderRepository.save(order);
+        }
+        
+        return "redirect:/customer/orders";
+    }
+
     @PostMapping("/checkout")
     @Transactional
     public String placeOrder(HttpSession session, @ModelAttribute CheckoutForm checkoutForm) {
@@ -514,20 +636,32 @@ public class CustomerController {
         }
 
         Customer customer = optionalCustomer.get();
-        List<Consultation> consultations;
-        if (status != null && !status.isBlank()) {
-            try {
-                consultations = consultationRepository.findByCustomerUserIdAndStatusOrderByCreatedAtDesc(
-                        customer.getUserId(), ConsultationStatus.valueOf(status));
-            } catch (IllegalArgumentException ex) {
-                consultations = consultationRepository.findByCustomerUserIdOrderByCreatedAtDesc(customer.getUserId());
-            }
+        // Tarik semua konsultasi milik user ini dari repository
+        List<Consultation> allConsultations = consultationRepository.findByCustomerUserIdOrderByCreatedAtDesc(customer.getUserId());
+        
+        // Hitung masing-masing status untuk Badge
+        long countWaiting = allConsultations.stream().filter(c -> c.getStatus().name().equals("WAITING")).count();
+        long countInProgress = allConsultations.stream().filter(c -> c.getStatus().name().equals("IN_PROGRESS")).count();
+        long countCompleted = allConsultations.stream().filter(c -> c.getStatus().name().equals("COMPLETED")).count();
+        long countAll = allConsultations.size();
+
+        // Lakukan filtering data berdasarkan parameter status
+        List<Consultation> filteredConsultations;
+        if (status == null || status.isBlank()) {
+            filteredConsultations = allConsultations;
         } else {
-            consultations = consultationRepository.findByCustomerUserIdOrderByCreatedAtDesc(customer.getUserId());
+            filteredConsultations = allConsultations.stream()
+                .filter(c -> c.getStatus().name().equals(status))
+                .collect(java.util.stream.Collectors.toList());
         }
 
-        model.addAttribute("consultations", consultations);
+        model.addAttribute("consultations", filteredConsultations);
         model.addAttribute("status", status);
+        model.addAttribute("countAll", countAll);
+        model.addAttribute("countWaiting", countWaiting);
+        model.addAttribute("countInProgress", countInProgress);
+        model.addAttribute("countCompleted", countCompleted);
+        
         setActiveSection(model, "consultations");
         return "customer/consultations";
     }

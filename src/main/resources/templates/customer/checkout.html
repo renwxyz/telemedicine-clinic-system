@@ -27,9 +27,8 @@
         <p class="text-stone-600">Selesaikan pembelian Anda</p>
       </div>
 
-      <div th:if="${error}" th:replace="~{fragments/alerts :: error(${error})}"></div>
 
-      <form th:action="@{/customer/checkout}" method="post" th:object="${checkoutForm}">
+      <form th:action="${isPrescriptionCheckout != null && isPrescriptionCheckout} ? @{/customer/prescription/{id}/checkout(id=${prescriptionId})} : @{/customer/checkout}" method="post" th:object="${checkoutForm}">
         <input type="hidden" name="${_csrf.parameterName}" th:value="${_csrf.token}" />
         <input type="hidden" name="action" value="pay" />
 

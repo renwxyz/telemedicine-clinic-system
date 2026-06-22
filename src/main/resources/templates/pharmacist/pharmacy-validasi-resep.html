@@ -54,150 +54,46 @@
             </div>
 
             <!-- Prescriptions List -->
+            <!-- Prescriptions List -->
             <div class="space-y-4">
-                <!-- Prescription Card 1 -->
-                <div class="bg-white rounded-2xl shadow-md border border-stone-200 p-6 hover:shadow-lg transition">
+                <div th:each="order : ${orders}" th:with="prescription=${prescriptionMap.get(order.prescriptionId)}" class="bg-white rounded-2xl shadow-md border border-stone-200 p-6 hover:shadow-lg transition">
                     <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-start mb-4">
                         <div>
                             <p class="text-xs text-gray-600 font-medium">NOMOR RESEP</p>
-                            <p class="text-lg font-bold text-gray-900">RX-20241128-001</p>
+                            <p class="text-lg font-bold text-gray-900" th:text="${order.prescriptionId}"></p>
                         </div>
                         <div>
                             <p class="text-xs text-gray-600 font-medium">DOKTER</p>
-                            <p class="text-sm text-gray-900 font-semibold">Dr. Ahmad Fauzi</p>
+                            <p class="text-sm text-gray-900 font-semibold" th:text="${prescription != null ? prescription.consultation.doctor.name : 'Dokter KlinikKu'}"></p>
                         </div>
                         <div>
                             <p class="text-xs text-gray-600 font-medium">PASIEN</p>
-                            <p class="text-sm text-gray-900 font-semibold">Siti Rahayu</p>
+                            <p class="text-sm text-gray-900 font-semibold" th:text="${order.recipientName}"></p>
                         </div>
                         <div>
                             <p class="text-xs text-gray-600 font-medium">TANGGAL</p>
-                            <p class="text-sm text-gray-600">28 Nov 2024, 10:30</p>
+                            <p class="text-sm text-gray-600" th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy, HH:mm')}"></p>
                         </div>
                         <div>
                             <p class="text-xs text-gray-600 font-medium">STATUS</p>
-                            <p class="inline-block text-xs bg-orange-100 text-orange-700 px-3 py-1 rounded-full font-medium">Menunggu</p>
+                            <p class="inline-block text-xs bg-orange-100 text-orange-700 px-3 py-1 rounded-full font-medium">Menunggu Validasi</p>
                         </div>
                     </div>
 
                     <div class="border-t border-stone-200 pt-4 mb-4">
                         <h4 class="font-semibold text-gray-900 mb-3">Daftar Obat:</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div class="bg-gray-50 p-3 rounded-lg">
-                                <p class="font-medium text-gray-900">Paracetamol 500mg</p>
-                                <p class="text-xs text-gray-600 mt-1">Dosis: 1 tablet, 3x sehari</p>
-                                <span class="inline-block text-xs bg-green-100 text-green-700 px-2 py-1 rounded mt-2">Obat Bebas</span>
-                            </div>
-                            <div class="bg-gray-50 p-3 rounded-lg">
-                                <p class="font-medium text-gray-900">Omeprazole 20mg</p>
-                                <p class="text-xs text-gray-600 mt-1">Dosis: 1 tablet, 2x sehari</p>
-                                <span class="inline-block text-xs bg-red-100 text-red-700 px-2 py-1 rounded mt-2">Obat Keras</span>
+                            <div th:each="item : ${order.items}" class="bg-gray-50 p-3 rounded-lg">
+                                <p class="font-medium text-gray-900" th:text="${item.medicineName} + ' (' + ${item.quantity} + ' pcs)'"></p>
                             </div>
                         </div>
                     </div>
 
                     <div class="flex gap-3">
-                        <button class="flex-1 bg-[#D53E0F] text-white font-semibold py-3 rounded-lg hover:bg-[#5E0006] transition" onclick="openValidationModal('RX-20241128-001', 'Siti Rahayu')">
+                        <button class="flex-1 bg-[#D53E0F] text-white font-semibold py-3 rounded-lg hover:bg-[#5E0006] transition" 
+                                th:onclick="openValidationModal([[${order.orderId}]], [[${order.prescriptionId}]], [[${order.recipientName}]])">
                             Validasi & Raci Obat
                         </button>
-                        <button class="flex-1 border-2 border-red-500 text-red-600 font-semibold py-3 rounded-lg hover:bg-red-50 transition">
-                            Tolak Resep
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Prescription Card 2 -->
-                <div class="bg-white rounded-2xl shadow-md border border-stone-200 p-6 hover:shadow-lg transition">
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-start mb-4">
-                        <div>
-                            <p class="text-xs text-gray-600 font-medium">NOMOR RESEP</p>
-                            <p class="text-lg font-bold text-gray-900">RX-20241128-002</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-600 font-medium">DOKTER</p>
-                            <p class="text-sm text-gray-900 font-semibold">Dr. Eka Putri</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-600 font-medium">PASIEN</p>
-                            <p class="text-sm text-gray-900 font-semibold">Budi Santoso</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-600 font-medium">TANGGAL</p>
-                            <p class="text-sm text-gray-600">28 Nov 2024, 11:45</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-600 font-medium">STATUS</p>
-                            <p class="inline-block text-xs bg-orange-100 text-orange-700 px-3 py-1 rounded-full font-medium">Menunggu</p>
-                        </div>
-                    </div>
-
-                    <div class="border-t border-stone-200 pt-4 mb-4">
-                        <h4 class="font-semibold text-gray-900 mb-3">Daftar Obat:</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <div class="bg-gray-50 p-3 rounded-lg">
-                                <p class="font-medium text-gray-900">Amoksisilin 500mg</p>
-                                <p class="text-xs text-gray-600 mt-1">Dosis: 1 kapsul, 3x sehari</p>
-                                <span class="inline-block text-xs bg-red-100 text-red-700 px-2 py-1 rounded mt-2">Obat Keras</span>
-                            </div>
-                            <div class="bg-gray-50 p-3 rounded-lg">
-                                <p class="font-medium text-gray-900">Deksametason 0.5mg</p>
-                                <p class="text-xs text-gray-600 mt-1">Dosis: 1 tablet, 2x sehari</p>
-                                <span class="inline-block text-xs bg-red-100 text-red-700 px-2 py-1 rounded mt-2">Obat Keras</span>
-                            </div>
-                            <div class="bg-gray-50 p-3 rounded-lg">
-                                <p class="font-medium text-gray-900">Ibuprofen 400mg</p>
-                                <p class="text-xs text-gray-600 mt-1">Dosis: 1 tablet, 3x sehari</p>
-                                <span class="inline-block text-xs bg-green-100 text-green-700 px-2 py-1 rounded mt-2">Obat Bebas</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-3">
-                        <button class="flex-1 bg-[#D53E0F] text-white font-semibold py-3 rounded-lg hover:bg-[#5E0006] transition" onclick="openValidationModal('RX-20241128-002', 'Budi Santoso')">
-                            Validasi & Raci Obat
-                        </button>
-                        <button class="flex-1 border-2 border-red-500 text-red-600 font-semibold py-3 rounded-lg hover:bg-red-50 transition">
-                            Tolak Resep
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Prescription Card 3 - Already Validated -->
-                <div class="bg-white rounded-2xl shadow-md border border-stone-200 p-6 opacity-75">
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-start mb-4">
-                        <div>
-                            <p class="text-xs text-gray-600 font-medium">NOMOR RESEP</p>
-                            <p class="text-lg font-bold text-gray-900">RX-20241127-005</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-600 font-medium">DOKTER</p>
-                            <p class="text-sm text-gray-900 font-semibold">Dr. Rinto Harahap</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-600 font-medium">PASIEN</p>
-                            <p class="text-sm text-gray-900 font-semibold">Rina Wijaya</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-600 font-medium">TANGGAL</p>
-                            <p class="text-sm text-gray-600">27 Nov 2024, 14:00</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-600 font-medium">STATUS</p>
-                            <p class="inline-block text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">Selesai</p>
-                        </div>
-                    </div>
-
-                    <div class="border-t border-stone-200 pt-4 mb-4">
-                        <h4 class="font-semibold text-gray-900 mb-3">Daftar Obat:</h4>
-                        <div class="bg-gray-50 p-3 rounded-lg">
-                            <p class="font-medium text-gray-900">Loratadine 10mg</p>
-                            <p class="text-xs text-gray-600 mt-1">Dosis: 1 tablet, 1x sehari</p>
-                            <span class="inline-block text-xs bg-green-100 text-green-700 px-2 py-1 rounded mt-2">Obat Bebas</span>
-                        </div>
-                    </div>
-
-                    <div class="text-center py-3 text-gray-600">
-                        <p>Resep telah divalidasi pada 27 Nov 2024, 14:30 oleh Fitra Aprilianto</p>
                     </div>
                 </div>
             </div>
@@ -250,22 +146,26 @@
                 </div>
 
                 <!-- Buttons -->
-                <div class="flex gap-3">
-                    <button onclick="closeValidationModal()" class="flex-1 border-2 border-stone-300 text-gray-700 font-semibold py-3 rounded-lg hover:bg-gray-50 transition">
-                        Batal
-                    </button>
-                    <button class="flex-1 bg-[#D53E0F] text-white font-semibold py-3 rounded-lg hover:bg-[#5E0006] transition">
-                        Validasi Resep
-                    </button>
-                </div>
+                <form id="validationForm" method="post" action="">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <div class="flex gap-3 mt-6">
+                        <button type="button" onclick="closeValidationModal()" class="flex-1 border-2 border-stone-300 text-gray-700 font-semibold py-3 rounded-lg hover:bg-gray-50 transition">
+                            Batal
+                        </button>
+                        <button type="submit" class="flex-1 bg-[#D53E0F] text-white font-semibold py-3 rounded-lg hover:bg-[#5E0006] transition">
+                            Validasi Resep Selesai
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
     <script>
-        function openValidationModal(prescriptionId, patientName) {
+        function openValidationModal(orderId, prescriptionId, patientName) {
             document.getElementById('validationModal').classList.remove('hidden');
             document.getElementById('modalRecipientInfo').textContent = `Resep: ${prescriptionId} • Pasien: ${patientName}`;
+            document.getElementById('validationForm').action = '/pharmacist/validasi-resep/' + orderId + '/approve';
             console.log("[v0] Opened validation modal for:", prescriptionId, patientName);
         }
 

@@ -46,6 +46,9 @@ public class Order {
     private Long pharmacyId;
     private String snapToken;
     
+    @Column(name = "prescription_id")
+    private String prescriptionId;
+    
     private double subtotal;
     private double shippingFee;
     private double adminFee;
@@ -124,6 +127,10 @@ public class Order {
 
     public String getSnapToken() {
         return snapToken;
+    }
+
+    public String getPrescriptionId() { 
+        return prescriptionId; 
     }
 
     public double getSubtotal() {
@@ -208,6 +215,10 @@ public class Order {
 
     public void setSnapToken(String snapToken) {
         this.snapToken = snapToken;
+    }
+
+    public void setPrescriptionId(String prescriptionId) { 
+        this.prescriptionId = prescriptionId; 
     }
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
