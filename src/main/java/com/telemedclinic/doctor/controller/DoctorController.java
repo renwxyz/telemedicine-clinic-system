@@ -73,16 +73,44 @@ public class DoctorController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(HttpSession session, Model model) {
-        Optional<Doctor> optionalDoctor = findAuthenticatedDoctor(session);
-        if (optionalDoctor.isEmpty()) {
-            return "redirect:/auth/login";
-        }
-
-        Doctor doctor = optionalDoctor.get();
-        model.addAttribute("doctor", doctor);
-        return "doctor/doctor-dashboard";
+public String dashboard(HttpSession session, Model model) {
+    Optional<Doctor> optionalDoctor = findAuthenticatedDoctor(session);
+    if (optionalDoctor.isEmpty()) {
+        return "redirect:/auth/login";
     }
+
+    Doctor doctor = optionalDoctor.get();
+
+    Long doctorId = doctor.getUserId();
+
+    // Total pasien yang pernah ditangani
+    long totalPatients = consultationRepository
+            .findByDoctorUserIdAndStatusOrderByCreatedAtDesc(
+                    doctorId,
+                    ConsultationStatus.COMPLETED
+            ).size();
+
+    // Antrean menunggu
+    long waitingQueue = consultationRepository
+            .findByDoctorUserIdAndStatusInOrderByCreatedAtAsc(
+                    doctorId,
+                    java.util.List.of(ConsultationStatus.IN_PROGRESS)
+            ).size();
+
+    // Konsultasi hari ini
+    List<Consultation> todayConsultations =
+            consultationRepository.findByDoctorUserIdAndStatusInOrderByCreatedAtAsc(
+                    doctorId,
+                    java.util.List.of(ConsultationStatus.COMPLETED)
+            );
+
+    model.addAttribute("doctor", doctor);
+    model.addAttribute("totalPatients", totalPatients);
+    model.addAttribute("waitingQueue", waitingQueue);
+    model.addAttribute("todayConsultations", todayConsultations);
+
+    return "doctor/doctor-dashboard";
+}
 
     @GetMapping("/profile")
     public String profile(HttpSession session, Model model) {
