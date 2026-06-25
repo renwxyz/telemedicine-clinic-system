@@ -76,6 +76,16 @@ public class DataSeeder implements ApplicationRunner {
 
         if (userRepository.existsByEmail(DEFAULT_DOCTOR_EMAIL)) {
             log.info("Doctor default sudah ada, skip seeding doctor");
+            userRepository.findByEmail(DEFAULT_DOCTOR_EMAIL).ifPresent(user -> {
+                if (user instanceof com.telemedclinic.user.entity.Doctor doc) {
+                    if (doc.getBalance() == null || doc.getBalance() == 0.0) {
+                        doc.setBalance(2500000.0);
+                        doc.setConsultationFee(250000.0);
+                        doctorRepository.save(doc);
+                        log.info("Default doctor wallet & fee initialized.");
+                    }
+                }
+            });
             return;
         }
 
@@ -90,6 +100,8 @@ public class DataSeeder implements ApplicationRunner {
 
         // set as approved so the account can login immediately
         doctor.approveApplication();
+        doctor.setBalance(2500000.0);
+        doctor.setConsultationFee(250000.0);
 
         doctorRepository.save(doctor);
         log.info("Doctor default berhasil dibuat: {}", DEFAULT_DOCTOR_EMAIL);
