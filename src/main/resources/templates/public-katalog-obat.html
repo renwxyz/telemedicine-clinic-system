@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Katalog Obat - KlinikKu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
+    </style>
+  </head>
+  <body class="bg-stone-50 text-stone-900">
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <!-- Main Content -->
+    <div class="pt-20">
+      <div class="p-8">
+          <!-- Page Header -->
+          <div class="mb-8">
+            <h1 class="text-4xl font-bold text-stone-900 mb-2">Katalog Obat</h1>
+            <p class="text-stone-600">
+              Temukan obat yang Anda butuhkan dengan harga terjangkau
+            </p>
+          </div>
+
+
+          <!-- Filter & Search Section -->
+          <div
+            class="bg-white rounded-2xl p-6 border border-stone-200 shadow-sm mb-8"
+          >
+            <div class="grid md:grid-cols-3 gap-4">
+              <!-- Search Input -->
+              <div class="md:col-span-2">
+                <form
+                  th:action="@{/katalog-obat}"
+                  method="get"
+                  class="flex gap-2"
+                >
+                  <input
+                    type="text"
+                    name="search"
+                    placeholder="Cari nama obat..."
+                    th:value="${search}"
+                    class="flex-1 px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                  <button
+                    type="submit"
+                    class="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-semibold"
+                  >
+                    Cari
+                  </button>
+                </form>
+              </div>
+
+              <!-- Filter by Type -->
+              <div>
+                <form th:action="@{/katalog-obat}" method="get">
+                  <select
+                    name="type"
+                    th:value="${type}"
+                    onchange="this.form.submit()"
+                    class="w-full px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value="">Semua Kategori</option>
+                    <option value="BEBAS" th:selected="${type == 'BEBAS'}">
+                      Obat Bebas
+                    </option>
+                    <option value="RESEP" th:selected="${type == 'RESEP'}">
+                      Obat Resep
+                    </option>
+                  </select>
+                </form>
+              </div>
+            </div>
+
+            <!-- Sort Options -->
+            <div class="mt-4 flex gap-2 flex-wrap">
+              <a
+                th:href="@{/katalog-obat(sort='name-asc')}"
+                class="px-4 py-2 rounded-lg text-sm font-medium transition"
+                th:classappend="${sort == 'name-asc'} ? 'bg-orange-500 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'"
+              >
+                Nama A-Z
+              </a>
+              <a
+                th:href="@{/katalog-obat(sort='price-asc')}"
+                class="px-4 py-2 rounded-lg text-sm font-medium transition"
+                th:classappend="${sort == 'price-asc'} ? 'bg-orange-500 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'"
+              >
+                Harga Terendah
+              </a>
+              <a
+                th:href="@{/katalog-obat(sort='price-desc')}"
+                class="px-4 py-2 rounded-lg text-sm font-medium transition"
+                th:classappend="${sort == 'price-desc'} ? 'bg-orange-500 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'"
+              >
+                Harga Tertinggi
+              </a>
+            </div>
+          </div>
+
+          <!-- Medicines Grid -->
+          <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+            <div
+              th:each="medicine : ${medicines}"
+              class="bg-white rounded-2xl border border-stone-200 shadow-sm hover:shadow-md transition overflow-hidden flex flex-col"
+            >
+              <!-- Medicine Image -->
+              <a th:href="@{/auth/login}" class="block">
+                <div class="bg-orange-100 h-40 flex items-center justify-center overflow-hidden">
+                  <img th:if="${medicine.medicine.imageUrl != null}" th:src="${medicine.medicine.imageUrl}" th:alt="${medicine.medicine.name}" class="w-full h-full object-cover"/>
+                  <svg
+                    th:unless="${medicine.medicine.imageUrl != null}"
+                    class="w-16 h-16 text-orange-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.5"
+                      d="M19.5 13.5L12 20.5l-7.5-7"
+                    />
+                  </svg>
+                </div>
+              </a>
+
+              <!-- Medicine Details -->
+              <div class="p-4 flex-1 flex flex-col">
+                <!-- Medicine Name -->
+                <a th:href="@{/auth/login}" class="hover:text-orange-500 transition">
+                  <h3
+                    class="font-bold text-stone-900 mb-1 line-clamp-2"
+                    th:text="${medicine.medicine.name}"
+                  >
+                    Paracetamol 500mg
+                  </h3>
+                </a>
+
+                <!-- Pharmacy Info -->
+                <p
+                  class="text-xs text-stone-600 mb-2"
+                  th:text="${medicine.pharmacy.name + ' • Stok: ' + medicine.stock}"
+                >
+                  Apotek Sejahtera • Stok: 50
+                </p>
+
+                <!-- Medicine Type Badge -->
+                <div class="mb-3">
+                  <span
+                    th:replace="~{fragments/status-badges :: medicine-type(${medicine.medicine.requiresPrescription})}"
+                  ></span>
+                </div>
+
+                <!-- Price -->
+                <p
+                  class="text-lg font-bold text-orange-500 mb-3"
+                  th:text="${'Rp ' + #numbers.formatInteger(medicine.price, 0, 'COMMA')}"
+                >
+                  Rp 12.500
+                </p>
+
+                <!-- Add to Cart Button -->
+                <div class="mt-auto">
+                  <a th:href="@{/auth/login}" class="block text-center w-full px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-semibold">
+                    Beli
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty State -->
+            <div
+              th:if="${#lists.isEmpty(medicines)}"
+              class="md:col-span-4 text-center py-12"
+            >
+              <svg
+                class="w-24 h-24 mx-auto text-stone-300 mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                />
+              </svg>
+              <p class="text-stone-600 text-lg font-semibold mb-2">
+                Obat tidak ditemukan
+              </p>
+              <p class="text-stone-500 mb-4">
+                Coba ubah filter atau cari dengan kata kunci yang berbeda
+              </p>
+              <a
+                th:href="@{/katalog-obat}"
+                class="text-orange-600 font-semibold hover:underline"
+              >
+                Reset Filter
+              </a>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div
+            th:if="${totalPages > 1}"
+            class="flex justify-center items-center gap-2"
+          >
+            <a
+              th:if="${currentPage > 1}"
+              th:href="@{/katalog-obat(page=${currentPage - 1})}"
+              class="px-4 py-2 border border-stone-300 rounded-lg hover:bg-orange-50 transition"
+            >
+              ← Sebelumnya
+            </a>
+
+            <span
+              th:each="page : ${#numbers.sequence(1, totalPages)}"
+              th:if="${(page >= currentPage - 2 && page <= currentPage + 2)}"
+            >
+              <a
+                th:if="${page != currentPage}"
+                th:href="@{/katalog-obat(page=${page})}"
+                th:text="${page}"
+                class="px-3 py-2 border border-stone-300 rounded-lg hover:bg-orange-50 transition"
+                >1</a
+              >
+              <span
+                th:if="${page == currentPage}"
+                th:text="${page}"
+                class="px-3 py-2 bg-orange-500 text-white rounded-lg"
+                >1</span
+              >
+            </span>
+
+            <a
+              th:if="${currentPage < totalPages}"
+              th:href="@{/katalog-obat(page=${currentPage + 1})}"
+              class="px-4 py-2 border border-stone-300 rounded-lg hover:bg-orange-50 transition"
+            >
+              Selanjutnya →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

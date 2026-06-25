@@ -31,6 +31,8 @@ public class Customer extends User {
     @Column(nullable = false)
     private Double weight;
 
+    private Double latitude;
+    private Double longitude;
 
     // No-args constructor for JPA
     public Customer() {
@@ -89,6 +91,14 @@ public class Customer extends User {
 
     public Double getWeight() {
         return weight;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
     }
 
     @Transient
@@ -175,6 +185,14 @@ public class Customer extends User {
         }
 
         this.weight = weight;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
     }
 
 

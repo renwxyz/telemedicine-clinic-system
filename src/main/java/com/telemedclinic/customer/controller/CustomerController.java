@@ -71,6 +71,7 @@ public class CustomerController {
     private final CartItemRepository cartItemRepository;
     private final OrderRepository orderRepository;
     private final ConsultationRepository consultationRepository;
+    private final com.telemedclinic.order.service.OrderRoutingService orderRoutingService;
 
     @Autowired
     private MidtransService midtransService;
@@ -91,7 +92,8 @@ public class CustomerController {
             InventoryQueryApi inventoryQueryApi,
             CartItemRepository cartItemRepository,
             OrderRepository orderRepository,
-            ConsultationRepository consultationRepository
+            ConsultationRepository consultationRepository,
+            com.telemedclinic.order.service.OrderRoutingService orderRoutingService
     ) {
         this.userRepository = userRepository;
         this.doctorRepository = doctorRepository;
@@ -100,6 +102,7 @@ public class CustomerController {
         this.cartItemRepository = cartItemRepository;
         this.orderRepository = orderRepository;
         this.consultationRepository = consultationRepository;
+        this.orderRoutingService = orderRoutingService;
     }
 
     @ModelAttribute
@@ -437,18 +440,14 @@ public class CustomerController {
         order.setPaymentStatus(PaymentStatus.PENDING);
         order.setPrescriptionId(prescription.getPrescriptionId());
         
-        Long pharmacyId = null;
         double subtotal = 0;
         for (com.telemedclinic.prescription.model.PrescriptionItem pItem : prescription.getItems()) {
             List<InventoryItem> inventoryItems = inventoryQueryApi.searchAvailableMedicines(pItem.getMedicine().getName());
             if (!inventoryItems.isEmpty()) {
                 InventoryItem invItem = inventoryItems.get(0);
-                if (pharmacyId == null && invItem.getPharmacy() != null) {
-                    pharmacyId = invItem.getPharmacy().getPharmacyId();
-                }
                 order.addItem(new OrderItem(
                     invItem.getMedicine().getName(),
-                    invItem.getPharmacy().getName(),
+                    "Menunggu Alokasi",
                     pItem.getQuantity(),
                     invItem.getPrice(),
                     invItem.getMedicine().isRequiresPrescription()
@@ -457,7 +456,7 @@ public class CustomerController {
             }
         }
         
-        order.setPharmacyId(pharmacyId);
+        order.setPharmacyId(null);
         order.setShippingFee(10000);
         order.setAdminFee(2500);
         order.setTotalAmount(subtotal + order.getShippingFee() + order.getAdminFee());
@@ -476,7 +475,7 @@ public class CustomerController {
                 return "redirect:/customer/payment/" + order.getOrderId();
             }
         } else {
-            order.setStatus(OrderStatus.PROCESSING);
+            orderRoutingService.assignNearestPharmacy(order);
             orderRepository.save(order);
         }
         
@@ -505,21 +504,17 @@ public class CustomerController {
         order.setPaymentMethod(checkoutForm.getPaymentMethod() != null ? checkoutForm.getPaymentMethod() : PaymentMethod.COD);
         order.setPaymentStatus(PaymentStatus.PENDING);
 
-        Long pharmacyId = null;
         for (CartItem cartItem : cartItems) {
             InventoryItem inventoryItem = cartItem.getInventoryItem();
-            if (pharmacyId == null && inventoryItem.getPharmacy() != null) {
-                pharmacyId = inventoryItem.getPharmacy().getPharmacyId();
-            }
             order.addItem(new OrderItem(
                     inventoryItem.getMedicine().getName(),
-                    inventoryItem.getPharmacy().getName(),
+                    "Menunggu Alokasi",
                     cartItem.getQuantity(),
                     inventoryItem.getPrice(),
                     inventoryItem.getMedicine().isRequiresPrescription()
             ));
         }
-        order.setPharmacyId(pharmacyId);
+        order.setPharmacyId(null);
         order.setShippingFee(10000);
         order.setAdminFee(2500);
         order.setTotalAmount(order.getSubtotal() + order.getShippingFee() + order.getAdminFee());
@@ -541,7 +536,7 @@ public class CustomerController {
                 return "redirect:/customer/orders";
             }
         } else {
-            order.setStatus(OrderStatus.PROCESSING);
+            orderRoutingService.assignNearestPharmacy(order);
             orderRepository.save(order);
         }
         

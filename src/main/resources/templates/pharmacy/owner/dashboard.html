@@ -24,7 +24,7 @@
         <!-- Welcome Header -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div>
-                <h1 class="text-2xl font-bold text-stone-900">Ringkasan Apotek</h1>
+                <h1 class="text-2xl font-bold text-stone-900" th:text="${owner != null and owner.pharmacies.size() > 1 and pharmacy != null ? 'Ringkasan Apotek - ' + pharmacy.name : 'Ringkasan Apotek'}">Ringkasan Apotek</h1>
                 <p class="text-sm text-stone-500 mt-1">Pantau performa penjualan dan operasional apotek Anda hari ini.</p>
             </div>
             <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-stone-200 shadow-sm">

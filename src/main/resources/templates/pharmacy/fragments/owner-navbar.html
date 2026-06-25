@@ -53,6 +53,10 @@
                                     <p class="text-sm font-bold text-stone-900" th:text="${session.currentUserName ?: 'Owner'}">Budi Santoso</p>
                                     <p class="text-xs text-stone-500">Owner Apotek</p>
                                 </div>
+                                <div class="px-3 py-2 border-b border-stone-100 mb-1">
+                                    <p class="text-xs text-stone-500">Apotek Aktif</p>
+                                    <p class="text-sm font-bold text-stone-900 truncate" th:text="${pharmacy != null ? pharmacy.name : 'Tidak Ada Apotek'}">Apotek Sehat</p>
+                                </div>
                                 
                                 <a th:href="@{/owner/pharmacy/profile}" class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-stone-600 rounded-lg hover:bg-[#FDF3F0] hover:text-[#D53E0F] transition-colors">
                                     <i class="ti ti-user-circle text-lg"></i> Profil Saya
@@ -61,6 +65,12 @@
                                 <a th:href="@{/owner/pharmacy/settings}" class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-stone-600 rounded-lg hover:bg-[#FDF3F0] hover:text-[#D53E0F] transition-colors">
                                     <i class="ti ti-settings text-lg"></i> Pengaturan
                                 </a>
+
+                                <form th:if="${owner != null and owner.pharmacies.size() > 1}" th:action="@{/owner/pharmacy/switch}" method="post" class="m-0 p-0">
+                                    <button type="submit" class="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-stone-600 rounded-lg hover:bg-[#FDF3F0] hover:text-[#D53E0F] transition-colors text-left">
+                                        <i class="ti ti-arrows-exchange text-lg"></i> Ganti Apotek
+                                    </button>
+                                </form>
                                 
                                 <div class="h-px bg-stone-100 my-1"></div>
                                 

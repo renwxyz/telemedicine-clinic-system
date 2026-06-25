@@ -36,12 +36,12 @@
 
         <!-- Apoteker Profile & Logout -->
         <div class="p-4 border-t border-stone-200 flex flex-col gap-4">
-            <div class="flex items-center justify-center lg:justify-start gap-3">
+            <div class="flex items-center justify-center lg:justify-start gap-3" th:if="${pharmacist != null}">
                 <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                    <span class="text-sm font-bold text-blue-700">SF</span>
+                    <span class="text-sm font-bold text-blue-700" th:text="${#strings.substring(pharmacist.name, 0, 1).toUpperCase()}">S</span>
                 </div>
                 <div class="min-w-0 hidden lg:block">
-                    <p class="text-sm font-semibold text-stone-900 truncate">Siska Faradilla</p>
+                    <p class="text-sm font-semibold text-stone-900 truncate" th:text="${pharmacist.name}">Siska Faradilla</p>
                     <span class="inline-block text-stone-500 text-[10px] font-bold mt-0.5">APOTEKER</span>
                 </div>
             </div>

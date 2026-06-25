@@ -14,8 +14,8 @@
         <h1 class="text-4xl md:text-5xl font-extrabold text-stone-900 leading-tight mt-4">Konsultasi Dokter & Beli Obat dalam Satu Platform</h1>
         <p class="text-stone-500 text-lg mt-4 leading-relaxed">Dapatkan layanan kesehatan terpercaya kapan saja dan di mana saja. Dokter berpengalaman siap membantu Anda.</p>
         <div class="flex flex-wrap gap-3 mt-8">
-          <a th:href="@{/auth/register}" class="bg-[#D53E0F] hover:bg-[#5E0006] text-white font-semibold px-6 py-3 rounded-xl transition-colors">Mulai Konsultasi</a>
-          <a th:href="@{/customer/medicines}" class="border border-stone-300 text-stone-700 hover:border-[#D53E0F] hover:text-[#D53E0F] font-semibold px-6 py-3 rounded-xl transition-colors">Lihat Katalog Obat</a>
+          <a th:href="@{/auth/login}" class="bg-[#D53E0F] hover:bg-[#5E0006] text-white font-semibold px-6 py-3 rounded-xl transition-colors">Mulai Konsultasi</a>
+          <a th:href="@{/katalog-obat}" class="border border-stone-300 text-stone-700 hover:border-[#D53E0F] hover:text-[#D53E0F] font-semibold px-6 py-3 rounded-xl transition-colors">Lihat Katalog Obat</a>
         </div>
       </div>
       <!-- Kanan -->
@@ -34,15 +34,15 @@
   <section class="bg-white border-y border-stone-200 py-12 px-6 md:px-12">
     <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
       <div>
-        <span class="text-4xl font-extrabold text-[#D53E0F]">500+</span>
+        <span class="text-4xl font-extrabold text-[#D53E0F]" th:text="${doctorCount} + '+'">500+</span>
         <p class="text-stone-500 text-sm font-medium mt-1">Dokter Terdaftar</p>
       </div>
       <div>
-        <span class="text-4xl font-extrabold text-[#D53E0F]">10.000+</span>
+        <span class="text-4xl font-extrabold text-[#D53E0F]" th:text="${patientCount} + '+'">10.000+</span>
         <p class="text-stone-500 text-sm font-medium mt-1">Pasien Aktif</p>
       </div>
       <div>
-        <span class="text-4xl font-extrabold text-[#D53E0F]">50+</span>
+        <span class="text-4xl font-extrabold text-[#D53E0F]" th:text="${pharmacyCount} + '+'">50+</span>
         <p class="text-stone-500 text-sm font-medium mt-1">Apotek Mitra</p>
       </div>
     </div>
@@ -121,6 +121,80 @@
     </div>
   </section>
 
+  <!-- Section: Dokter Pilihan -->
+  <section id="dokter" class="bg-[#FDF3F0] py-20 px-6 md:px-12 overflow-hidden">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div>
+        <span class="bg-[#FAD5C8] text-[#D53E0F] text-xs font-semibold px-3 py-1 rounded-full inline-block">Dokter Spesialis</span>
+        <h2 class="text-3xl md:text-4xl font-extrabold text-stone-900 mt-4">Temui Dokter Terbaik Kami</h2>
+      </div>
+      <a th:href="@{/auth/login}" class="text-[#D53E0F] font-semibold hover:underline hidden md:block">Lihat Semua Dokter &rarr;</a>
+    </div>
+    
+    <div class="max-w-7xl mx-auto mt-10">
+      <!-- Slider Container with CSS Scroll Snap -->
+      <div class="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-8 pt-4 px-2 -mx-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <!-- Loop through featuredDoctors -->
+        <div th:each="doc : ${featuredDoctors}" class="bg-white rounded-2xl shadow-sm border border-stone-100 p-6 flex-none w-[85%] md:w-[400px] snap-center hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+          <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-full bg-[#FAD5C8] flex items-center justify-center flex-shrink-0 text-2xl">
+              👨‍⚕️
+            </div>
+            <div>
+              <h3 class="font-bold text-stone-900 text-lg" th:text="${doc.name}">Dr. Nama</h3>
+              <p class="text-[#D53E0F] text-sm font-medium" th:text="${doc.specialization}">Spesialis</p>
+            </div>
+          </div>
+          <div class="mt-6 flex items-center justify-between border-t border-stone-100 pt-4">
+            <div>
+              <p class="text-xs text-stone-500">Biaya Konsultasi</p>
+              <p class="font-bold text-stone-900" th:text="'Rp ' + ${#numbers.formatDecimal(doc.consultationFee, 0, 'COMMA', 0, 'POINT')}">Rp 0</p>
+            </div>
+            <a th:href="@{/customer/consultations/new}" class="bg-[#D53E0F] hover:bg-[#5E0006] text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+              Konsultasi
+            </a>
+          </div>
+        </div>
+        
+        <!-- Empty State if no doctors -->
+        <div th:if="${#lists.isEmpty(featuredDoctors)}" class="text-stone-500 italic py-4">Belum ada dokter tersedia.</div>
+      </div>
+      <a th:href="@{/auth/login}" class="text-[#D53E0F] font-semibold hover:underline block mt-4 md:hidden text-center">Lihat Semua Dokter &rarr;</a>
+    </div>
+  </section>
+
+  <!-- Section: Apotek Mitra -->
+  <section id="apotek" class="bg-white py-20 px-6 md:px-12 border-b border-stone-200">
+    <div class="max-w-7xl mx-auto text-center">
+      <span class="bg-stone-100 text-stone-600 text-xs font-semibold px-3 py-1 rounded-full inline-block">Partner Kami</span>
+      <h2 class="text-3xl md:text-4xl font-extrabold text-stone-900 mt-4">Apotek Mitra Terdekat</h2>
+      <p class="text-stone-500 mt-3 max-w-2xl mx-auto">Kami bekerja sama dengan apotek tepercaya untuk memastikan obat Anda asli dan aman.</p>
+    </div>
+    
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+      <!-- Loop through featuredPharmacies -->
+      <div th:each="pharmacy : ${featuredPharmacies}" class="bg-stone-50 rounded-2xl p-6 border border-stone-200 hover:border-[#D53E0F] transition-colors group">
+        <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center mb-4 text-[#D53E0F]">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+        </div>
+        <h3 class="font-bold text-stone-900 text-xl" th:text="${pharmacy.name}">Nama Apotek</h3>
+        <p class="text-stone-500 text-sm mt-2 flex items-start gap-1">
+          <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          <span th:text="${pharmacy.address}">Alamat Apotek</span>
+        </p>
+        <a th:href="@{/customer/medicines}" class="mt-6 inline-flex items-center text-[#D53E0F] font-semibold text-sm group-hover:underline">
+          Lihat Obat <span class="ml-1">&rarr;</span>
+        </a>
+      </div>
+      
+      <!-- Empty State -->
+      <div th:if="${#lists.isEmpty(featuredPharmacies)}" class="col-span-1 md:col-span-3 text-center text-stone-500 italic">Belum ada apotek mitra tersedia.</div>
+    </div>
+    <div class="text-center mt-10">
+      <a th:href="@{/auth/login}" class="border border-stone-300 text-stone-700 hover:border-[#D53E0F] hover:text-[#D53E0F] font-semibold px-6 py-3 rounded-xl transition-colors inline-block">Lihat Semua Apotek</a>
+    </div>
+  </section>
+
   <!-- Section: CTA Banner -->
   <section class="py-12 px-6 md:px-12">
     <div class="bg-[#D53E0F] rounded-2xl py-16 px-8 text-center max-w-7xl mx-auto">
@@ -133,11 +207,16 @@
   <footer th:replace="~{fragments/footer :: footer}"></footer>
 
   <script>
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    document.querySelectorAll('a[href*="#"]').forEach(anchor => {
       anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) target.scrollIntoView({ behavior: 'smooth' });
+        const url = new URL(this.href, window.location.origin);
+        if (url.pathname === window.location.pathname && url.hash) {
+          const target = document.querySelector(url.hash);
+          if (target) {
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
       });
     });
   </script>

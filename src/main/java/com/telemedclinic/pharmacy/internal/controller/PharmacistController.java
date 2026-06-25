@@ -34,6 +34,9 @@ public class PharmacistController {
     private final com.telemedclinic.delivery.core.port.out.DeliveryServicePort deliveryServicePort;
     private final com.telemedclinic.medicine.repository.MedicineRepository medicineRepository;
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
     public PharmacistController(UserRepository userRepository, 
                                 OrderRepository orderRepository, 
                                 InventoryItemRepository inventoryItemRepository, 
@@ -120,6 +123,48 @@ public class PharmacistController {
         model.addAttribute("pharmacist", pharmacist);
         model.addAttribute("pharmacy", pharmacist.getPharmacy());
         return "pharmacy/pharmacist/profile";
+    }
+
+    @PostMapping("/profile/update")
+    public String updateProfile(
+            @org.springframework.web.bind.annotation.RequestParam("name") String name,
+            @org.springframework.web.bind.annotation.RequestParam("phoneNumber") String phoneNumber,
+            HttpSession session, RedirectAttributes redirectAttributes) {
+        Optional<Pharmacist> optionalPharmacist = findAuthenticatedPharmacist(session);
+        if (optionalPharmacist.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Pharmacist pharmacist = optionalPharmacist.get();
+        try {
+            pharmacist.updateProfile(name, phoneNumber);
+            userRepository.save(pharmacist);
+            redirectAttributes.addFlashAttribute("success", "Profil berhasil diperbarui.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Gagal memperbarui profil: " + e.getMessage());
+        }
+        return "redirect:/pharmacist/profile";
+    }
+
+    @PostMapping("/profile/password")
+    public String updatePassword(
+            @org.springframework.web.bind.annotation.RequestParam("currentPassword") String currentPassword,
+            @org.springframework.web.bind.annotation.RequestParam("newPassword") String newPassword,
+            HttpSession session, RedirectAttributes redirectAttributes) {
+        Optional<Pharmacist> optionalPharmacist = findAuthenticatedPharmacist(session);
+        if (optionalPharmacist.isEmpty()) {
+            return "redirect:/auth/login";
+        }
+
+        Pharmacist pharmacist = optionalPharmacist.get();
+        if (pharmacist.matchesPassword(currentPassword, passwordEncoder)) {
+            pharmacist.changePassword(passwordEncoder.encode(newPassword));
+            userRepository.save(pharmacist);
+            redirectAttributes.addFlashAttribute("success", "Kata sandi berhasil diperbarui.");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Kata sandi saat ini tidak cocok.");
+        }
+        return "redirect:/pharmacist/profile";
     }
 
     @GetMapping("/orders")

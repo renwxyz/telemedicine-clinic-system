@@ -63,6 +63,10 @@ public class OrderItem {
         return pharmacyName;
     }
 
+    public void setPharmacyName(String pharmacyName) {
+        this.pharmacyName = pharmacyName;
+    }
+
     public int getQuantity() {
         return quantity;
     }

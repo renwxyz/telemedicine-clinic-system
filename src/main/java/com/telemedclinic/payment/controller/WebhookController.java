@@ -33,6 +33,9 @@ public class WebhookController {
     @Autowired
     private ConsultationRepository consultationRepository;
 
+    @Autowired
+    private com.telemedclinic.order.service.OrderRoutingService orderRoutingService;
+
     @Value("${midtrans.server.key}")
     private String serverKey;
 
@@ -112,7 +115,7 @@ public class WebhookController {
                         Order order = optionalOrder.get();
                         if ("settlement".equals(transactionStatus) || "capture".equals(transactionStatus)) {
                             order.setPaymentStatus(PaymentStatus.PAID);
-                            order.setStatus(OrderStatus.PROCESSING);
+                            orderRoutingService.assignNearestPharmacy(order);
                         } else if ("cancel".equals(transactionStatus) || "deny".equals(transactionStatus) || "expire".equals(transactionStatus)) {
                             order.setStatus(OrderStatus.CANCELLED);
                         } else if ("pending".equals(transactionStatus)) {
