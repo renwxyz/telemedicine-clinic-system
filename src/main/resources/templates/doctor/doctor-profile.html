@@ -28,18 +28,14 @@
             Pastikan dokumen Surat Izin Praktik (SIP) Anda selalu mutakhir.
           </p>
         </div>
-        <form
-          th:action="@{/auth/logout}"
-          method="post"
-          class="w-full sm:w-auto"
-        >
-          <button
-            type="submit"
-            class="bg-red-500 text-white font-semibold px-6 py-3 rounded-xl hover:bg-red-600 transition w-full"
-          >
-            Logout
-          </button>
-        </form>
+      </div>
+
+      <!-- Alerts -->
+      <div th:if="${successMessage}" class="mb-6">
+        <div th:replace="~{fragments/alerts :: success(${successMessage})}"></div>
+      </div>
+      <div th:if="${errorMessage}" class="mb-6">
+        <div th:replace="~{fragments/alerts :: error(${errorMessage})}"></div>
       </div>
 
       <div
@@ -50,12 +46,17 @@
         <div class="px-8 pb-8">
           <div class="flex justify-between items-end -mt-12 mb-8">
             <div class="flex items-end gap-5">
-              <div class="w-24 h-24 bg-white rounded-2xl p-1 shadow-md">
-                <div
-                  class="w-full h-full bg-orange-100 rounded-xl flex items-center justify-center text-4xl font-bold text-[#D53E0F]"
-                  th:text="${doctor != null and doctor.name != null and doctor.name.length() >= 2 ? #strings.toUpperCase(doctor.name.substring(0,2)) : 'DR'}"
-                >
-                  AF
+              <div class="w-24 h-24 bg-white rounded-2xl p-1 shadow-md overflow-hidden relative">
+                <div class="w-full h-full rounded-xl overflow-hidden flex items-center justify-center">
+                  <img th:if="${doctor != null and doctor.profilePhotoPath != null and !doctor.profilePhotoPath.isEmpty()}" 
+                       th:src="@{${doctor.profilePhotoPath}}" 
+                       class="w-full h-full object-cover" 
+                       alt="Profile Photo">
+                  <div th:unless="${doctor != null and doctor.profilePhotoPath != null and !doctor.profilePhotoPath.isEmpty()}"
+                       class="w-full h-full bg-orange-100 flex items-center justify-center text-4xl font-bold text-[#D53E0F]"
+                       th:text="${doctor != null and doctor.name != null and doctor.name.length() >= 2 ? #strings.toUpperCase(doctor.name.substring(0,2)) : 'DR'}">
+                    DR
+                  </div>
                 </div>
               </div>
               <div class="mt-14">
@@ -90,149 +91,103 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="space-y-5">
-              <h3
-                class="font-extrabold text-stone-900 border-b border-stone-100 pb-2"
-              >
-                Informasi Dasar
-              </h3>
-
-              <div>
-                <label
-                  class="block text-xs font-bold text-stone-500 uppercase mb-1"
-                  >Email</label
-                >
-                <input
-                  type="email"
-                  th:value="${doctor.email}"
-                  class="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl font-medium text-stone-700 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition"
-                  readonly
-                />
-                <p class="text-[10px] text-stone-400 mt-1">
-                  Email terikat pada sistem, hubungi admin untuk mengubah.
-                </p>
-              </div>
-
-              <div>
-                <label
-                  class="block text-xs font-bold text-stone-500 uppercase mb-1"
-                  >Nomor Handphone (WhatsApp)</label
-                >
-                <input
-                  type="text"
-                  th:value="${doctor.phoneNumber}"
-                  class="w-full px-4 py-2.5 bg-white border border-stone-300 rounded-xl font-medium text-stone-900 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition"
-                />
-              </div>
-
-              <div>
-                <label
-                  class="block text-xs font-bold text-stone-500 uppercase mb-1"
-                  >Pengaturan Tarif Konsultasi</label
-                >
-                <div class="relative">
-                  <span
-                    class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-stone-500"
-                    >Rp</span
-                  >
-                  <input
-                    type="number"
-                    value="150000"
-                    class="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-300 rounded-xl font-bold text-[#D53E0F] outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition"
-                  />
+          <form th:action="@{/doctor/profile/update}" method="POST" enctype="multipart/form-data">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div class="space-y-6">
+                <div>
+                  <h3 class="font-extrabold text-stone-900 border-b border-stone-100 pb-2 mb-4">
+                    Informasi Dasar
+                  </h3>
+                  <div class="space-y-4">
+                    <div>
+                      <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Email</label>
+                      <input type="email" th:value="${doctor.email}" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl font-medium text-stone-700 outline-none" readonly />
+                      <p class="text-[10px] text-stone-400 mt-1">Email terikat pada sistem, hubungi admin untuk mengubah.</p>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Nomor Handphone (WhatsApp)</label>
+                      <input type="text" name="phoneNumber" th:value="${doctor.phoneNumber}" class="w-full px-4 py-2.5 bg-white border border-stone-300 rounded-xl font-medium text-stone-900 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition" required />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Foto Profil Baru</label>
+                      <input type="file" name="profilePhoto" accept="image/*" class="w-full px-4 py-2 border border-stone-300 rounded-xl text-sm font-medium text-stone-900 outline-none file:mr-4 file:py-1.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-[#D53E0F] hover:file:bg-orange-100 transition" />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Tarif Konsultasi</label>
+                      <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-stone-500">Rp</span>
+                        <input type="text" th:value="${#numbers.formatDecimal(doctor.consultationFee, 0, 'POINT', 0, 'COMMA')}" class="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl font-bold text-stone-500 outline-none" readonly />
+                      </div>
+                      <p class="text-[10px] text-stone-400 mt-1">Tarif ini bersifat dinamis dan dapat dikonfigurasi melalui halaman Keuangan.</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <button
-                class="bg-[#D53E0F] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#5E0006] transition w-full md:w-auto shadow-md shadow-orange-200"
-              >
-                Simpan Profil Dasar
+              <div class="space-y-5">
+                <h3 class="font-extrabold text-stone-900 border-b border-stone-100 pb-2">
+                  Dokumen Legal (SIP)
+                </h3>
+
+                <div>
+                  <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Nomor SIP</label>
+                  <input type="text" name="licenseNumber" th:value="${doctor.licenseNumber}"
+                    class="w-full px-4 py-2.5 bg-white border border-stone-300 rounded-xl font-medium text-stone-900 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition"
+                    required />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-stone-500 uppercase mb-1">File Pindai SIP Terkini</label>
+                  <div class="relative">
+                    <input type="file" name="sipDocument" id="sipDocument" class="hidden" accept="application/pdf,image/*" onchange="updateSipFileName(this)" />
+                    <label for="sipDocument" class="block border-2 border-dashed border-stone-300 rounded-2xl p-6 text-center hover:border-[#D53E0F] hover:bg-orange-50 transition cursor-pointer group">
+                      <div class="w-12 h-12 bg-orange-100 text-[#D53E0F] rounded-full mx-auto flex items-center justify-center mb-3 group-hover:scale-110 transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                      </div>
+                      <p class="text-sm font-bold text-stone-900">Klik untuk upload dokumen baru</p>
+                      <p class="text-xs text-stone-500 mt-1">Format PDF/JPG/PNG. Maksimal 5MB.</p>
+                    </label>
+                  </div>
+                  
+                  <!-- Display Current/Uploaded File Name -->
+                  <div class="mt-3 flex items-center justify-between p-3 bg-stone-50 border border-stone-200 rounded-xl">
+                    <div class="flex items-center gap-3 overflow-hidden">
+                      <svg class="w-5 h-5 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                      </svg>
+                      <span id="sip-file-name" class="text-sm font-bold text-stone-700 truncate"
+                            th:text="${doctor.sipDocumentPath != null ? #strings.substring(doctor.sipDocumentPath, doctor.sipDocumentPath.lastIndexOf('/') + 1) : 'Belum ada dokumen'}">
+                        Belum ada dokumen
+                      </span>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                      <a th:if="${doctor.sipDocumentPath != null}" th:href="@{${doctor.sipDocumentPath}}" target="_blank"
+                         class="text-[10px] font-bold bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded transition">Lihat</a>
+                      <span th:if="${doctor.sipDocumentPath != null}"
+                            class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-1 rounded">Terverifikasi</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-stone-100 flex justify-end">
+              <button type="submit" class="bg-[#D53E0F] text-white font-extrabold px-8 py-3.5 rounded-xl hover:bg-[#5E0006] transition shadow-md shadow-orange-200">
+                Simpan Semua Perubahan
               </button>
             </div>
-
-            <div class="space-y-5">
-              <h3
-                class="font-extrabold text-stone-900 border-b border-stone-100 pb-2"
-              >
-                Dokumen Legal (SIP)
-              </h3>
-
-              <div>
-                <label
-                  class="block text-xs font-bold text-stone-500 uppercase mb-1"
-                  >Nomor SIP</label
-                >
-                <input
-                  type="text"
-                  th:value="${doctor.licenseNumber}"
-                  class="w-full px-4 py-2.5 bg-white border border-stone-300 rounded-xl font-medium text-stone-900 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition"
-                />
-              </div>
-
-              <div>
-                <label
-                  class="block text-xs font-bold text-stone-500 uppercase mb-1"
-                  >File Pindai SIP Terkini</label
-                >
-                <div
-                  class="border-2 border-dashed border-stone-300 rounded-2xl p-6 text-center hover:border-[#D53E0F] hover:bg-orange-50 transition cursor-pointer group"
-                >
-                  <div
-                    class="w-12 h-12 bg-orange-100 text-[#D53E0F] rounded-full mx-auto flex items-center justify-center mb-3 group-hover:scale-110 transition"
-                  >
-                    <svg
-                      class="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                      ></path>
-                    </svg>
-                  </div>
-                  <p class="text-sm font-bold text-stone-900">
-                    Klik untuk upload dokumen baru
-                  </p>
-                  <p class="text-xs text-stone-500 mt-1">
-                    Format PDF/JPG. Maksimal 5MB.
-                  </p>
-                </div>
-                <div
-                  class="mt-3 flex items-center justify-between p-3 bg-stone-50 border border-stone-200 rounded-xl"
-                >
-                  <div class="flex items-center gap-3">
-                    <svg
-                      class="w-5 h-5 text-red-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      ></path>
-                    </svg>
-                    <span class="text-sm font-bold text-stone-700"
-                      >SIP_AhmadFauzi_2025.pdf</span
-                    >
-                  </div>
-                  <span
-                    class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-1 rounded"
-                    >Terverifikasi</span
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
+          </form>
         </div>
       </div>
-    </main>
+    <script>
+      function updateSipFileName(input) {
+        const fileNameSpan = document.getElementById('sip-file-name');
+        if (input.files && input.files.length > 0) {
+          fileNameSpan.textContent = input.files[0].name;
+        }
+      }
+    </script>
   </body>
 </html>

@@ -42,34 +42,56 @@
 
             <!-- Filter Section -->
             <div class="bg-white rounded-xl border border-stone-200 p-6 mb-8">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <input type="text" placeholder="Cari nama pasien..." class="px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent">
-                    <select class="px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent">
-                        <option>Semua Status</option>
-                        <option>Baru Masuk</option>
-                        <option>Menunggu Lama</option>
-                    </select>
-                    <select class="px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent">
-                        <option>Urutkan: Terbaru</option>
-                        <option>Urutan: Terpenggal Lama</option>
-                        <option>Urutan: Nama A-Z</option>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" id="search-input" placeholder="Cari nama pasien..." class="px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent">
+                    <select id="sort-filter" class="px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent">
+                        <option value="NEWEST">Urutkan: Terbaru</option>
+                        <option value="NAME">Urutan: Nama A-Z</option>
                     </select>
                 </div>
             </div>
 
             <!-- Patient Queue Cards -->
-            <div class="space-y-4">
-                <div class="patient-card bg-white rounded-xl border border-stone-200 p-6 hover:border-[#D53E0F]" th:each="consultation : ${queue}">
+            <div class="space-y-4" id="queue-container">
+                <!-- Server-Side Empty State -->
+                <div th:if="${#lists.isEmpty(queue)}" class="bg-white rounded-xl border border-stone-200 p-12 text-center">
+                    <div class="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4 text-stone-400">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-stone-800 mb-1">Tidak Ada Antrean Aktif</h3>
+                    <p class="text-sm text-stone-500">Saat ini tidak ada pasien yang sedang menunggu atau dalam sesi konsultasi.</p>
+                </div>
+
+                <!-- Client-Side No Results Found -->
+                <div id="no-results" class="hidden bg-white rounded-xl border border-stone-200 p-12 text-center">
+                    <div class="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4 text-stone-400">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-stone-800 mb-1">Hasil Pencarian Tidak Ditemukan</h3>
+                    <p class="text-sm text-stone-500">Coba ubah kata kunci pencarian atau filter status Anda.</p>
+                </div>
+
+                <div class="patient-card bg-white rounded-xl border border-stone-200 p-6 hover:border-[#D53E0F]" 
+                     th:each="consultation : ${queue}"
+                     th:data-name="${#strings.toLowerCase(consultation.customer.name)}"
+                     th:data-status="${consultation.status.name()}"
+                     th:data-created="${consultation.createdAt}">
                     <div class="flex justify-between items-start mb-4">
                         <div class="flex items-center gap-4">
-                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center text-2xl font-bold text-[#D53E0F]" th:text="${#strings.substring(consultation.customer.name, 0, 2).toUpperCase()}">
+                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center text-2xl font-bold text-[#D53E0F]"
+                                 th:text="${consultation.customer != null and consultation.customer.name != null and consultation.customer.name.length() >= 2 ? #strings.toUpperCase(consultation.customer.name.substring(0,2)) : 'PS'}">
                                 SN
                             </div>
                             <div>
                                 <h3 class="text-xl font-bold text-gray-900" th:text="${consultation.customer.name}">Nama Pasien</h3>
                                 <p class="text-gray-600 text-sm" th:text="'ID: PAT-' + ${consultation.customer.userId}">ID: PAT-2024-00123</p>
                                 <div class="flex gap-2 mt-2">
-                                    <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">Menunggu</span>
+                                    <span th:if="${consultation.status.name() == 'WAITING'}" class="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full">Menunggu</span>
+                                    <span th:if="${consultation.status.name() == 'IN_PROGRESS'}" class="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full">Berjalan</span>
                                 </div>
                             </div>
                         </div>
@@ -113,13 +135,13 @@
                             
                             <!-- Jika tidak ada sesi aktif, gunakan form POST untuk menerima pasien -->
                             <form th:unless="${activeConsultationId != null}" th:action="@{/doctor/accept-consultation/{id}(id=${consultation.id})}" method="post" class="w-full">
-                                <input type="hidden" name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                 <button type="submit" class="w-full bg-[#D53E0F] hover:bg-[#5E0006] text-white font-bold py-3 px-4 rounded-lg transition text-center block">Terima Konsultasi</button>
                             </form>
                         </div>
-                        <button class="px-6 py-3 border border-stone-300 text-gray-700 font-medium rounded-lg hover:bg-stone-50 transition">
-                            Tolak
-                        </button>
+                        <div th:if="${consultation.status.name() == 'COMPLETED'}" class="flex-1">
+                            <a th:href="@{/doctor/live-konsultasi/{id}(id=${consultation.id})}" class="flex-1 bg-stone-800 hover:bg-stone-900 text-white font-bold py-3 px-4 rounded-lg transition text-center block w-full">Lihat Detail & Resep</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -127,16 +149,66 @@
     </main>
 
     <script>
-        // Simple search functionality
-        document.querySelectorAll('input[type="text"]').forEach(input => {
-            input.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                document.querySelectorAll('.patient-card').forEach(card => {
-                    const name = card.querySelector('h3').textContent.toLowerCase();
-                    card.style.display = name.includes(searchTerm) ? '' : 'none';
-                });
+        const searchInput = document.getElementById('search-input');
+        const sortFilter = document.getElementById('sort-filter');
+        const queueContainer = document.getElementById('queue-container');
+        const noResults = document.getElementById('no-results');
+
+        function updateFilters() {
+            if (!queueContainer) return;
+            const cards = Array.from(queueContainer.getElementsByClassName('patient-card'));
+            if (cards.length === 0) return;
+
+            const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            const sortBy = sortFilter ? sortFilter.value : 'NEWEST';
+
+            let visibleCount = 0;
+
+            // Filter
+            cards.forEach(card => {
+                const name = card.getAttribute('data-name') || '';
+                const matchesSearch = name.includes(query);
+
+                if (matchesSearch) {
+                    card.style.display = '';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
             });
-        });
+
+            // Toggle No Results Message
+            if (noResults) {
+                if (visibleCount === 0) {
+                    noResults.classList.remove('hidden');
+                } else {
+                    noResults.classList.add('hidden');
+                }
+            }
+
+            // Sort
+            cards.sort((a, b) => {
+                if (sortBy === 'NAME') {
+                    const nameA = a.getAttribute('data-name') || '';
+                    const nameB = b.getAttribute('data-name') || '';
+                    return nameA.localeCompare(nameB);
+                } else {
+                    // NEWEST
+                    const timeA = new Date(a.getAttribute('data-created') || '');
+                    const timeB = new Date(b.getAttribute('data-created') || '');
+                    return timeB - timeA;
+                }
+            });
+
+            // Re-append sorted cards
+            cards.forEach(card => queueContainer.appendChild(card));
+        }
+
+        if (searchInput) searchInput.addEventListener('input', updateFilters);
+        if (sortFilter) sortFilter.addEventListener('change', updateFilters);
+        
+        // Run once on load
+        document.addEventListener('DOMContentLoaded', updateFilters);
     </script>
 </body>
 </html>

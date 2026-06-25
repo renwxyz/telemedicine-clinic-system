@@ -35,7 +35,7 @@
                 <div class="flex items-center gap-3">
                     <span th:replace="~{fragments/status-badges :: consultation-status(${consultation.status.name()})}"></span>
                     <form th:if="${consultation.status.name() == 'IN_PROGRESS'}" th:action="@{/doctor/live-konsultasi/{id}/end(id=${consultation.id})}" method="post" onsubmit="return confirm('Apakah Anda yakin ingin mengakhiri sesi ini? Pasien tidak akan bisa membalas pesan lagi.');">
-                        <input type="hidden" name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <button type="submit" class="bg-red-100 hover:bg-red-200 text-red-700 font-bold px-4 py-2 rounded-lg text-sm transition">Akhiri Sesi</button>
                     </form>
                 </div>
@@ -102,7 +102,7 @@
                         <ul id="med-search-results" class="absolute z-50 w-full bg-white border border-stone-200 rounded-xl mt-1 shadow-xl max-h-48 overflow-y-auto hidden custom-scrollbar"></ul>
                     </div>
                     <form th:action="@{/doctor/prescription/create}" method="post" id="prescription-form">
-                        <input type="hidden" name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <input type="hidden" name="consultationId" th:value="${consultation.id}" />
                         <div id="selected-meds-container" class="space-y-3 mb-6 max-h-64 overflow-y-auto custom-scrollbar pr-1"></div>
                         <button type="submit" id="submit-prescription-btn" class="w-full bg-[#D53E0F] hover:bg-[#5E0006] text-white font-bold py-3 rounded-xl transition text-center shadow-md disabled:opacity-50 disabled:cursor-not-allowed" disabled>
