@@ -78,7 +78,7 @@
                   </div>
                   <div class="mt-auto pt-3 border-t border-stone-100 flex justify-between items-center">
                     <span class="text-xs text-stone-500 font-medium">Biaya Sesi</span>
-                    <span class="text-sm font-bold text-[#D53E0F]">Hubungi Dokter</span>
+                    <span class="text-sm font-bold text-[#D53E0F]" th:text="${'Rp ' + #numbers.formatInteger(doctor.consultationFee, 0, 'COMMA')}">Hubungi Dokter</span>
                   </div>
                 </div>
               </label>
