@@ -98,4 +98,37 @@ public class EmailService {
             return EmailResult.failure(exception.getMessage());
         }
     }
+
+    public EmailResult sendOwnerCredentials(
+            String toEmail,
+            String ownerName,
+            String tempPassword
+    ) {
+        try {
+            Context context = new Context();
+            context.setVariable("ownerName", ownerName);
+            context.setVariable("email", toEmail);
+            context.setVariable("tempPassword", tempPassword);
+
+            String htmlContent = templateEngine.process(
+                    "auth/owner-credentials-email",
+                    context
+            );
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromAddress);
+            helper.setTo(toEmail);
+            helper.setSubject("Kredensial Akun Pemilik Apotek Telemedclinic Anda");
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+
+            return EmailResult.success();
+        } catch (Exception exception) {
+            logger.error("Failed to send owner credentials email to {}.", toEmail, exception);
+            return EmailResult.failure(exception.getMessage());
+        }
+    }
 }

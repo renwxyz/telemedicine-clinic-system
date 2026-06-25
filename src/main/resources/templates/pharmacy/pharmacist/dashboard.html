@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dasbor - Apoteker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#FDF3F0] h-screen overflow-hidden flex">
+
+    <!-- SIDEBAR OPERASIONAL -->
+    <aside th:replace="~{pharmacy/fragments/pharmacist-sidebar :: sidebar(activePage='dashboard')}"></aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col overflow-y-auto bg-stone-50/50">
+        
+        <!-- Header Section -->
+        <div class="bg-white border-b border-stone-200 px-8 py-8 flex-shrink-0 relative overflow-hidden">
+            <!-- Decorative Elements -->
+            <div class="absolute right-0 top-0 w-64 h-64 bg-gradient-to-br from-[#FAD5C8] to-transparent rounded-full opacity-50 -translate-y-1/2 translate-x-1/4"></div>
+            
+            <div class="relative z-10 flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-stone-900 mb-1" th:text="'Selamat Bertugas, ' + ${pharmacist.name} + '! 👋'">Selamat Bertugas, Siska! 👋</h1>
+                    <p class="text-sm text-stone-500">Mari bantu pasien mendapatkan obat mereka dengan tepat waktu hari ini.</p>
+                </div>
+                <div class="text-right hidden md:block">
+                    <p class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1" th:text="${pharmacy != null ? pharmacy.name : 'Apotek Belum Terdaftar'}">Jadwal Shift Pagi</p>
+                    <p class="text-lg font-bold text-stone-900 flex items-center justify-end gap-2">
+                        <i class="ti ti-clock text-[#D53E0F]"></i> <span th:text="${#temporals.format(#temporals.createNow(), 'dd MMM yyyy, HH:mm')}"></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Widgets -->
+        <div class="p-8 space-y-8">
+            
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                <!-- Stat 1 -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-stone-200 relative overflow-hidden group hover:border-[#D53E0F] transition-all cursor-pointer">
+                    <div class="absolute right-0 bottom-0 w-24 h-24 bg-red-50 rounded-tl-full opacity-50 group-hover:scale-110 transition-transform"></div>
+                    <div class="relative z-10">
+                        <div class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center mb-4">
+                            <i class="ti ti-bell-ringing text-xl"></i>
+                        </div>
+                        <p class="text-sm font-bold text-stone-500 mb-1">Pesanan Menunggu</p>
+                        <div class="flex items-end gap-3">
+                            <h3 class="text-3xl font-black text-stone-900" th:text="${pendingCount != null ? pendingCount : 0}">2</h3>
+                            <span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded-md animate-pulse">Perlu Diproses</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stat 2 -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-stone-200 relative overflow-hidden group hover:border-orange-400 transition-all cursor-pointer">
+                    <div class="absolute right-0 bottom-0 w-24 h-24 bg-orange-50 rounded-tl-full opacity-50 group-hover:scale-110 transition-transform"></div>
+                    <div class="relative z-10">
+                        <div class="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center mb-4">
+                            <i class="ti ti-box text-xl"></i>
+                        </div>
+                        <p class="text-sm font-bold text-stone-500 mb-1">Sedang Disiapkan</p>
+                        <div class="flex items-end gap-3">
+                            <h3 class="text-3xl font-black text-stone-900" th:text="${processingCount != null ? processingCount : 0}">1</h3>
+                            <span class="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded-md">Proses Racik</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stat 3 -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-stone-200 relative overflow-hidden group hover:border-green-400 transition-all cursor-pointer">
+                    <div class="absolute right-0 bottom-0 w-24 h-24 bg-green-50 rounded-tl-full opacity-50 group-hover:scale-110 transition-transform"></div>
+                    <div class="relative z-10">
+                        <div class="w-10 h-10 rounded-xl bg-green-100 text-green-600 flex items-center justify-center mb-4">
+                            <i class="ti ti-check text-xl"></i>
+                        </div>
+                        <p class="text-sm font-bold text-stone-500 mb-1">Total Dikirim/Selesai</p>
+                        <div class="flex items-end gap-3">
+                            <h3 class="text-3xl font-black text-stone-900" th:text="${completedCount != null ? completedCount : 0}">14</h3>
+                            <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md">Pesanan</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stat 4 -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-stone-200 relative overflow-hidden group hover:border-stone-400 transition-all cursor-pointer">
+                    <div class="absolute right-0 bottom-0 w-24 h-24 bg-stone-100 rounded-tl-full opacity-50 group-hover:scale-110 transition-transform"></div>
+                    <div class="relative z-10">
+                        <div class="w-10 h-10 rounded-xl bg-stone-100 text-stone-600 flex items-center justify-center mb-4">
+                            <i class="ti ti-alert-triangle text-xl"></i>
+                        </div>
+                        <p class="text-sm font-bold text-stone-500 mb-1">Peringatan Stok Obat</p>
+                        <div class="flex items-end gap-3">
+                            <h3 class="text-3xl font-black text-stone-900" th:text="${lowStockCount != null ? lowStockCount : 0}">3</h3>
+                            <span class="text-xs font-bold text-stone-600 bg-stone-100 px-2 py-1 rounded-md">Stok Menipis</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Urgent Tasks Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- Card: Pesanan Terbaru -->
+                <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-bold text-stone-900 flex items-center gap-2">
+                            <i class="ti ti-bolt text-[#D53E0F]"></i> Pesanan Terbaru
+                        </h2>
+                        <a href="/pharmacist/orders" class="text-sm font-bold text-blue-600 hover:text-blue-800">Lihat Semua Antrean</a>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div th:if="${#lists.isEmpty(recentOrders)}" class="text-center text-stone-500 py-4">
+                            Tidak ada pesanan terbaru.
+                        </div>
+                        
+                        <div th:each="order : ${recentOrders}" 
+                             th:classappend="${order.status.name() == 'PENDING'} ? 'bg-red-50/50 border-red-100' : 'bg-stone-50 border-stone-200'"
+                             class="flex items-center justify-between p-4 border rounded-xl">
+                            <div class="flex items-start gap-3">
+                                <div th:classappend="${order.status.name() == 'PENDING'} ? 'bg-red-100 text-red-600' : 'bg-white border border-stone-200 text-stone-500'" class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="ti ti-prescription text-lg"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-stone-900 mb-0.5" th:text="${order.orderId}">#ORD-1025</p>
+                                    <p class="text-xs text-stone-500" th:text="${order.customer.name} + ' - ' + ${order.status.name()}">Agus Pratama</p>
+                                </div>
+                            </div>
+                            <a th:href="@{/pharmacist/orders}" th:classappend="${order.status.name() == 'PENDING'} ? 'bg-[#D53E0F] hover:bg-[#5E0006] text-white' : 'bg-white border border-stone-300 hover:bg-stone-50 text-stone-700'" class="px-4 py-2 text-xs font-bold rounded-lg transition-colors shadow-sm">Buka</a>
+                        </div>
+                        
+                    </div>
+                </div>
+
+                <!-- Card: Placeholder untuk Info Tambahan -->
+                <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 flex flex-col justify-center items-center text-center">
+                    <div class="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="ti ti-info-circle text-4xl text-stone-400"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-stone-900 mb-2">Informasi Apotek</h2>
+                    <p class="text-sm text-stone-500 mb-4">Akses detail stok dan riwayat dari menu di samping.</p>
+                    <a href="/pharmacist/katalog" class="px-6 py-2 bg-stone-900 text-white rounded-xl text-sm font-bold hover:bg-stone-800 transition-colors">Buka Katalog</a>
+                </div>
+
+            </div>
+            
+        </div>
+    </main>
+
+</body>
+</html>

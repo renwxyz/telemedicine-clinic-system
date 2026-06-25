@@ -1,0 +1,33 @@
+spring.application.name=telemedicine-clinic-system
+
+spring.datasource.url=jdbc:mysql://localhost:3306/telemedclinic  
+spring.datasource.username=your_database_username
+spring.datasource.password=your_database_password
+
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.show-sql=true
+
+spring.thymeleaf.cache=false
+
+spring.mail.host=sandbox.smtp.mailtrap.io
+spring.mail.port=2525
+
+spring.mail.username=your_mailtrap_username
+spring.mail.password=your_mailtrap_password
+
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+app.mail.from=noreply@telemedclinic.com
+server.address=0.0.0.0
+server.port=8080
+
+# Midtrans Configuration
+midtrans.server.key=your_midtrans_server_key
+midtrans.client.key=your_midtrans_client_key
+midtrans.is.production=false
+midtrans.api.url=https://app.sandbox.midtrans.com/snap/v1/transactions
+
+# link untuk aktivkan ssh
+# ssh -p 443 -R0:localhost:8088 a.pinggy.io
+# mvn clean install

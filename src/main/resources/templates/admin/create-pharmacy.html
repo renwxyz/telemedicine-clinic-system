@@ -230,6 +230,74 @@
                     </div>
                 </div>
 
+                <!-- Section: Card Informasi Pemilik -->
+                <div class="bg-white rounded-2xl shadow-md border border-stone-200 overflow-hidden">
+
+                    <!-- Card Header -->
+                    <div class="px-6 py-4 border-b border-stone-100 flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-purple-100 flex items-center justify-center">
+                            <i class="ti ti-user-shield text-lg text-purple-600"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-stone-900 text-sm">Informasi Pemilik Apotek</h2>
+                            <p class="text-xs text-stone-500">Akun ini akan memiliki hak akses penuh ke manajemen apotek</p>
+                        </div>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="px-6 py-6 space-y-5">
+
+                        <!-- Field: Nama Pemilik -->
+                        <div>
+                            <label for="ownerName" class="block text-sm font-semibold text-stone-900 mb-1.5">
+                                Nama Pemilik <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text"
+                                   id="ownerName"
+                                   th:field="*{ownerName}"
+                                   placeholder="Contoh: Budi Santoso"
+                                   class="w-full px-4 py-3 border border-stone-200 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-sm"
+                                   th:classappend="${#fields.hasErrors('ownerName')} ? 'border-red-400' : ''"/>
+                            <p th:if="${#fields.hasErrors('ownerName')}"
+                               th:errors="*{ownerName}"
+                               class="text-red-500 text-xs mt-1.5">Error</p>
+                        </div>
+
+                        <!-- Field: Email Pemilik -->
+                        <div>
+                            <label for="ownerEmail" class="block text-sm font-semibold text-stone-900 mb-1.5">
+                                Email Pemilik <span class="text-red-500">*</span>
+                            </label>
+                            <input type="email"
+                                   id="ownerEmail"
+                                   th:field="*{ownerEmail}"
+                                   placeholder="Contoh: budi.santoso@email.com"
+                                   class="w-full px-4 py-3 border border-stone-200 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-sm"
+                                   th:classappend="${#fields.hasErrors('ownerEmail')} ? 'border-red-400' : ''"/>
+                            <p th:if="${#fields.hasErrors('ownerEmail')}"
+                               th:errors="*{ownerEmail}"
+                               class="text-red-500 text-xs mt-1.5">Error</p>
+                            <p class="text-xs text-stone-400 mt-1.5">Kredensial login akan dikirimkan ke email ini.</p>
+                        </div>
+
+                        <!-- Field: Nomor Telepon Pemilik -->
+                        <div>
+                            <label for="ownerPhoneNumber" class="block text-sm font-semibold text-stone-900 mb-1.5">
+                                Nomor Handphone Pemilik <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text"
+                                   id="ownerPhoneNumber"
+                                   th:field="*{ownerPhoneNumber}"
+                                   placeholder="Contoh: 081234567890"
+                                   class="w-full px-4 py-3 border border-stone-200 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-sm"
+                                   th:classappend="${#fields.hasErrors('ownerPhoneNumber')} ? 'border-red-400' : ''"/>
+                            <p th:if="${#fields.hasErrors('ownerPhoneNumber')}"
+                               th:errors="*{ownerPhoneNumber}"
+                               class="text-red-500 text-xs mt-1.5">Error</p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Section: Action Buttons -->
                 <div class="flex items-center justify-end gap-3 pt-2 pb-8">
                     <!-- Tombol Batal -->

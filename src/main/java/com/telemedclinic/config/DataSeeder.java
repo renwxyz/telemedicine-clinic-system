@@ -12,15 +12,17 @@ import org.springframework.transaction.annotation.Transactional;
 import com.telemedclinic.user.entity.Admin;
 import com.telemedclinic.user.entity.Customer;
 import com.telemedclinic.user.entity.Gender;
-import com.telemedclinic.pharmacy.repository.PharmacyRepository;
-import com.telemedclinic.user.entity.Pharmacist;
+import com.telemedclinic.pharmacy.internal.repository.PharmacyRepository;
+import com.telemedclinic.pharmacy.internal.entity.Pharmacist;
 import com.telemedclinic.medicine.entity.Medicine;
 import com.telemedclinic.medicine.repository.MedicineRepository;
-import com.telemedclinic.inventory.entity.InventoryItem;
-import com.telemedclinic.inventory.repository.InventoryItemRepository;
+import com.telemedclinic.pharmacy.internal.entity.InventoryItem;
+import com.telemedclinic.pharmacy.internal.repository.InventoryItemRepository;
 import com.telemedclinic.user.repository.AdminRepository;
 import com.telemedclinic.user.repository.UserRepository;
 import com.telemedclinic.user.repository.DoctorRepository;
+import com.telemedclinic.pharmacy.internal.entity.PharmacyOwner;
+import com.telemedclinic.pharmacy.internal.repository.PharmacyOwnerRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +56,7 @@ public class DataSeeder implements ApplicationRunner {
     private final MedicineRepository medicineRepository;
     private final InventoryItemRepository inventoryItemRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PharmacyOwnerRepository pharmacyOwnerRepository;
 
     @Override
     @Transactional
@@ -61,6 +64,7 @@ public class DataSeeder implements ApplicationRunner {
         seedAdmin();
         seedDefaultUser();
         seedDefaultDoctor();
+        seedDefaultPharmacyOwner();
         seedDefaultPharmacy();
         seedDefaultPharmacist();
         seedMedicines();
@@ -95,6 +99,30 @@ public class DataSeeder implements ApplicationRunner {
         log.info("Doctor default berhasil dibuat: {}", DEFAULT_DOCTOR_EMAIL);
     }
 
+    private void seedDefaultPharmacyOwner() {
+        final String DEFAULT_OWNER_NAME = "Budi Santoso";
+        final String DEFAULT_OWNER_EMAIL = "owner@klinikku.id";
+        final String DEFAULT_OWNER_PASSWORD = "owner123";
+        final String DEFAULT_OWNER_PHONE = "081255556666";
+        final String DEFAULT_OWNER_NIK = "3170000000000001";
+
+        if (userRepository.existsByEmail(DEFAULT_OWNER_EMAIL)) {
+            log.info("Pharmacy Owner default sudah ada, skip seeding owner");
+            return;
+        }
+
+        PharmacyOwner owner = new PharmacyOwner(
+                DEFAULT_OWNER_NAME,
+                DEFAULT_OWNER_EMAIL,
+                passwordEncoder.encode(DEFAULT_OWNER_PASSWORD),
+                DEFAULT_OWNER_PHONE,
+                DEFAULT_OWNER_NIK
+        );
+
+        pharmacyOwnerRepository.save(owner);
+        log.info("Pharmacy Owner default berhasil dibuat: {}", DEFAULT_OWNER_EMAIL);
+    }
+
     private void seedDefaultPharmacy() {
         final String DEFAULT_PHARMACY_NAME = "Apotek Medika Farma";
         final String DEFAULT_PHARMACY_ADDRESS = "Jl. Raya Kebayoran No. 45, Jakarta Selatan";
@@ -108,7 +136,7 @@ public class DataSeeder implements ApplicationRunner {
             return;
         }
 
-        com.telemedclinic.pharmacy.entity.Pharmacy pharmacy = new com.telemedclinic.pharmacy.entity.Pharmacy(
+        com.telemedclinic.pharmacy.internal.entity.Pharmacy pharmacy = new com.telemedclinic.pharmacy.internal.entity.Pharmacy(
                 DEFAULT_PHARMACY_NAME,
                 DEFAULT_PHARMACY_ADDRESS,
                 DEFAULT_PHARMACY_PHONE,
@@ -116,6 +144,12 @@ public class DataSeeder implements ApplicationRunner {
                 DEFAULT_PHARMACY_LATITUDE,
                 DEFAULT_PHARMACY_LONGITUDE
         );
+
+        userRepository.findByEmail("owner@klinikku.id").ifPresent(user -> {
+            if (user instanceof PharmacyOwner owner) {
+                pharmacy.setOwner(owner);
+            }
+        });
 
         pharmacyRepository.save(pharmacy);
         log.info("Pharmacy default berhasil dibuat: {}", DEFAULT_PHARMACY_NAME);
@@ -134,7 +168,7 @@ public class DataSeeder implements ApplicationRunner {
             return;
         }
 
-        com.telemedclinic.pharmacy.entity.Pharmacy pharmacy = pharmacyRepository.findByLegalDocumentNumber(DEFAULT_PHARMACY_LEGAL_DOC)
+        com.telemedclinic.pharmacy.internal.entity.Pharmacy pharmacy = pharmacyRepository.findByLegalDocumentNumber(DEFAULT_PHARMACY_LEGAL_DOC)
                 .orElseThrow(() -> new IllegalStateException("Default pharmacy not found for pharmacist seeding."));
 
         Pharmacist pharmacist = new Pharmacist(
@@ -145,6 +179,8 @@ public class DataSeeder implements ApplicationRunner {
                 DEFAULT_PHARMACIST_LICENSE,
                 pharmacy
         );
+
+        pharmacist.clearMustChangePassword();
 
         userRepository.save(pharmacist);
         log.info("Pharmacist default berhasil dibuat: {}", DEFAULT_PHARMACIST_EMAIL);
@@ -196,7 +232,7 @@ public class DataSeeder implements ApplicationRunner {
             return;
         }
 
-        com.telemedclinic.pharmacy.entity.Pharmacy pharmacy = pharmacyRepository.findByLegalDocumentNumber("SIA-2024-001234")
+        com.telemedclinic.pharmacy.internal.entity.Pharmacy pharmacy = pharmacyRepository.findByLegalDocumentNumber("SIA-2024-001234")
                 .orElseThrow(() -> new IllegalStateException("Default pharmacy not found for medicine seeding."));
 
         Medicine paracetamol = new Medicine(

@@ -11,19 +11,20 @@ import com.telemedclinic.auth.dto.AuthResponse;
 import com.telemedclinic.auth.service.AuthService;
 import com.telemedclinic.auth.service.DoctorProvisioningResult;
 import com.telemedclinic.auth.service.DoctorProvisioningService;
-import com.telemedclinic.auth.service.PharmacistProvisioningResult;
-import com.telemedclinic.auth.service.PharmacistProvisioningService;
+import com.telemedclinic.auth.service.OwnerProvisioningResult;
+import com.telemedclinic.auth.service.OwnerProvisioningService;
+import com.telemedclinic.user.dto.CreateOwnerRequest;
 import com.telemedclinic.user.dto.CreateDoctorForm;
 import com.telemedclinic.user.dto.CreateDoctorRequest;
 import com.telemedclinic.user.dto.CreatePharmacistForm;
 import com.telemedclinic.user.dto.CreatePharmacistRequest;
-import com.telemedclinic.pharmacy.dto.CreatePharmacyForm;
-import com.telemedclinic.pharmacy.dto.PharmacyRegisterRequest;
-import com.telemedclinic.pharmacy.entity.Pharmacy;
-import com.telemedclinic.pharmacy.service.PharmacyService;
+import com.telemedclinic.pharmacy.internal.dto.CreatePharmacyForm;
+import com.telemedclinic.pharmacy.internal.dto.PharmacyRegisterRequest;
+import com.telemedclinic.pharmacy.internal.entity.Pharmacy;
+import com.telemedclinic.pharmacy.internal.service.PharmacyService;
 import com.telemedclinic.user.entity.Role;
 import com.telemedclinic.user.entity.User;
-import com.telemedclinic.pharmacy.repository.PharmacyRepository;
+import com.telemedclinic.pharmacy.internal.repository.PharmacyRepository;
 import com.telemedclinic.user.repository.UserRepository;
 
 @Service
@@ -31,31 +32,44 @@ public class AdminService {
 
     private final AuthService authService;
     private final DoctorProvisioningService doctorProvisioningService;
-    private final PharmacistProvisioningService pharmacistProvisioningService;
+    private final OwnerProvisioningService ownerProvisioningService;
     private final PharmacyService pharmacyService;
     private final PharmacyRepository pharmacyRepository;
     private final UserRepository userRepository;
+    private final com.telemedclinic.medicine.repository.MedicineRepository medicineRepository;
 
     public AdminService(
             AuthService authService,
             DoctorProvisioningService doctorProvisioningService,
-            PharmacistProvisioningService pharmacistProvisioningService,
+            OwnerProvisioningService ownerProvisioningService,
             PharmacyService pharmacyService,
             PharmacyRepository pharmacyRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            com.telemedclinic.medicine.repository.MedicineRepository medicineRepository
     ) {
 
         this.authService = authService;
         this.doctorProvisioningService = doctorProvisioningService;
-        this.pharmacistProvisioningService = pharmacistProvisioningService;
+        this.ownerProvisioningService = ownerProvisioningService;
         this.pharmacyService = pharmacyService;
         this.pharmacyRepository = pharmacyRepository;
         this.userRepository = userRepository;
+        this.medicineRepository = medicineRepository;
     }
 
-    // Membuat pharmacy baru dari input admin dengan status langsung approved dan aktif.
+    // Membuat pharmacy baru dari input admin beserta dengan akun ownernya.
     @Transactional
-    public Pharmacy createPharmacy(CreatePharmacyForm form) {
+    public OwnerProvisioningResult createPharmacy(CreatePharmacyForm form) {
+        // 1. Buat Pharmacy Owner
+        OwnerProvisioningResult ownerResult = ownerProvisioningService.provisionOwner(
+                new CreateOwnerRequest(
+                        form.getOwnerName(),
+                        form.getOwnerEmail(),
+                        form.getOwnerPhoneNumber()
+                )
+        );
+
+        // 2. Buat Pharmacy
         Pharmacy pharmacy = pharmacyService.registerPharmacy(
                 new PharmacyRegisterRequest(
                         form.getName(),
@@ -67,8 +81,13 @@ public class AdminService {
                 )
         );
 
+        // 3. Kaitkan
+        ownerResult.getOwner().addPharmacy(pharmacy);
+        
         pharmacy.approveApplication();
-        return pharmacyRepository.save(pharmacy);
+        pharmacyRepository.save(pharmacy);
+
+        return ownerResult;
     }
 
     // Mengambil semua pharmacy yang terdaftar untuk kebutuhan halaman admin.
@@ -110,18 +129,6 @@ public class AdminService {
         return doctorProvisioningService.resendCredentials(doctorId);
     }
 
-    // Membuat akun pharmacist baru untuk pharmacy yang sudah dipilih admin.
-    public PharmacistProvisioningResult createPharmacist(CreatePharmacistForm form) {
-        return pharmacistProvisioningService.provisionPharmacist(
-                new CreatePharmacistRequest(
-                        form.getName(),
-                        form.getEmail(),
-                        form.getPhoneNumber(),
-                        form.getLicenseNumber(),
-                        form.getPharmacyId()
-                )
-        );
-    }
 
     // Mengambil semua user dari seluruh role untuk kebutuhan manajemen akun admin.
     public List<User> findAllUsers() {
@@ -160,6 +167,39 @@ public class AdminService {
                 .totalPharmacy(pharmacyRepository.count())
                 .totalInactiveUser(userRepository.countByActiveFalse())
                 .build();
+    }
+
+    // Mengambil semua master data obat
+    public List<com.telemedclinic.medicine.entity.Medicine> findAllMedicines() {
+        return medicineRepository.findAll();
+    }
+
+    public List<com.telemedclinic.medicine.entity.Medicine> findMedicines(String search) {
+        List<com.telemedclinic.medicine.entity.Medicine> medicines = findAllMedicines();
+
+        if (search == null || search.isBlank()) {
+            return medicines;
+        }
+
+        String keyword = search.toLowerCase(Locale.ROOT);
+
+        return medicines.stream()
+                .filter(med -> containsIgnoreCase(med.getName(), keyword)
+                        || containsIgnoreCase(med.getCategory(), keyword))
+                .toList();
+    }
+
+    // Menambah master data obat baru
+    @Transactional
+    public com.telemedclinic.medicine.entity.Medicine createMedicine(com.telemedclinic.admin.dto.CreateMedicineForm form) {
+        com.telemedclinic.medicine.entity.Medicine medicine = new com.telemedclinic.medicine.entity.Medicine(
+                form.getName(),
+                form.getDescription(),
+                form.getCategory(),
+                form.isRequiresPrescription(),
+                form.getImageUrl()
+        );
+        return medicineRepository.save(medicine);
     }
 
     private boolean containsIgnoreCase(String value, String keyword) {

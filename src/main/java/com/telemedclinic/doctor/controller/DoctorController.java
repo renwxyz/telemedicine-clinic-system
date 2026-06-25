@@ -193,10 +193,8 @@ public String dashboard(HttpSession session, Model model) {
                 com.telemedclinic.medicine.entity.Medicine med = medOpt.get();
                 int requestedQty = quantities.get(i);
 
-                // Cek apakah stok fisik obat mencukupi
-                if (med.getStock() == null || med.getStock() < requestedQty) {
-                    allStockAvailable = false;
-                }
+                // Note: Physical stock check is now deferred to the pharmacy domain.
+                // allStockAvailable remains true by default until pharmacy validation.
 
                 item.setMedicine(med);
                 item.setInstructions(instructions.get(i));

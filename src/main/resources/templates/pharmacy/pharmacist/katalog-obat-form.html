@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Obat Baru - Apoteker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#FDF3F0] h-screen overflow-hidden flex">
+
+    <!-- SIDEBAR OPERASIONAL -->
+    <aside th:replace="~{pharmacy/fragments/pharmacist-sidebar :: sidebar(activePage='catalog')}"></aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col overflow-y-auto bg-stone-50/50">
+        
+        <!-- Header Section -->
+        <div class="bg-white border-b border-stone-200 px-8 py-6 flex-shrink-0">
+            <div class="flex items-center gap-4 mb-2">
+                <a href="/pharmacist/katalog" class="w-8 h-8 flex items-center justify-center rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-600 transition-colors">
+                    <i class="ti ti-arrow-left"></i>
+                </a>
+                <h1 class="text-2xl font-bold text-stone-900">Tambah Obat Baru</h1>
+            </div>
+            <p class="text-sm text-stone-500 ml-12">Masukkan detail informasi obat untuk ditambahkan ke katalog global dan apotek Anda.</p>
+        </div>
+
+        <!-- Form Area -->
+        <div class="p-8 max-w-4xl">
+            <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-8">
+                <form th:action="@{/pharmacist/katalog/tambah}" method="post" class="space-y-6">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Pilih Obat -->
+                        <div class="col-span-1 md:col-span-2 space-y-2 mb-2">
+                            <label for="medicineId" class="block text-sm font-bold text-stone-700">Cari Obat dari Master Data <span class="text-red-500">*</span></label>
+                            <select id="medicineId" name="medicineId" required placeholder="Ketik nama atau kategori obat..." class="w-full text-sm">
+                                <option value=""></option>
+                                <option th:each="med : ${availableMedicines}" 
+                                        th:value="${med.medicineId}" 
+                                        th:text="|${med.name} — ${med.category}${med.requiresPrescription ? ' (Obat Keras)' : ''}|"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Harga -->
+                        <div class="space-y-2">
+                            <label for="price" class="block text-sm font-bold text-stone-700">Harga Jual (Rp) <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500 font-bold">Rp</span>
+                                <input type="number" id="price" name="price" min="0" step="500" required placeholder="0" class="w-full pl-12 pr-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-sm bg-stone-50 focus:bg-white transition-colors">
+                            </div>
+                        </div>
+
+                        <!-- Stok Awal -->
+                        <div class="space-y-2">
+                            <label for="stock" class="block text-sm font-bold text-stone-700">Stok Awal Fisik <span class="text-red-500">*</span></label>
+                            <input type="number" id="stock" name="stock" min="0" required placeholder="Jumlah stok" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-sm bg-stone-50 focus:bg-white transition-colors">
+                        </div>
+                    </div>
+
+                    <hr class="border-stone-100">
+
+                    <!-- Actions -->
+                    <div class="flex items-center justify-end gap-4 pt-2">
+                        <a href="/pharmacist/katalog" class="px-6 py-3 rounded-xl font-bold text-stone-500 hover:bg-stone-100 transition-colors">Batal</a>
+                        <button type="submit" class="px-8 py-3 rounded-xl bg-[#D53E0F] hover:bg-[#5E0006] text-white font-bold transition-colors shadow-md flex items-center gap-2">
+                            <i class="ti ti-device-floppy"></i> Tambahkan ke Inventaris
+                        </button>
+                    </div>
+                    
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        new TomSelect("#medicineId",{
+            create: false,
+            sortField: {
+                field: "text",
+                direction: "asc"
+            }
+        });
+    </script>
+</body>
+</html>

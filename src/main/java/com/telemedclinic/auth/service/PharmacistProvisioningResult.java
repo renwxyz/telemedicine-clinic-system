@@ -1,6 +1,6 @@
 package com.telemedclinic.auth.service;
 
-import com.telemedclinic.user.entity.Pharmacist;
+import com.telemedclinic.pharmacy.internal.entity.Pharmacist;
 
 public class PharmacistProvisioningResult {
 

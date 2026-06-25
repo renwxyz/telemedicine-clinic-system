@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Data Obat - Admin KlinikKu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#FDF3F0] h-screen overflow-hidden flex">
+
+    <!-- Section: Sidebar -->
+    <!-- Thymeleaf: Admin sidebar fragment dengan active state 'medicines' -->
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar('medicines')}"></aside>
+
+    <!-- Section: Main Content -->
+    <main class="flex-1 flex flex-col overflow-hidden bg-stone-50/50">
+        
+        <!-- Header -->
+        <div class="bg-white border-b border-stone-200 px-8 py-6 flex-shrink-0 flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-stone-900">Katalog Obat (Master Data)</h1>
+                <p class="text-sm text-stone-500 mt-1">Daftar obat resmi yang dapat digunakan oleh seluruh apotek di sistem.</p>
+            </div>
+            <a th:href="@{/admin/medicines/create}" class="bg-[#D53E0F] hover:bg-[#5E0006] text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 shadow-md">
+                <i class="ti ti-plus text-lg"></i> Tambah Master Obat
+            </a>
+        </div>
+
+        <!-- Alert Notification -->
+        <div th:if="${successMessage}" class="mx-8 mt-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl flex items-center gap-3">
+            <i class="ti ti-circle-check text-xl"></i>
+            <span th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="mx-8 mt-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center gap-3">
+            <i class="ti ti-alert-circle text-xl"></i>
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto p-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
+                
+                <!-- Toolbar -->
+                <div class="p-6 border-b border-stone-200 flex flex-col md:flex-row gap-4 items-center justify-between">
+                    <form th:action="@{/admin/medicines}" method="get" class="w-full md:w-96 relative">
+                        <i class="ti ti-search absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"></i>
+                        <input type="text" name="search" th:value="${search}" placeholder="Cari nama atau kategori obat..." class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-sm bg-stone-50 focus:bg-white transition-colors">
+                    </form>
+                </div>
+
+                <!-- Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-stone-50 text-xs text-stone-500 uppercase tracking-wide border-b border-stone-200">
+                                <th class="px-6 py-4 font-semibold w-16 text-center">ID</th>
+                                <th class="px-6 py-4 font-semibold">Nama Obat</th>
+                                <th class="px-6 py-4 font-semibold">Kategori</th>
+                                <th class="px-6 py-4 font-semibold">Resep</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-stone-100 text-sm">
+                            <tr th:if="${#lists.isEmpty(medicines)}">
+                                <td colspan="4" class="px-6 py-8 text-center text-stone-500">
+                                    <i class="ti ti-pill text-4xl text-stone-300 block mb-2"></i>
+                                    Belum ada data obat.
+                                </td>
+                            </tr>
+                            <tr th:each="med : ${medicines}" class="hover:bg-stone-50 transition-colors">
+                                <td class="px-6 py-4 text-center font-medium text-stone-500" th:text="${med.medicineId}">#1</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-stone-100 flex items-center justify-center border border-stone-200 text-stone-400">
+                                            <i class="ti ti-pill text-xl"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-stone-900" th:text="${med.name}">Paracetamol</p>
+                                            <p class="text-xs text-stone-500 truncate max-w-xs" th:text="${med.description}">Deskripsi</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="px-3 py-1 bg-stone-100 text-stone-700 rounded-full text-xs font-semibold" th:text="${med.category}">Kategori</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span th:if="${med.requiresPrescription}" class="px-2.5 py-1 bg-orange-100 text-orange-700 rounded-md text-xs font-bold border border-orange-200">
+                                        Perlu Resep
+                                    </span>
+                                    <span th:unless="${med.requiresPrescription}" class="px-2.5 py-1 bg-green-100 text-green-700 rounded-md text-xs font-bold border border-green-200">
+                                        Bebas
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+</body>
+</html>

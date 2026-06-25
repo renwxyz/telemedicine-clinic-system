@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <nav th:fragment="navbar(activePage)" class="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Left side: Logo & Menu -->
+                <div class="flex items-center gap-8">
+                    <div class="flex-shrink-0 flex items-center gap-2">
+                        <i class="ti ti-building-hospital text-2xl text-[#D53E0F]"></i>
+                        <span class="text-xl font-extrabold tracking-tight hidden sm:block"><span class="text-stone-900">KlinikKu</span> <span class="text-[#D53E0F]">Apotek</span></span>
+                    </div>
+                    
+                    <!-- Desktop Menu -->
+                    <div class="hidden md:flex space-x-1">
+                        <a th:href="@{/owner/pharmacy/dashboard}" th:classappend="${activePage == 'dashboard'} ? 'text-[#D53E0F] bg-[#FDF3F0] font-bold' : 'text-stone-600 hover:text-[#D53E0F] hover:bg-[#FDF3F0] font-medium'" class="px-3 py-2 text-sm rounded-lg transition-colors">
+                            <i class="ti ti-layout-dashboard mr-1"></i> Dasbor
+                        </a>
+                        <a th:href="@{/owner/pharmacy/transactions}" th:classappend="${activePage == 'transactions'} ? 'text-[#D53E0F] bg-[#FDF3F0] font-bold' : 'text-stone-600 hover:text-[#D53E0F] hover:bg-[#FDF3F0] font-medium'" class="px-3 py-2 text-sm rounded-lg transition-colors">
+                            <i class="ti ti-receipt mr-1"></i> Transaksi
+                        </a>
+                        <a th:href="@{/owner/pharmacy/products}" th:classappend="${activePage == 'products'} ? 'text-[#D53E0F] bg-[#FDF3F0] font-bold' : 'text-stone-600 hover:text-[#D53E0F] hover:bg-[#FDF3F0] font-medium'" class="px-3 py-2 text-sm rounded-lg transition-colors">
+                            <i class="ti ti-pill mr-1"></i> Produk
+                        </a>
+                        <a th:href="@{/owner/pharmacy/staff}" th:classappend="${activePage == 'staff'} ? 'text-[#D53E0F] bg-[#FDF3F0] font-bold' : 'text-stone-600 hover:text-[#D53E0F] hover:bg-[#FDF3F0] font-medium'" class="px-3 py-2 text-sm rounded-lg transition-colors">
+                            <i class="ti ti-users mr-1"></i> Apoteker
+                        </a>
+                        <a th:href="@{/owner/pharmacy/balance}" th:classappend="${activePage == 'balance'} ? 'text-[#D53E0F] bg-[#FDF3F0] font-bold' : 'text-stone-600 hover:text-[#D53E0F] hover:bg-[#FDF3F0] font-medium'" class="px-3 py-2 text-sm rounded-lg transition-colors">
+                            <i class="ti ti-wallet mr-1"></i> Keuangan
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right side: Profile & Settings -->
+                <div class="flex items-center gap-3">
+                    <!-- Profile Dropdown -->
+                    <div class="relative group py-4">
+                        <div class="flex items-center gap-3 cursor-pointer">
+                            <div class="text-right hidden sm:block">
+                                <p class="text-sm font-bold text-stone-900 leading-none" th:text="${session.currentUserName ?: 'Owner'}">Budi Santoso</p>
+                                <span class="text-[10px] font-bold text-[#D53E0F] uppercase tracking-wider">Owner</span>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-[#FAD5C8] flex items-center justify-center border-2 border-transparent group-hover:border-[#D53E0F] transition-all shadow-sm">
+                                <span class="text-sm font-bold text-[#D53E0F]" th:text="${session.currentUserName != null ? #strings.substring(session.currentUserName,0,1).toUpperCase() : 'O'}">B</span>
+                            </div>
+                            <i class="ti ti-chevron-down text-stone-400 text-sm group-hover:text-stone-600 transition-transform group-hover:rotate-180"></i>
+                        </div>
+                        
+                        <!-- Dropdown Menu -->
+                        <div class="absolute right-0 top-full -mt-2 w-56 bg-white rounded-xl shadow-xl border border-stone-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right z-50">
+                            <div class="p-2">
+                                <div class="px-3 py-2 border-b border-stone-100 mb-1 block sm:hidden">
+                                    <p class="text-sm font-bold text-stone-900" th:text="${session.currentUserName ?: 'Owner'}">Budi Santoso</p>
+                                    <p class="text-xs text-stone-500">Owner Apotek</p>
+                                </div>
+                                
+                                <a th:href="@{/owner/pharmacy/profile}" class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-stone-600 rounded-lg hover:bg-[#FDF3F0] hover:text-[#D53E0F] transition-colors">
+                                    <i class="ti ti-user-circle text-lg"></i> Profil Saya
+                                </a>
+                                
+                                <a th:href="@{/owner/pharmacy/settings}" class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-stone-600 rounded-lg hover:bg-[#FDF3F0] hover:text-[#D53E0F] transition-colors">
+                                    <i class="ti ti-settings text-lg"></i> Pengaturan
+                                </a>
+                                
+                                <div class="h-px bg-stone-100 my-1"></div>
+                                
+                                <form th:action="@{/auth/logout}" method="post" class="m-0 p-0">
+                                    <button type="submit" class="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-red-600 rounded-lg hover:bg-red-50 transition-colors text-left">
+                                        <i class="ti ti-logout text-lg"></i> Keluar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Master Obat - Admin KlinikKu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#FDF3F0] h-screen overflow-hidden flex">
+
+    <!-- Section: Sidebar -->
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar('medicines')}"></aside>
+
+    <!-- Section: Main Content -->
+    <main class="flex-1 flex flex-col overflow-y-auto bg-stone-50/50">
+        
+        <!-- Header Section -->
+        <div class="bg-white border-b border-stone-200 px-8 py-6 flex-shrink-0">
+            <div class="flex items-center gap-4 mb-2">
+                <a href="/admin/medicines" class="w-8 h-8 flex items-center justify-center rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-600 transition-colors">
+                    <i class="ti ti-arrow-left"></i>
+                </a>
+                <h1 class="text-2xl font-bold text-stone-900">Tambah Obat Baru (Master Data)</h1>
+            </div>
+            <p class="text-sm text-stone-500 ml-12">Daftarkan entitas obat resmi ke dalam sistem agar dapat dipilih oleh apotek.</p>
+        </div>
+
+        <!-- Form Area -->
+        <div class="p-8 max-w-4xl">
+            
+            <div th:if="${errorMessage}" class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center gap-3">
+                <i class="ti ti-alert-circle text-xl"></i>
+                <span th:text="${errorMessage}"></span>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-8">
+                <form th:action="@{/admin/medicines/create}" th:object="${createMedicineForm}" method="post" class="space-y-6">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Nama Obat -->
+                        <div class="space-y-2">
+                            <label for="name" class="block text-sm font-bold text-stone-700">Nama Obat <span class="text-red-500">*</span></label>
+                            <input type="text" id="name" th:field="*{name}" required placeholder="Contoh: Paracetamol 500mg" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-sm bg-stone-50 focus:bg-white transition-colors">
+                            <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-xs text-red-500 font-semibold"></p>
+                        </div>
+                        
+                        <!-- Kategori Obat -->
+                        <div class="space-y-2">
+                            <label for="category" class="block text-sm font-bold text-stone-700">Kategori Golongan <span class="text-red-500">*</span></label>
+                            <select id="category" th:field="*{category}" required class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-sm bg-stone-50 focus:bg-white transition-colors">
+                                <option value="" disabled selected>Pilih Kategori</option>
+                                <option value="Obat Bebas">Obat Bebas</option>
+                                <option value="Obat Bebas Terbatas">Obat Bebas Terbatas</option>
+                                <option value="Obat Keras">Obat Keras</option>
+                                <option value="Antibiotik">Antibiotik</option>
+                                <option value="Suplemen & Vitamin">Suplemen & Vitamin</option>
+                                <option value="Alat Kesehatan">Alat Kesehatan</option>
+                            </select>
+                            <p th:if="${#fields.hasErrors('category')}" th:errors="*{category}" class="text-xs text-red-500 font-semibold"></p>
+                        </div>
+                    </div>
+
+                    <!-- Deskripsi Obat -->
+                    <div class="space-y-2">
+                        <label for="description" class="block text-sm font-bold text-stone-700">Deskripsi / Indikasi <span class="text-red-500">*</span></label>
+                        <textarea id="description" th:field="*{description}" rows="3" required placeholder="Jelaskan kegunaan dan indikasi obat ini..." class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-sm bg-stone-50 focus:bg-white transition-colors"></textarea>
+                        <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-xs text-red-500 font-semibold"></p>
+                    </div>
+
+                    <!-- Image URL -->
+                    <div class="space-y-2">
+                        <label for="imageUrl" class="block text-sm font-bold text-stone-700">URL Gambar (Opsional)</label>
+                        <input type="url" id="imageUrl" th:field="*{imageUrl}" placeholder="https://example.com/image.png" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-sm bg-stone-50 focus:bg-white transition-colors">
+                    </div>
+
+                    <!-- Butuh Resep -->
+                    <div class="flex items-center gap-3 p-4 bg-orange-50 border border-orange-100 rounded-xl">
+                        <input type="checkbox" id="requiresPrescription" th:field="*{requiresPrescription}" class="w-5 h-5 rounded border-orange-300 text-[#D53E0F] focus:ring-[#D53E0F]">
+                        <label for="requiresPrescription" class="text-sm font-bold text-stone-900 cursor-pointer">
+                            Obat ini memerlukan Resep Dokter
+                            <p class="text-xs text-stone-500 font-medium mt-0.5">Centang jika ini adalah golongan obat keras atau antibiotik yang tidak boleh dibeli bebas oleh pasien.</p>
+                        </label>
+                    </div>
+
+                    <hr class="border-stone-100">
+
+                    <!-- Actions -->
+                    <div class="flex items-center justify-end gap-4 pt-2">
+                        <a href="/admin/medicines" class="px-6 py-3 rounded-xl font-bold text-stone-500 hover:bg-stone-100 transition-colors">Batal</a>
+                        <button type="submit" class="px-8 py-3 rounded-xl bg-[#D53E0F] hover:bg-[#5E0006] text-white font-bold transition-colors shadow-md flex items-center gap-2">
+                            <i class="ti ti-device-floppy"></i> Daftarkan Master Data
+                        </button>
+                    </div>
+                    
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Saya - Owner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#FDF3F0] min-h-screen">
+
+    <!-- TOP NAVBAR -->
+    <nav th:replace="~{pharmacy/fragments/owner-navbar :: navbar(activePage='profile')}"></nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Page Header -->
+        <div class="mb-8 max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-stone-900 mb-2">Profil Saya</h1>
+                <p class="text-stone-500 font-medium">Kelola informasi pribadi dan keamanan akun Anda.</p>
+            </div>
+        </div>
+
+        <!-- Profile Content -->
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-3xl shadow-sm border border-stone-200 overflow-hidden">
+                
+                <!-- Banner -->
+                <div class="h-32 bg-gradient-to-r from-[#D53E0F] to-[#8c2505]"></div>
+
+                <!-- Profile Section -->
+                <div class="px-8 pb-8">
+                    <div class="flex justify-between items-end -mt-12 mb-8">
+                        <div class="flex items-end gap-5">
+                            <div class="w-24 h-24 bg-white rounded-2xl p-1 shadow-md relative group cursor-pointer">
+                                <div class="w-full h-full bg-[#FAD5C8] rounded-xl flex items-center justify-center text-4xl font-bold text-[#D53E0F]" th:text="${owner != null and owner.name != null and owner.name.length() > 0 ? #strings.substring(owner.name,0,1).toUpperCase() : 'O'}">
+                                    O
+                                </div>
+                                <!-- Overlay tooltip -->
+                                <div class="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                    <span class="text-white text-[10px] font-bold">Ubah Foto</span>
+                                </div>
+                            </div>
+                            <div class="mt-14">
+                                <h2 class="text-2xl font-extrabold text-stone-900" th:text="${owner != null ? owner.name : 'Owner Name'}">Nama Owner</h2>
+                                <p class="text-stone-500 font-medium" th:text="${owner != null ? owner.email : 'owner@klinikku.id'}">email@klinikku.id</p>
+                            </div>
+                        </div>
+
+                        <div class="pb-1 hidden sm:block">
+                            <span class="bg-blue-100 text-blue-700 border border-blue-200 font-bold px-4 py-2 rounded-full text-xs flex items-center gap-2">
+                                <i class="ti ti-user-shield text-base"></i>
+                                PHARMACY OWNER
+                            </span>
+                        </div>
+                    </div>
+
+                    <form th:action="@{/owner/pharmacy/profile/update}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Left Column: Personal Data -->
+                        <div class="space-y-5">
+                            <h3 class="font-extrabold text-stone-900 border-b border-stone-100 pb-2">Data Pribadi</h3>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Nama Lengkap</label>
+                                <input type="text" name="name" th:value="${owner != null ? owner.name : ''}" class="w-full px-4 py-2.5 bg-white border border-stone-300 rounded-xl font-medium text-stone-900 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">NIK (Nomor Induk Kependudukan)</label>
+                                <input type="text" th:value="${owner != null ? owner.identityCardNumber : ''}" class="w-full px-4 py-2.5 bg-white border border-stone-300 rounded-xl font-medium text-stone-900 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Nomor Handphone</label>
+                                <div class="relative">
+                                    <i class="ti ti-phone absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"></i>
+                                    <input type="tel" name="phoneNumber" th:value="${owner != null ? owner.phoneNumber : ''}" class="w-full pl-11 pr-4 py-2.5 bg-white border border-stone-300 rounded-xl font-medium text-stone-900 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Security -->
+                        <div class="space-y-5">
+                            <h3 class="font-extrabold text-stone-900 border-b border-stone-100 pb-2">Keamanan Akun</h3>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Email Login</label>
+                                <div class="relative">
+                                    <i class="ti ti-mail absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"></i>
+                                    <input type="email" th:value="${owner != null ? owner.email : ''}" class="w-full pl-11 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl font-medium text-stone-700 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition" readonly>
+                                </div>
+                                <p class="text-[10px] text-stone-400 mt-1">Email digunakan untuk login dan tidak dapat diubah.</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Password Saat Ini</label>
+                                <input type="password" placeholder="Kosongkan jika tidak ingin mengubah" class="w-full px-4 py-2.5 bg-white border border-stone-300 rounded-xl font-medium text-stone-900 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Password Baru</label>
+                                <input type="password" placeholder="Minimal 8 karakter" class="w-full px-4 py-2.5 bg-white border border-stone-300 rounded-xl font-medium text-stone-900 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition">
+                            </div>
+                        </div>
+                    
+                    <!-- Footer / Save Actions -->
+                    <div class="mt-8 pt-6 border-t border-stone-100 flex justify-end md:col-span-2">
+                        <button type="submit" class="bg-[#D53E0F] text-white font-bold px-8 py-3 rounded-xl hover:bg-[#5E0006] transition shadow-md shadow-orange-200 flex items-center gap-2">
+                            <i class="ti ti-device-floppy"></i> Simpan Perubahan
+                        </button>
+                    </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>

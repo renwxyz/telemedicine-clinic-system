@@ -41,8 +41,8 @@ import com.telemedclinic.consultation.model.ConsultationStatus;
 import com.telemedclinic.consultation.repository.ConsultationRepository;
 import com.telemedclinic.customer.dto.CheckoutForm;
 import com.telemedclinic.customer.dto.ConsultationForm;
-import com.telemedclinic.inventory.entity.InventoryItem;
-import com.telemedclinic.inventory.repository.InventoryItemRepository;
+import com.telemedclinic.pharmacy.internal.entity.InventoryItem;
+import com.telemedclinic.pharmacy.api.InventoryQueryApi;
 import com.telemedclinic.order.entity.DeliveryMethod;
 import com.telemedclinic.order.entity.Order;
 import com.telemedclinic.order.entity.OrderItem;
@@ -67,7 +67,7 @@ public class CustomerController {
     private final UserRepository userRepository;
     private final DoctorRepository doctorRepository;
     private final PrescriptionRepository prescriptionRepository;
-    private final InventoryItemRepository inventoryItemRepository;
+    private final InventoryQueryApi inventoryQueryApi;
     private final CartItemRepository cartItemRepository;
     private final OrderRepository orderRepository;
     private final ConsultationRepository consultationRepository;
@@ -88,7 +88,7 @@ public class CustomerController {
             UserRepository userRepository,
             DoctorRepository doctorRepository,
             PrescriptionRepository prescriptionRepository,
-            InventoryItemRepository inventoryItemRepository,
+            InventoryQueryApi inventoryQueryApi,
             CartItemRepository cartItemRepository,
             OrderRepository orderRepository,
             ConsultationRepository consultationRepository
@@ -96,7 +96,7 @@ public class CustomerController {
         this.userRepository = userRepository;
         this.doctorRepository = doctorRepository;
         this.prescriptionRepository = prescriptionRepository;
-        this.inventoryItemRepository = inventoryItemRepository;
+        this.inventoryQueryApi = inventoryQueryApi;
         this.cartItemRepository = cartItemRepository;
         this.orderRepository = orderRepository;
         this.consultationRepository = consultationRepository;
@@ -169,9 +169,9 @@ public class CustomerController {
 
         List<InventoryItem> medicines;
         if (search != null && !search.isBlank()) {
-            medicines = inventoryItemRepository.findByMedicine_NameContainingIgnoreCase(search);
+            medicines = inventoryQueryApi.searchAvailableMedicines(search);
         } else {
-            medicines = inventoryItemRepository.findAll();
+            medicines = inventoryQueryApi.getAllAvailableMedicines();
         }
 
         if (type != null && !type.isBlank()) {
@@ -224,7 +224,7 @@ public class CustomerController {
             return "redirect:/auth/login";
         }
 
-        Optional<InventoryItem> optionalItem = inventoryItemRepository.findById(id);
+        Optional<InventoryItem> optionalItem = inventoryQueryApi.getInventoryItem(id);
         if (optionalItem.isEmpty()) {
             return "redirect:/customer/medicines";
         }
@@ -247,7 +247,7 @@ public class CustomerController {
         }
 
         Customer customer = optionalCustomer.get();
-        Optional<InventoryItem> optionalItem = inventoryItemRepository.findById(medicineId);
+        Optional<InventoryItem> optionalItem = inventoryQueryApi.getInventoryItem(medicineId);
         if (optionalItem.isEmpty()) {
             return "redirect:/customer/medicines";
         }
@@ -387,7 +387,7 @@ public class CustomerController {
 
         for (com.telemedclinic.prescription.model.PrescriptionItem pItem : prescription.getItems()) {
             // Cari harga obat dari Inventory
-            List<InventoryItem> inventoryItems = inventoryItemRepository.findByMedicine_NameContainingIgnoreCase(pItem.getMedicine().getName());
+            List<InventoryItem> inventoryItems = inventoryQueryApi.searchAvailableMedicines(pItem.getMedicine().getName());
             if (!inventoryItems.isEmpty()) {
                 InventoryItem invItem = inventoryItems.get(0); // Ambil stok pertama yang cocok
 
@@ -440,7 +440,7 @@ public class CustomerController {
         Long pharmacyId = null;
         double subtotal = 0;
         for (com.telemedclinic.prescription.model.PrescriptionItem pItem : prescription.getItems()) {
-            List<InventoryItem> inventoryItems = inventoryItemRepository.findByMedicine_NameContainingIgnoreCase(pItem.getMedicine().getName());
+            List<InventoryItem> inventoryItems = inventoryQueryApi.searchAvailableMedicines(pItem.getMedicine().getName());
             if (!inventoryItems.isEmpty()) {
                 InventoryItem invItem = inventoryItems.get(0);
                 if (pharmacyId == null && invItem.getPharmacy() != null) {

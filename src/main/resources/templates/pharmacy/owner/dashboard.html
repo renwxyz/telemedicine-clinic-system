@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard - Pharmacy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#FDF3F0] min-h-screen">
+
+    <!-- TOP NAVBAR -->
+    <nav th:replace="~{pharmacy/fragments/owner-navbar :: navbar(activePage='dashboard')}"></nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Welcome Header -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-stone-900">Ringkasan Apotek</h1>
+                <p class="text-sm text-stone-500 mt-1">Pantau performa penjualan dan operasional apotek Anda hari ini.</p>
+            </div>
+            <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-stone-200 shadow-sm">
+                <i class="ti ti-calendar text-stone-400"></i>
+                <span class="text-sm font-semibold text-stone-700">23 Juni 2026</span>
+            </div>
+        </div>
+
+        <!-- Metrics Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            
+            <!-- Card 1 (Hero Metric) -->
+            <div class="bg-gradient-to-br from-[#D53E0F] to-[#8c2505] rounded-2xl shadow-md p-6 relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 w-32 h-32 bg-white/10 rounded-full group-hover:scale-110 transition-transform"></div>
+                <div class="flex justify-between items-start mb-4 relative z-10">
+                    <div class="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white">
+                        <i class="ti ti-cash text-2xl"></i>
+                    </div>
+                    <span class="bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
+                        <i class="ti ti-trending-up"></i> +12%
+                    </span>
+                </div>
+                <p class="text-sm font-bold text-white/80 uppercase tracking-wider relative z-10">Pendapatan Hari Ini</p>
+                <h3 class="text-2xl font-black text-white mt-1 relative z-10" th:text="${'Rp ' + #numbers.formatDecimal(todayEarnings, 1, 'COMMA', 0, 'POINT')}">Rp 0</h3>
+            </div>
+
+            <!-- Card 2 (Total Produk) -->
+            <a th:href="@{/owner/pharmacy/products}" class="block bg-white rounded-2xl shadow-sm border border-stone-200 p-6 relative overflow-hidden group hover:border-blue-400 hover:shadow-md transition-all">
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-50 rounded-full opacity-50 group-hover:scale-110 transition-transform"></div>
+                <div class="flex justify-between items-start mb-4 relative z-10">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                        <i class="ti ti-pill text-2xl"></i>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-stone-50 flex items-center justify-center text-stone-400 group-hover:text-blue-500 group-hover:bg-blue-50 transition-colors">
+                        <i class="ti ti-arrow-up-right"></i>
+                    </div>
+                </div>
+                <p class="text-sm font-medium text-stone-500 relative z-10">Total Produk Aktif</p>
+                <h3 class="text-2xl font-black text-stone-900 mt-1 relative z-10" th:text="${totalProducts}">24</h3>
+            </a>
+
+            <!-- Card 3 (Transactions Today) -->
+            <a th:href="@{/owner/pharmacy/transactions}" class="block bg-white rounded-2xl shadow-sm border border-stone-200 p-6 relative overflow-hidden group hover:border-blue-500 transition-all">
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-50 rounded-full opacity-50 group-hover:scale-110 transition-transform"></div>
+                <div class="flex justify-between items-start mb-4 relative z-10">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                        <i class="ti ti-shopping-cart-check text-2xl"></i>
+                    </div>
+                </div>
+                <p class="text-sm font-medium text-stone-500 relative z-10">Transaksi Selesai Hari Ini</p>
+                <h3 class="text-2xl font-black text-stone-900 mt-1 relative z-10" th:text="${todayTransactions + ' Pesanan'}">0 Pesanan</h3>
+            </a>
+
+            <!-- Card 4 (Total Staff) -->
+            <a th:href="@{/owner/pharmacy/staff}" class="block bg-white rounded-2xl shadow-sm border border-stone-200 p-6 relative overflow-hidden group hover:border-[#D53E0F] transition-all">
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-stone-50 rounded-full opacity-50 group-hover:scale-110 transition-transform"></div>
+                <div class="flex justify-between items-start mb-4 relative z-10">
+                    <div class="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center text-stone-600">
+                        <i class="ti ti-users text-2xl"></i>
+                    </div>
+                </div>
+                <p class="text-sm font-medium text-stone-500 relative z-10">Apoteker Aktif</p>
+                <h3 class="text-2xl font-black text-stone-900 mt-1 relative z-10" th:text="${totalStaff + ' Orang'}">2 Orang</h3>
+            </a>
+
+        </div>
+
+        <!-- Critical Info Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Left: Stok Kritis List -->
+            <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6">
+                <h2 class="text-lg font-bold text-stone-900 mb-4 flex items-center gap-2">
+                    <i class="ti ti-alert-circle text-red-500"></i> Segera Restock
+                </h2>
+                
+                <div class="space-y-4">
+                    <div th:each="item : ${lowStockItems}" class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-stone-100 flex items-center justify-center text-stone-400"><i class="ti ti-pill"></i></div>
+                            <div>
+                                <p class="text-sm font-bold text-stone-900" th:text="${item.medicine.name}">Nama Obat</p>
+                                <p class="text-xs text-stone-500">Sisa: <span class="text-red-600 font-bold" th:text="${item.stock}">0</span></p>
+                            </div>
+                        </div>
+                        <button class="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors" title="Lihat Detail Produk"><i class="ti ti-chevron-right"></i></button>
+                    </div>
+                    <div th:if="${#lists.isEmpty(lowStockItems)}" class="text-sm text-stone-500 italic text-center py-4">Stok aman, tidak ada peringatan restock.</div>
+                </div>
+                
+                <a href="#" class="block text-center text-sm font-semibold text-[#D53E0F] mt-6 hover:underline">Lihat Semua Katalog</a>
+            </div>
+
+            <!-- Right: Status Apoteker & Quick Action -->
+            <div class="space-y-6">
+                <!-- Status Apoteker -->
+                <div class="bg-gradient-to-br from-stone-900 to-stone-800 rounded-2xl shadow-md border border-stone-700 p-6 text-white">
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-stone-400 mb-4">Status Operasional</h2>
+                    <div class="space-y-4">
+                        <div th:each="staff : ${pharmacists}" class="flex items-center gap-4">
+                            <div class="relative">
+                                <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center font-bold text-white border-2 border-stone-800" th:text="${staff.name != null && staff.name.length() > 0 ? staff.name.substring(0,1).toUpperCase() : 'A'}">S</div>
+                                <div class="absolute bottom-0 right-0 w-3.5 h-3.5 border-2 border-stone-800 rounded-full" th:classappend="${staff.shiftSchedule != null ? 'bg-green-500' : 'bg-stone-500'}"></div>
+                            </div>
+                            <div>
+                                <p class="font-bold text-lg leading-tight" th:text="${staff.name != null ? staff.name : 'Apoteker'}">Nama</p>
+                                <p class="text-xs text-stone-400" th:text="${staff.shiftSchedule != null ? staff.shiftSchedule : 'Sedang Libur'}">Jadwal Shift</p>
+                            </div>
+                        </div>
+                        <div th:if="${#lists.isEmpty(pharmacists)}" class="text-sm text-stone-400 italic">Belum ada apoteker terdaftar.</div>
+                    </div>
+                </div>
+
+                <!-- Quick Action (Tarik Saldo) -->
+                <div class="bg-[#FAD5C8]/30 rounded-2xl border border-[#FAD5C8] p-6 flex items-center justify-between hover:bg-[#FAD5C8]/50 transition-colors cursor-pointer group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-[#D53E0F] shadow-sm group-hover:scale-110 transition-transform">
+                            <i class="ti ti-wallet text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-stone-900">Tarik Saldo Tersedia</h3>
+                            <p class="text-xs font-medium text-stone-500 mt-1">Cairkan pendapatan ke rekening bank Anda.</p>
+                        </div>
+                    </div>
+                    <i class="ti ti-chevron-right text-stone-400 group-hover:text-[#D53E0F] group-hover:translate-x-1 transition-all"></i>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+</body>
+</html>
+
+
+
+
+

@@ -115,7 +115,7 @@
               <div th:each="order : ${recentOrders}" class="py-4 flex items-center justify-between">
                 <div>
                   <p class="text-sm font-bold text-stone-900" th:text="${order.orderId}">ORD-XXX</p>
-                  <p class="text-xs text-stone-500 mt-0.5 font-medium">Rp <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}">0</span></p>
+                  <p class="text-xs text-stone-500 mt-0.5 font-medium">Rp <span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 0, 'POINT')}">0</span></p>
                 </div>
                 <span th:if="${order.status.name() == 'PENDING'}" class="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase">Bayar</span>
                 <span th:if="${order.status.name() == 'PROCESSING' or order.status.name() == 'SHIPPED'}" class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase">Proses</span>

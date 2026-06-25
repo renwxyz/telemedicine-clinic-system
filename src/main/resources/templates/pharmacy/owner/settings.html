@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan Apotek - Owner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#FDF3F0] min-h-screen">
+
+    <!-- TOP NAVBAR -->
+    <nav th:replace="~{pharmacy/fragments/owner-navbar :: navbar(activePage='settings')}"></nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Page Header -->
+        <div class="mb-8 max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-stone-900 mb-2">Profil Apotek</h1>
+                <p class="text-stone-500 font-medium">Kelola informasi publik dan data legalitas apotek Anda.</p>
+            </div>
+        </div>
+
+        <!-- Settings Content -->
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-3xl shadow-sm border border-stone-200 overflow-hidden">
+                
+                <!-- Banner -->
+                <div class="h-32 bg-gradient-to-r from-[#D53E0F] to-[#8c2505]"></div>
+
+                <!-- Profile Section -->
+                <div class="px-8 pb-8">
+                    <div class="flex justify-between items-end -mt-12 mb-8">
+                        <div class="flex items-end gap-5">
+                            <div class="w-24 h-24 bg-white rounded-2xl p-1 shadow-md relative group cursor-pointer">
+                                <div class="w-full h-full bg-stone-50 rounded-xl border-2 border-dashed border-stone-300 flex items-center justify-center text-stone-400 group-hover:border-[#D53E0F] transition-colors overflow-hidden">
+                                    <i class="ti ti-camera-plus text-2xl group-hover:text-[#D53E0F] group-hover:scale-110 transition-transform"></i>
+                                </div>
+                                <!-- Overlay tooltip -->
+                                <div class="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                    <span class="text-white text-[10px] font-bold">Ubah Logo</span>
+                                </div>
+                            </div>
+                            <div class="mt-14">
+                                <h2 class="text-2xl font-extrabold text-stone-900">KlinikKu Apotek</h2>
+                                <p class="text-stone-500 font-medium">Pusat Farmasi Terpadu</p>
+                            </div>
+                        </div>
+
+                        <div class="pb-1 hidden sm:block">
+                            <span class="bg-green-100 text-green-700 border border-green-200 font-bold px-4 py-2 rounded-full text-xs flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                VERIFIED BUSINESS
+                            </span>
+                        </div>
+                    </div>
+
+                        <form th:action="@{/owner/pharmacy/settings/update}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+                        <!-- Left Column -->
+                        <div class="space-y-5">
+                            <h3 class="font-extrabold text-stone-900 border-b border-stone-100 pb-2">Informasi Dasar</h3>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Nama Apotek Terdaftar</label>
+                                <input type="text" name="name" th:value="${pharmacy.name}" class="w-full px-4 py-2.5 bg-white border border-stone-300 rounded-xl font-medium text-stone-900 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Email Bisnis</label>
+                                <div class="relative">
+                                    <i class="ti ti-mail absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"></i>
+                                    <input type="email" value="admin@klinikku.com" class="w-full pl-11 pr-4 py-2.5 bg-white border border-stone-300 rounded-xl font-medium text-stone-900 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Nomor Telepon / WhatsApp</label>
+                                <div class="relative">
+                                    <i class="ti ti-phone absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"></i>
+                                    <input type="tel" name="phoneNumber" th:value="${pharmacy.phoneNumber}" class="w-full pl-11 pr-4 py-2.5 bg-white border border-stone-300 rounded-xl font-medium text-stone-900 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Alamat Lengkap</label>
+                                <textarea name="address" rows="3" class="w-full px-4 py-3 bg-white border border-stone-300 rounded-xl font-medium text-stone-900 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition resize-none" th:text="${pharmacy.address}">Jl. Jend. Sudirman...</textarea>
+                            </div>
+                            
+                            <!-- LAT / LNG -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Latitude</label>
+                                    <input type="number" step="any" name="latitude" th:value="${pharmacy.latitude}" class="w-full px-4 py-2.5 bg-white border border-stone-300 rounded-xl font-medium text-stone-900 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Longitude</label>
+                                    <input type="number" step="any" name="longitude" th:value="${pharmacy.longitude}" class="w-full px-4 py-2.5 bg-white border border-stone-300 rounded-xl font-medium text-stone-900 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition">
+                                </div>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="space-y-5">
+                            <h3 class="font-extrabold text-stone-900 border-b border-stone-100 pb-2">Dokumen Legalitas</h3>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Nomor Izin Apotek (SIA)</label>
+                                <input type="text" name="legalDocumentNumber" th:value="${pharmacy.legalDocumentNumber}" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl font-medium text-stone-700 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition" readonly>
+                                <p class="text-[10px] text-stone-400 mt-1">SIA terikat pada sistem, hubungi admin untuk mengubah.</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">NPWP Bisnis</label>
+                                <input type="text" value="12.345.678.9-012.000" class="w-full px-4 py-2.5 bg-white border border-stone-300 rounded-xl font-medium text-stone-900 outline-none focus:border-[#D53E0F] focus:ring-1 focus:ring-[#D53E0F] transition">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase mb-1">File Pindai Izin SIA</label>
+                                <div class="border-2 border-dashed border-stone-300 rounded-2xl p-6 text-center hover:border-[#D53E0F] hover:bg-orange-50 transition cursor-pointer group">
+                                    <div class="w-12 h-12 bg-orange-100 text-[#D53E0F] rounded-full mx-auto flex items-center justify-center mb-3 group-hover:scale-110 transition">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                    </div>
+                                    <p class="text-sm font-bold text-stone-900">Klik untuk upload dokumen baru</p>
+                                    <p class="text-xs text-stone-500 mt-1">Format PDF/JPG. Maksimal 5MB.</p>
+                                </div>
+                                <div class="mt-3 flex items-center justify-between p-3 bg-stone-50 border border-stone-200 rounded-xl">
+                                    <div class="flex items-center gap-3">
+                                        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                        <span class="text-sm font-bold text-stone-700">SIA_Apotek_2024.pdf</span>
+                                    </div>
+                                    <span class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-1 rounded">Terverifikasi</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer / Save Actions -->
+                    <div class="mt-8 pt-6 border-t border-stone-100 flex justify-end w-full md:col-span-2">
+                        <button type="submit" class="bg-[#D53E0F] text-white font-bold px-8 py-3 rounded-xl hover:bg-[#5E0006] transition shadow-md shadow-orange-200 flex items-center gap-2">
+                            <i class="ti ti-device-floppy"></i> Simpan Perubahan
+                        </button>
+                    </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>

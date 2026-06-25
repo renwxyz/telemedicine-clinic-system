@@ -11,11 +11,11 @@ import com.telemedclinic.user.dto.DoctorRegisterRequest;
 import com.telemedclinic.auth.dto.LoginRequest;
 import com.telemedclinic.user.entity.Customer;
 import com.telemedclinic.user.entity.Doctor;
-import com.telemedclinic.user.entity.Pharmacist;
-import com.telemedclinic.pharmacy.entity.Pharmacy;
+import com.telemedclinic.pharmacy.internal.entity.Pharmacist;
+import com.telemedclinic.pharmacy.internal.entity.Pharmacy;
 import com.telemedclinic.user.entity.User;
 import com.telemedclinic.user.repository.DoctorRepository;
-import com.telemedclinic.pharmacy.repository.PharmacyRepository;
+import com.telemedclinic.pharmacy.internal.repository.PharmacyRepository;
 import com.telemedclinic.user.repository.UserRepository;
 
 @Service

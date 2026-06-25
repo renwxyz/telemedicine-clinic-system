@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Staf - Owner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        function openEditStaffModal(id, name, phone, license, shift) {
+            const modal = document.getElementById('editStaffModal');
+            const content = document.getElementById('editStaffModalContent');
+            
+            document.getElementById('editPharmacistId').value = id;
+            document.getElementById('editName').value = name;
+            document.getElementById('editPhone').value = phone;
+            document.getElementById('editLicense').value = license;
+            if(shift) {
+                document.getElementById('editShiftSchedule').value = shift;
+            }
+
+            modal.classList.remove('hidden');
+            // Trigger reflow
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95');
+        }
+
+        function closeEditStaffModal() {
+            const modal = document.getElementById('editStaffModal');
+            const content = document.getElementById('editStaffModalContent');
+            
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#FDF3F0] min-h-screen">
+
+    <!-- TOP NAVBAR -->
+    <nav th:replace="~{pharmacy/fragments/owner-navbar :: navbar(activePage='staff')}"></nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-stone-900">Manajemen Staf Apoteker</h1>
+                <p class="text-sm text-stone-500 mt-1">Kelola akun, SIPA (Surat Izin Praktik), dan status aktif tim apoteker Anda.</p>
+            </div>
+            <button onclick="document.getElementById('addStaffModal').classList.remove('hidden')" class="bg-[#D53E0F] hover:bg-[#5E0006] text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 shadow-md">
+                <i class="ti ti-user-plus text-lg"></i> Tambah Apoteker
+            </button>
+        </div>
+
+        <!-- Staff Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <!-- Staff Loop -->
+            <div th:each="p : ${pharmacists}" class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 relative overflow-hidden group hover:border-[#D53E0F] transition-all">
+                <div class="absolute right-0 top-0 w-24 h-24 bg-green-50 rounded-bl-full -z-0 opacity-50 group-hover:scale-110 transition-transform"></div>
+                
+                <div class="relative z-10 flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <div class="w-14 h-14 rounded-full bg-[#FAD5C8] flex items-center justify-center border-2 border-white shadow-sm text-[#D53E0F] font-bold text-xl">
+                                <span th:text="${p.name.substring(0,1).toUpperCase()}">A</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-stone-900 text-lg" th:text="${p.name}">Nama</h3>
+                            <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">Aktif</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative z-10 space-y-3 mb-6">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-stone-500">No. SIPA</span>
+                        <span class="font-bold text-stone-900" th:text="${p.licenseNumber}">SIPA</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-stone-500">Email</span>
+                        <span class="font-medium text-stone-900" th:text="${p.email}">Email</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-stone-500">Jadwal Shift</span>
+                        <span class="font-medium text-stone-900" th:text="${p.shiftSchedule != null ? p.shiftSchedule : 'Belum Diatur'}">Shift</span>
+                    </div>
+                </div>
+                <div class="absolute bottom-4 right-6">
+                    <button th:data-id="${p.userId}" th:data-name="${p.name}" th:data-phone="${p.phoneNumber}" th:data-license="${p.licenseNumber}" th:data-shift="${p.shiftSchedule}" onclick="openEditStaffModal(this.getAttribute('data-id'), this.getAttribute('data-name'), this.getAttribute('data-phone'), this.getAttribute('data-license'), this.getAttribute('data-shift'))" class="text-stone-400 hover:text-[#D53E0F] transition-colors" title="Edit Informasi Apoteker">
+                        <i class="ti ti-edit text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Empty State / Add New Card inside Grid -->
+            <div onclick="document.getElementById('addStaffModal').classList.remove('hidden')" class="bg-stone-50/50 rounded-2xl border-2 border-dashed border-stone-300 p-6 flex flex-col items-center justify-center text-center hover:bg-stone-50 hover:border-[#D53E0F] transition-colors cursor-pointer group min-h-[280px]">
+                <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center text-stone-400 group-hover:text-[#D53E0F] shadow-sm mb-4 transition-colors">
+                    <i class="ti ti-plus text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-stone-900 group-hover:text-[#D53E0F] transition-colors">Tambah Apoteker Baru</h3>
+                <p class="text-sm text-stone-500 mt-2 max-w-[200px]">Daftarkan apoteker baru untuk mengelola resep dan pesanan.</p>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Modal Tambah Apoteker -->
+    <div id="addStaffModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden">
+            <div class="p-6 border-b border-stone-100 flex justify-between items-center bg-stone-50">
+                <h3 class="font-bold text-lg text-stone-900">Tambah Apoteker Baru</h3>
+                <button type="button" onclick="document.getElementById('addStaffModal').classList.add('hidden')" class="text-stone-400 hover:text-stone-600">
+                    <i class="ti ti-x text-xl"></i>
+                </button>
+            </div>
+            <form th:action="@{/owner/pharmacy/staff/add}" method="POST" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Nama Lengkap</label>
+                    <input type="text" name="name" required class="w-full px-4 py-2 border border-stone-300 rounded-xl focus:ring-[#D53E0F] focus:border-[#D53E0F]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Email (Untuk Login)</label>
+                    <input type="email" name="email" required class="w-full px-4 py-2 border border-stone-300 rounded-xl focus:ring-[#D53E0F] focus:border-[#D53E0F]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-500 uppercase mb-1">No. Telepon / WA</label>
+                    <input type="tel" name="phoneNumber" required class="w-full px-4 py-2 border border-stone-300 rounded-xl focus:ring-[#D53E0F] focus:border-[#D53E0F]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-500 uppercase mb-1">No. Lisensi / SIPA</label>
+                    <input type="text" name="licenseNumber" required class="w-full px-4 py-2 border border-stone-300 rounded-xl focus:ring-[#D53E0F] focus:border-[#D53E0F]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Jadwal Shift</label>
+                    <select name="shiftSchedule" required class="w-full px-4 py-2 border border-stone-300 rounded-xl focus:ring-[#D53E0F] focus:border-[#D53E0F] bg-white">
+                        <option value="Pagi (07:00 - 15:00)">Pagi (07:00 - 15:00)</option>
+                        <option value="Sore (15:00 - 23:00)">Sore (15:00 - 23:00)</option>
+                        <option value="Full Shift (07:00 - 23:00)">Full Shift (07:00 - 23:00)</option>
+                    </select>
+                </div>
+                <div class="mt-6 pt-4 border-t border-stone-100 flex justify-end gap-3">
+                    <button type="button" onclick="document.getElementById('addStaffModal').classList.add('hidden')" class="px-5 py-2.5 text-stone-600 font-bold hover:bg-stone-100 rounded-xl">Batal</button>
+                    <button type="submit" class="bg-[#D53E0F] text-white px-5 py-2.5 rounded-xl font-bold hover:bg-[#5E0006]">Simpan & Kirim Email</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- EDIT STAFF MODAL -->
+    <div id="editStaffModal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-300">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden scale-95 transition-transform duration-300" id="editStaffModalContent">
+                <div class="px-6 py-4 border-b border-stone-100 flex justify-between items-center bg-stone-50">
+                    <h3 class="text-lg font-bold text-stone-900">Edit Informasi Apoteker</h3>
+                    <button type="button" onclick="closeEditStaffModal()" class="text-stone-400 hover:text-stone-600 transition-colors">
+                        <i class="ti ti-x text-xl"></i>
+                    </button>
+                </div>
+                <form th:action="@{/owner/pharmacy/staff/edit}" method="post" class="p-6 space-y-4">
+                    <input type="hidden" id="editPharmacistId" name="pharmacistId" />
+                    <div>
+                        <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Nama Lengkap</label>
+                        <input type="text" id="editName" name="name" required class="w-full px-4 py-2 border border-stone-300 rounded-xl focus:ring-[#D53E0F] focus:border-[#D53E0F]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-500 uppercase mb-1">No. Telepon / WA</label>
+                        <input type="tel" id="editPhone" name="phoneNumber" required class="w-full px-4 py-2 border border-stone-300 rounded-xl focus:ring-[#D53E0F] focus:border-[#D53E0F]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-500 uppercase mb-1">No. Lisensi / SIPA</label>
+                        <input type="text" id="editLicense" name="licenseNumber" required class="w-full px-4 py-2 border border-stone-300 rounded-xl focus:ring-[#D53E0F] focus:border-[#D53E0F]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Jadwal Shift</label>
+                        <select id="editShiftSchedule" name="shiftSchedule" required class="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-sm bg-white">
+                            <option value="Pagi (07:00 - 15:00)">Pagi (07:00 - 15:00)</option>
+                            <option value="Sore (15:00 - 23:00)">Sore (15:00 - 23:00)</option>
+                            <option value="Full Shift (07:00 - 23:00)">Full Shift (07:00 - 23:00)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mt-6 pt-4 border-t border-stone-100 flex justify-end gap-3">
+                        <button type="button" onclick="closeEditStaffModal()" class="px-5 py-2.5 text-stone-600 font-bold hover:bg-stone-100 rounded-xl">Batal</button>
+                        <button type="submit" class="bg-[#D53E0F] text-white px-5 py-2.5 rounded-xl font-bold hover:bg-[#5E0006]">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+

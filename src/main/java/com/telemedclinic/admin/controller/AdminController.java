@@ -19,12 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.telemedclinic.user.dto.CreateDoctorForm;
-import com.telemedclinic.user.dto.CreatePharmacistForm;
 import com.telemedclinic.user.entity.User;
-import com.telemedclinic.pharmacy.dto.CreatePharmacyForm;
+import com.telemedclinic.pharmacy.internal.dto.CreatePharmacyForm;
 import com.telemedclinic.admin.service.AdminService;
 import com.telemedclinic.auth.service.DoctorProvisioningResult;
-import com.telemedclinic.auth.service.PharmacistProvisioningResult;
+import com.telemedclinic.auth.service.OwnerProvisioningResult;
 
 @Controller
 @RequestMapping("/admin")
@@ -163,50 +162,6 @@ public class AdminController {
         return "redirect:/admin/users";
     }
 
-    // Menampilkan form pembuatan akun pharmacist.
-    @GetMapping("/pharmacists/create")
-    public String showCreatePharmacistForm(Model model) {
-        model.addAttribute("createPharmacistForm", new CreatePharmacistForm());
-        model.addAttribute("pharmacies", adminService.findAllPharmacies());
-        return "admin/create-pharmacist";
-    }
-
-    // Memproses form pembuatan akun pharmacist.
-    @PostMapping("/pharmacists/create")
-    public String createPharmacist(
-            @Valid @ModelAttribute("createPharmacistForm") CreatePharmacistForm form,
-            BindingResult bindingResult,
-            Model model,
-            RedirectAttributes redirectAttributes
-    ) {
-
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("pharmacies", adminService.findAllPharmacies());
-            return "admin/create-pharmacist";
-        }
-
-        try {
-            PharmacistProvisioningResult result = adminService.createPharmacist(form);
-
-            if (result.isEmailSent()) {
-                redirectAttributes.addFlashAttribute(
-                        "successMessage",
-                        "Akun apoteker berhasil dibuat. Kredensial telah dikirim ke " + form.getEmail() + "."
-                );
-            } else {
-                redirectAttributes.addFlashAttribute(
-                        "warningMessage",
-                        "Akun apoteker berhasil dibuat, tetapi email kredensial gagal dikirim."
-                );
-            }
-
-            return "redirect:/admin/users";
-        } catch (RuntimeException exception) {
-            model.addAttribute("pharmacies", adminService.findAllPharmacies());
-            model.addAttribute("errorMessage", exception.getMessage());
-            return "admin/create-pharmacist";
-        }
-    }
 
     // Menampilkan semua pharmacy yang terdaftar.
     @GetMapping("/pharmacies")
@@ -239,8 +194,66 @@ public class AdminController {
             return "admin/create-pharmacy";
         }
 
-        adminService.createPharmacy(form);
-        redirectAttributes.addFlashAttribute("successMessage", "Pharmacy berhasil dibuat.");
-        return "redirect:/admin/pharmacies";
+        try {
+            OwnerProvisioningResult result = adminService.createPharmacy(form);
+
+            if (result.isEmailSent()) {
+                redirectAttributes.addFlashAttribute(
+                        "successMessage",
+                        "Pharmacy dan akun pemilik berhasil dibuat. Kredensial telah dikirim ke " + form.getOwnerEmail() + "."
+                );
+            } else {
+                redirectAttributes.addFlashAttribute(
+                        "warningMessage",
+                        "Pharmacy berhasil dibuat, tetapi email kredensial pemilik gagal dikirim."
+                );
+            }
+
+            return "redirect:/admin/pharmacies";
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
+            return "redirect:/admin/pharmacies/create";
+        }
+    }
+
+    // Menampilkan semua master data obat.
+    @GetMapping("/medicines")
+    public String showMedicines(
+            @RequestParam(value = "search", required = false) String search,
+            Model model
+    ) {
+        model.addAttribute("medicines", adminService.findMedicines(search));
+        model.addAttribute("search", search);
+        return "admin/medicines";
+    }
+
+    // Menampilkan form pembuatan master data obat.
+    @GetMapping("/medicines/create")
+    public String showCreateMedicineForm(Model model) {
+        model.addAttribute("createMedicineForm", new com.telemedclinic.admin.dto.CreateMedicineForm());
+        return "admin/create-medicine";
+    }
+
+    // Memproses form pembuatan master data obat.
+    @PostMapping("/medicines/create")
+    public String createMedicine(
+            @Valid @ModelAttribute("createMedicineForm") com.telemedclinic.admin.dto.CreateMedicineForm form,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes
+    ) {
+
+        if (bindingResult.hasErrors()) {
+            return "admin/create-medicine";
+        }
+
+        try {
+            adminService.createMedicine(form);
+            redirectAttributes.addFlashAttribute("successMessage", "Obat baru berhasil ditambahkan ke Master Data.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Gagal menambahkan obat: " + e.getMessage());
+            return "redirect:/admin/medicines/create";
+        }
+
+        return "redirect:/admin/medicines";
     }
 }

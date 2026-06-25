@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keuangan & Penarikan - Owner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#FDF3F0] min-h-screen">
+
+    <!-- TOP NAVBAR -->
+    <nav th:replace="~{pharmacy/fragments/owner-navbar :: navbar(activePage='balance')}"></nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-stone-900">Keuangan & Penarikan</h1>
+                <p class="text-sm text-stone-500 mt-1">Kelola pendapatan apotek, riwayat transaksi, dan penarikan dana ke rekening Anda.</p>
+            </div>
+            <button class="bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 px-5 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 shadow-sm">
+                <i class="ti ti-download text-lg"></i> Unduh Laporan
+            </button>
+        </div>
+
+        <!-- 1/3 and 2/3 Layout -->
+        <div class="flex flex-col lg:flex-row gap-8">
+            
+            <!-- LEFT COLUMN: Wallet & Withdrawal Form (1/3 Width) -->
+            <div class="w-full lg:w-1/3 flex flex-col gap-6">
+                
+                <!-- Wallet Card -->
+                <div class="bg-gradient-to-br from-[#D53E0F] to-[#8c2505] rounded-2xl shadow-lg shadow-[#D53E0F]/20 p-6 relative overflow-hidden group">
+                    <div class="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
+                    <div class="absolute -left-4 -bottom-4 w-20 h-20 bg-black/10 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
+                    
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between mb-8">
+                            <span class="bg-white/20 backdrop-blur-sm text-white border border-white/10 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider">Saldo Aktif</span>
+                            <i class="ti ti-wallet text-white/50 text-2xl"></i>
+                        </div>
+                        <h2 class="text-3xl sm:text-4xl font-black text-white tracking-tight mb-1" th:text="${'Rp ' + #numbers.formatDecimal(pharmacy.currentBalance, 1, 'COMMA', 0, 'POINT')}">Rp 0</h2>
+                        <p class="text-xs font-medium text-white/70">Tersedia untuk ditarik hari ini</p>
+                    </div>
+
+                    <div class="relative z-10 mt-8 pt-4 border-t border-white/10 flex items-center justify-between">
+                        <div>
+                            <p class="text-[10px] text-white/50 uppercase tracking-widest font-bold mb-0.5">Saldo Tertunda</p>
+                            <p class="text-sm font-bold text-white">Rp 1.200.000</p>
+                        </div>
+                        <i class="ti ti-info-circle text-white/40 hover:text-white cursor-pointer" title="Dana dari pesanan yang belum diselesaikan oleh apoteker"></i>
+                    </div>
+                </div>
+
+                <!-- Withdrawal Form -->
+                <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6">
+                    <h3 class="font-bold text-stone-900 mb-4 flex items-center gap-2">
+                        <i class="ti ti-building-bank text-[#D53E0F]"></i> Tarik Dana
+                    </h3>
+                    
+                    <!-- Bank Account Info -->
+                    <div class="bg-stone-50 border border-stone-200 rounded-xl p-4 mb-6 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-white rounded-lg border border-stone-200 flex items-center justify-center shadow-sm">
+                                <span class="font-black text-blue-800 text-xs italic">BCA</span>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-stone-500 uppercase tracking-wider">Rekening Tujuan</p>
+                                <p class="text-sm font-bold text-stone-900 mt-0.5">8732 1099 22</p>
+                            </div>
+                        </div>
+                        <button class="text-blue-600 hover:text-blue-700 text-xs font-bold transition-colors">Ubah</button>
+                    </div>
+
+                    <!-- Input Form -->
+                    <form th:action="@{/owner/pharmacy/balance/withdraw}" method="POST">
+                        <input type="hidden" name="bankDetails" value="BCA 8732 1099 22">
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Nominal Penarikan (Rp)</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 font-bold">Rp</span>
+                                <input type="number" name="amount" placeholder="0" th:max="${pharmacy.currentBalance}" class="w-full pl-11 pr-4 py-3 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent font-bold text-stone-900 text-lg">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-[#D53E0F] hover:bg-[#5E0006] text-white py-3.5 rounded-xl font-bold transition-colors shadow-md flex items-center justify-center gap-2">
+                            Proses Penarikan <i class="ti ti-arrow-right"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Transaction History (2/3 Width) -->
+            <div class="w-full lg:w-2/3">
+                <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden flex flex-col h-full">
+                    
+                    <!-- Header -->
+                    <div class="p-6 border-b border-stone-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-stone-50/30">
+                        <div>
+                            <h3 class="font-bold text-stone-900 text-lg">Riwayat Mutasi Saldo</h3>
+                            <p class="text-xs font-medium text-stone-500 mt-1">Daftar pendapatan masuk dan penarikan keluar.</p>
+                        </div>
+                        <!-- Filters -->
+                        <div class="flex gap-2">
+                            <select class="bg-white border border-stone-300 text-stone-600 px-3 py-2 rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#D53E0F]">
+                                <option>Semua Tipe</option>
+                                <option>Pendapatan Masuk</option>
+                                <option>Penarikan Dana</option>
+                            </select>
+                            <select class="bg-white border border-stone-300 text-stone-600 px-3 py-2 rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#D53E0F]">
+                                <option>Bulan Ini</option>
+                                <option>7 Hari Terakhir</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="overflow-x-auto flex-1">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-stone-50 text-xs text-stone-500 uppercase tracking-widest border-b border-stone-200">
+                                    <th class="px-6 py-4 font-bold">Waktu & Ref</th>
+                                    <th class="px-6 py-4 font-bold">Tipe Transaksi</th>
+                                    <th class="px-6 py-4 font-bold text-right">Nominal</th>
+                                    <th class="px-6 py-4 font-bold text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-stone-100 text-sm">
+                                
+                                <!-- Dynamic Rows for Orders as Income -->
+                                <tr th:each="order : ${orders}" th:if="${order.status.name() == 'COMPLETED' or order.status.name() == 'SHIPPED' or order.status.name() == 'DELIVERED'}" class="hover:bg-stone-50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <p class="font-bold text-stone-900" th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy, HH:mm')}">23 Jun 2026, 14:30</p>
+                                        <p class="text-[10px] font-bold text-stone-400 mt-1 uppercase tracking-wider" th:text="${order.orderId}">#ORD-1024</p>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center text-green-600">
+                                                <i class="ti ti-arrow-down-left"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-bold text-stone-900">Pendapatan Pesanan</p>
+                                                <p class="text-[10px] font-bold text-stone-500 uppercase" th:text="${'Dari ' + (order.customer != null ? order.customer.name : 'Pelanggan')}">Dari Pelanggan</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <span class="font-black text-green-600" th:text="${'+ Rp ' + #numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 0, 'POINT')}">+ Rp 45.000</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="inline-flex items-center gap-1 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">
+                                            Berhasil
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(orders)}">
+                                    <td colspan="4" class="px-6 py-8 text-center text-stone-500">
+                                        <p class="font-bold text-stone-600">Belum ada riwayat mutasi pendapatan</p>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Clean Pagination -->
+                    <div class="px-6 py-4 border-t border-stone-200 flex items-center justify-between bg-white">
+                        <p class="text-sm font-medium text-stone-500">1-10 dari 48</p>
+                        <div class="flex items-center gap-1">
+                            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-300 bg-stone-50 cursor-not-allowed transition-colors"><i class="ti ti-chevron-left"></i></button>
+                            <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#D53E0F] text-white font-bold text-sm shadow-sm">1</button>
+                            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-transparent text-stone-600 hover:bg-stone-100 font-medium text-sm transition-colors">2</button>
+                            <span class="w-8 h-8 flex items-center justify-center text-stone-400 text-sm">...</span>
+                            <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-600 bg-white hover:bg-stone-50 transition-colors"><i class="ti ti-chevron-right"></i></button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+</body>
+</html>
+

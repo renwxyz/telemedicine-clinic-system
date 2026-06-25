@@ -93,6 +93,10 @@ public class AuthController {
                 return "redirect:/doctor/dashboard";
             }
 
+            if (authResponse.getRole() == Role.ROLE_PHARMACY_OWNER) {
+                return "redirect:/owner/pharmacy/dashboard";
+            }
+
             return "redirect:/customer/dashboard";
         } catch (IllegalArgumentException | IllegalStateException exception) {
             model.addAttribute("error", exception.getMessage());

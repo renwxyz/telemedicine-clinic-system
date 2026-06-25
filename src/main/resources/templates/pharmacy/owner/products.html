@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Produk & Kategori - Owner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#FDF3F0] min-h-screen">
+
+    <!-- TOP NAVBAR -->
+    <nav th:replace="~{pharmacy/fragments/owner-navbar :: navbar(activePage='products')}"></nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-stone-900">Katalog Produk & Inventaris</h1>
+                <p class="text-sm text-stone-500 mt-1">Pantau nilai aset obat dan daftar produk yang tersedia di apotek.</p>
+            </div>
+        </div>
+
+        <!-- Horizontal Tabs -->
+        <div class="border-b border-stone-200 mb-6">
+            <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                <a href="#" class="border-[#D53E0F] text-[#D53E0F] whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm flex items-center gap-2">
+                    <i class="ti ti-pill text-lg"></i> Daftar Obat
+                </a>
+                <a href="#" class="border-transparent text-stone-500 hover:text-stone-700 hover:border-stone-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors">
+                    <i class="ti ti-category text-lg"></i> Kategori
+                </a>
+            </nav>
+        </div>
+
+        <!-- TAB CONTENT: DAFTAR OBAT -->
+        <div>
+            <!-- Toolbar: Search & Actions -->
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+                <!-- Search -->
+                <div class="relative w-full sm:w-96">
+                    <i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-lg"></i>
+                    <input type="text" placeholder="Cari nama obat atau SKU..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-sm">
+                </div>
+                
+                <!-- Actions -->
+                <div class="flex gap-3 w-full sm:w-auto">
+                    <button class="bg-white border border-stone-200 hover:bg-stone-50 text-stone-600 px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors flex items-center gap-2 flex-1 sm:flex-none justify-center">
+                        <i class="ti ti-filter"></i> Filter
+                    </button>
+                </div>
+            </div>
+
+            <!-- Master Data Table -->
+            <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-stone-50 text-xs text-stone-500 uppercase tracking-wide border-b border-stone-200">
+                                <th class="px-6 py-4 font-semibold w-16">Foto</th>
+                                <th class="px-6 py-4 font-semibold">Nama Obat & SKU</th>
+                                <th class="px-6 py-4 font-semibold">Kategori</th>
+                                <th class="px-6 py-4 font-semibold">Harga Modal</th>
+                                <th class="px-6 py-4 font-semibold">Harga Jual</th>
+                                <th class="px-6 py-4 font-semibold text-center">Stok Fisik</th>
+                                <th class="px-6 py-4 font-semibold text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-stone-100 text-sm">
+                            <!-- Dynamic Rows -->
+                            <tr th:each="item : ${inventoryItems}" class="hover:bg-stone-50 transition-colors group">
+                                <td class="px-6 py-4">
+                                    <div class="w-12 h-12 rounded-lg bg-stone-100 flex items-center justify-center border border-stone-200 text-stone-400">
+                                        <i class="ti ti-photo text-xl"></i>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="font-bold text-stone-900" th:text="${item.medicine.name}">Nama Obat</p>
+                                    <p class="text-[10px] font-bold text-stone-400 mt-1 uppercase tracking-wider" th:text="${'SKU: MED-' + item.inventoryItemId}">SKU: MED-001</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-stone-100 text-stone-600">
+                                        Obat
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 font-medium text-stone-500" th:text="${'Rp ' + #numbers.formatDecimal(item.price * 0.8, 1, 'COMMA', 0, 'POINT')}">Rp 0</td>
+                                <td class="px-6 py-4 font-bold text-[#D53E0F]" th:text="${'Rp ' + #numbers.formatDecimal(item.price, 1, 'COMMA', 0, 'POINT')}">Rp 0</td>
+                                <td class="px-6 py-4 text-center">
+                                    <span th:class="${item.stock <= 10 ? 'font-bold text-red-600' : 'font-bold text-stone-900'}" th:text="${item.stock}">0</span>
+                                    <p th:if="${item.stock <= 10}" class="text-[9px] font-bold text-red-500 mt-0.5">KRITIS</p>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <span th:if="${item.stock > 0}" class="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">Aktif</span>
+                                    <span th:unless="${item.stock > 0}" class="bg-stone-100 text-stone-500 text-xs font-bold px-2.5 py-1 rounded-full">Nonaktif</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(inventoryItems)}">
+                                <td colspan="7" class="px-6 py-8 text-center text-stone-500">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <i class="ti ti-box text-4xl text-stone-300 mb-2"></i>
+                                        <p class="font-bold text-stone-600">Belum ada produk</p>
+                                        <p class="text-xs text-stone-400 mt-1">Produk inventaris apotek Anda akan tampil di sini.</p>
+                                    </div>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="px-6 py-4 border-t border-stone-200 flex items-center justify-between bg-white">
+                    <p class="text-sm font-medium text-stone-500">1-10 dari 124</p>
+                    <div class="flex items-center gap-1">
+                        <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-300 bg-stone-50 cursor-not-allowed transition-colors"><i class="ti ti-chevron-left"></i></button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#D53E0F] text-white font-bold text-sm shadow-sm">1</button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-transparent text-stone-600 hover:bg-stone-100 font-medium text-sm transition-colors">2</button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-transparent text-stone-600 hover:bg-stone-100 font-medium text-sm transition-colors">3</button>
+                        <span class="w-8 h-8 flex items-center justify-center text-stone-400 text-sm">...</span>
+                        <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-600 bg-white hover:bg-stone-50 transition-colors"><i class="ti ti-chevron-right"></i></button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+</body>
+</html>
+

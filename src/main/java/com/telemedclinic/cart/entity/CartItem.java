@@ -8,7 +8,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-import com.telemedclinic.inventory.entity.InventoryItem;
+import com.telemedclinic.pharmacy.internal.entity.InventoryItem;
 import com.telemedclinic.user.entity.Customer;
 
 @Entity

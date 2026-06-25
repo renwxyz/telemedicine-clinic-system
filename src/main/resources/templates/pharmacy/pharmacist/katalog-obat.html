@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Katalog Obat - Apoteker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#FDF3F0] h-screen overflow-hidden flex">
+
+    <!-- SIDEBAR OPERASIONAL -->
+    <aside th:replace="~{pharmacy/fragments/pharmacist-sidebar :: sidebar(activePage='catalog')}"></aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col overflow-hidden bg-stone-50/50">
+        
+        <!-- Header & Toolbar -->
+        <div class="bg-white border-b border-stone-200 px-8 py-6 flex-shrink-0">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-stone-900">Manajemen Katalog Obat</h1>
+                    <p class="text-sm text-stone-500 mt-1">Kelola data obat, perbarui sisa stok, dan atur penempatan lokasi rak.</p>
+                </div>
+                <!-- Action Button -->
+                <a href="/pharmacist/katalog/tambah" class="bg-[#D53E0F] hover:bg-[#5E0006] text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 shadow-md w-full sm:w-auto justify-center">
+                    <i class="ti ti-plus text-lg"></i> Tambah Obat Baru
+                </a>
+            </div>
+            
+            <!-- Tabs & Search -->
+            <div class="flex flex-col sm:flex-row justify-between items-end gap-4 mt-6">
+                <!-- Quick Category Tabs -->
+                <div class="flex items-center gap-6 border-b border-stone-200 w-full sm:w-auto">
+                    <button class="pb-3 border-b-2 border-[#D53E0F] text-[#D53E0F] font-bold text-sm">Semua Obat</button>
+                </div>
+
+                <!-- Search Input -->
+                <div class="relative w-full sm:w-80">
+                    <i class="ti ti-search absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"></i>
+                    <input type="text" placeholder="Cari nama atau SKU..." class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-sm bg-stone-50 focus:bg-white transition-colors">
+                </div>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="mx-8 mt-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl flex items-center gap-3">
+            <i class="ti ti-circle-check text-xl"></i>
+            <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="mx-8 mt-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center gap-3">
+            <i class="ti ti-alert-circle text-xl"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- Catalog Table -->
+        <div class="flex-1 overflow-y-auto p-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-stone-50 text-xs text-stone-500 uppercase tracking-wide border-b border-stone-200">
+                                <th class="px-6 py-4 font-semibold w-16">Foto</th>
+                                <th class="px-6 py-4 font-semibold">Nama Obat & SKU</th>
+                                <th class="px-6 py-4 font-semibold">Harga</th>
+                                <th class="px-6 py-4 font-semibold text-center">Stok Fisik</th>
+                                <th class="px-6 py-4 font-semibold text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-stone-100 text-sm">
+                            <tr th:if="${#lists.isEmpty(inventory)}">
+                                <td colspan="5" class="px-6 py-8 text-center text-stone-500">
+                                    Belum ada obat di apotek ini.
+                                </td>
+                            </tr>
+                            
+                            <tr th:each="item : ${inventory}" class="hover:bg-stone-50 transition-colors group">
+                                <td class="px-6 py-4">
+                                    <div class="w-12 h-12 rounded-lg bg-stone-100 flex items-center justify-center border border-stone-200 text-stone-400">
+                                        <i class="ti ti-pill text-xl"></i>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="font-bold text-stone-900 text-base" th:text="${item.medicine.name}">Paracetamol 500mg</p>
+                                    <p class="text-[10px] font-bold text-stone-400 mt-1 uppercase tracking-wider" th:text="'Kategori: ' + ${item.medicine.category}">Kategori</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-green-50 text-green-700 border border-green-100" th:text="'Rp ' + ${#numbers.formatDecimal(item.price, 1, 'COMMA', 0, 'POINT')}">
+                                        Rp 0
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <span th:if="${item.stock > 10}" class="font-black text-stone-900 text-lg" th:text="${item.stock}">124</span>
+                                    <div th:if="${item.stock > 0 and item.stock <= 10}">
+                                        <span class="font-black text-orange-600 text-lg" th:text="${item.stock}">5</span>
+                                        <p class="text-[9px] font-bold text-orange-500 mt-0.5"><i class="ti ti-arrow-down animate-bounce inline-block"></i> MENIPIS</p>
+                                    </div>
+                                    <div th:if="${item.stock == 0}">
+                                        <span class="font-black text-red-600 text-lg">0</span>
+                                        <p class="text-[9px] font-bold text-red-500 mt-0.5">HABIS</p>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button type="button"
+                                                th:data-id="${item.inventoryItemId}"
+                                                th:data-stock="${item.stock}"
+                                                th:data-name="${item.medicine.name}"
+                                                onclick="openStockModal(this.getAttribute('data-id'), this.getAttribute('data-stock'), this.getAttribute('data-name'))"
+                                                class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold text-xs flex items-center gap-1 transition-colors">
+                                            <i class="ti ti-refresh"></i> Update Stok
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Update Stock Modal -->
+    <div id="stockModal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 transform scale-95 opacity-0 transition-all duration-200" id="stockModalContent">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold text-stone-900">Update Stok Cepat</h3>
+                <button onclick="closeStockModal()" class="w-8 h-8 rounded-lg bg-stone-100 text-stone-500 flex items-center justify-center hover:bg-stone-200 transition-colors">
+                    <i class="ti ti-x"></i>
+                </button>
+            </div>
+            <form id="stockForm" method="post" th:action="@{/}">
+                <p class="text-sm text-stone-500 mb-4">Perbarui stok fisik untuk <span id="modalMedicineName" class="font-bold text-stone-900"></span></p>
+                
+                <div class="space-y-2 mb-6">
+                    <label for="newStock" class="block text-sm font-bold text-stone-700">Jumlah Stok Fisik</label>
+                    <input type="number" id="newStock" name="newStock" min="0" required class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent text-lg font-bold text-center bg-stone-50 focus:bg-white transition-colors">
+                </div>
+                
+                <button type="submit" class="w-full py-3 rounded-xl bg-[#D53E0F] hover:bg-[#5E0006] text-white font-bold transition-colors shadow-md">
+                    Simpan Perubahan
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        function openStockModal(itemId, currentStock, medicineName) {
+            document.getElementById('stockModal').classList.remove('hidden');
+            document.getElementById('stockForm').action = '/pharmacist/katalog/' + itemId + '/stok';
+            document.getElementById('newStock').value = currentStock;
+            document.getElementById('modalMedicineName').innerText = medicineName;
+            
+            // simple animation
+            setTimeout(() => {
+                document.getElementById('stockModalContent').classList.remove('scale-95', 'opacity-0');
+                document.getElementById('stockModalContent').classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+        
+        function closeStockModal() {
+            document.getElementById('stockModalContent').classList.remove('scale-100', 'opacity-100');
+            document.getElementById('stockModalContent').classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                document.getElementById('stockModal').classList.add('hidden');
+            }, 200);
+        }
+        /*]]>*/
+    </script>
+</body>
+</html>

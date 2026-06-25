@@ -59,16 +59,6 @@
             <span>Tambah Dokter</span>
         </a>
 
-        <!-- Tambah Apoteker -->
-        <a th:href="@{/admin/pharmacists/create}"
-           th:classappend="${activePage == 'add-pharmacist'} ?
-             'bg-[#FDF3F0] text-[#D53E0F] font-semibold border-l-4 border-[#D53E0F]' :
-             'text-stone-600 hover:bg-[#FDF3F0] hover:text-[#D53E0F]'"
-           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors">
-            <i class="ti ti-plus text-xl"></i>
-            <span>Tambah Apoteker</span>
-        </a>
-
         <!-- Master Data Group -->
         <p class="px-3 py-4 mt-4 text-xs uppercase font-semibold text-stone-400 tracking-wider">Master Data</p>
 
@@ -80,6 +70,16 @@
            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors">
             <i class="ti ti-building-hospital text-xl"></i>
             <span>Kelola Apotek</span>
+        </a>
+
+        <!-- Kelola Obat Master -->
+        <a th:href="@{/admin/medicines}"
+           th:classappend="${activePage == 'medicines'} ?
+             'bg-[#FDF3F0] text-[#D53E0F] font-semibold border-l-4 border-[#D53E0F]' :
+             'text-stone-600 hover:bg-[#FDF3F0] hover:text-[#D53E0F]'"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors">
+            <i class="ti ti-pill text-xl"></i>
+            <span>Katalog Obat (Master)</span>
         </a>
 
         <!-- Tambah Apotek -->

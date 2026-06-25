@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <aside th:fragment="sidebar(activePage)" class="w-20 lg:w-64 bg-white border-r border-stone-200 flex flex-col flex-shrink-0 h-full">
+        <!-- Logo -->
+        <div class="px-0 lg:px-6 py-6 border-b border-stone-200 flex justify-center lg:justify-start">
+            <div class="flex items-center gap-3">
+                <i class="ti ti-building-hospital text-2xl text-[#D53E0F]"></i>
+                <span class="text-xl font-extrabold tracking-tight hidden lg:block"><span class="text-stone-900">KlinikKu</span> <span class="text-[#D53E0F]">Apotek</span></span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
+            <a th:href="@{/pharmacist/dashboard}" th:classappend="${activePage == 'dashboard'} ? 'bg-[#FDF3F0] text-[#D53E0F] font-semibold border-l-4 border-[#D53E0F]' : 'text-stone-600 hover:bg-[#FDF3F0] hover:text-[#D53E0F]'" class="flex items-center justify-center lg:justify-start gap-3 px-3 py-3 rounded-xl transition-colors">
+                <i class="ti ti-layout-dashboard text-2xl"></i>
+                <span class="hidden lg:block">Dasbor</span>
+            </a>
+            <a th:href="@{/pharmacist/orders}" th:classappend="${activePage == 'orders'} ? 'bg-[#FDF3F0] text-[#D53E0F] font-semibold border-l-4 border-[#D53E0F]' : 'text-stone-600 hover:bg-[#FDF3F0] hover:text-[#D53E0F]'" class="flex items-center justify-center lg:justify-start gap-3 px-3 py-3 rounded-xl transition-colors">
+                <i class="ti ti-receipt-2 text-2xl"></i>
+                <span class="hidden lg:block">Pesanan Aktif</span>
+            </a>
+            <a th:href="@{/pharmacist/katalog}" th:classappend="${activePage == 'catalog'} ? 'bg-[#FDF3F0] text-[#D53E0F] font-semibold border-l-4 border-[#D53E0F]' : 'text-stone-600 hover:bg-[#FDF3F0] hover:text-[#D53E0F]'" class="flex items-center justify-center lg:justify-start gap-3 px-3 py-3 rounded-xl transition-colors">
+                <i class="ti ti-pill text-2xl"></i>
+                <span class="hidden lg:block">Manajemen Katalog</span>
+            </a>
+            <a th:href="@{/pharmacist/history}" th:classappend="${activePage == 'history'} ? 'bg-[#FDF3F0] text-[#D53E0F] font-semibold border-l-4 border-[#D53E0F]' : 'text-stone-600 hover:bg-[#FDF3F0] hover:text-[#D53E0F]'" class="flex items-center justify-center lg:justify-start gap-3 px-3 py-3 rounded-xl transition-colors">
+                <i class="ti ti-history text-2xl"></i>
+                <span class="hidden lg:block">Riwayat Selesai</span>
+            </a>
+            <a th:href="@{/pharmacist/profile}" th:classappend="${activePage == 'profile'} ? 'bg-[#FDF3F0] text-[#D53E0F] font-semibold border-l-4 border-[#D53E0F]' : 'text-stone-600 hover:bg-[#FDF3F0] hover:text-[#D53E0F]'" class="flex items-center justify-center lg:justify-start gap-3 px-3 py-3 rounded-xl transition-colors">
+                <i class="ti ti-user-circle text-2xl"></i>
+                <span class="hidden lg:block">Profil Saya</span>
+            </a>
+        </nav>
+
+        <!-- Apoteker Profile & Logout -->
+        <div class="p-4 border-t border-stone-200 flex flex-col gap-4">
+            <div class="flex items-center justify-center lg:justify-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                    <span class="text-sm font-bold text-blue-700">SF</span>
+                </div>
+                <div class="min-w-0 hidden lg:block">
+                    <p class="text-sm font-semibold text-stone-900 truncate">Siska Faradilla</p>
+                    <span class="inline-block text-stone-500 text-[10px] font-bold mt-0.5">APOTEKER</span>
+                </div>
+            </div>
+            <form th:action="@{/auth/logout}" method="post" class="w-full m-0 p-0">
+                <button type="submit" class="flex items-center justify-center lg:justify-start gap-2 w-full px-4 py-2.5 bg-red-50 text-red-600 rounded-xl font-semibold hover:bg-red-100 transition-colors">
+                    <i class="ti ti-logout text-xl"></i>
+                    <span class="hidden lg:block">Keluar</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+</body>
+</html>

@@ -6,10 +6,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.telemedclinic.pharmacy.entity.Pharmacy;
-import com.telemedclinic.pharmacy.repository.PharmacyRepository;
+import com.telemedclinic.pharmacy.internal.entity.Pharmacy;
+import com.telemedclinic.pharmacy.internal.repository.PharmacyRepository;
 import com.telemedclinic.user.dto.CreatePharmacistRequest;
-import com.telemedclinic.user.entity.Pharmacist;
+import com.telemedclinic.pharmacy.internal.entity.Pharmacist;
 import com.telemedclinic.user.repository.UserRepository;
 
 @Service
