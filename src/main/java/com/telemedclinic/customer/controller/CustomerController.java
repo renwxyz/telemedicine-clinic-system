@@ -687,7 +687,8 @@ public class CustomerController {
         // Gunakan lambda aman untuk menghindari error pemetaan pewarisan class User
         List<Doctor> availableDoctors = doctorRepository.findAll().stream()
                 .filter(Doctor::isApprovedPartner)
-                .filter(doctor -> doctor.isActive()) 
+                .filter(Doctor::isActive)
+                .filter(Doctor::isPracticeActiveNow)
                 .toList();
 
         model.addAttribute("availableDoctors", availableDoctors);
@@ -719,7 +720,8 @@ public class CustomerController {
             model.addAttribute("error", "Pilih dokter dan jelaskan keluhan Anda.");
             model.addAttribute("availableDoctors", doctorRepository.findAll().stream()
                     .filter(Doctor::isApprovedPartner)
-                    .filter(doctor -> doctor.isActive()).toList());
+                    .filter(Doctor::isActive)
+                    .filter(Doctor::isPracticeActiveNow).toList());
             model.addAttribute("consultationForm", consultationForm);
             setActiveSection(model, "consultations");
             return "customer/consultation-new";
@@ -730,7 +732,8 @@ public class CustomerController {
             model.addAttribute("error", "Dokter tidak ditemukan.");
             model.addAttribute("availableDoctors", doctorRepository.findAll().stream()
                     .filter(Doctor::isApprovedPartner)
-                    .filter(doctor -> doctor.isActive()).toList());
+                    .filter(Doctor::isActive)
+                    .filter(Doctor::isPracticeActiveNow).toList());
             model.addAttribute("consultationForm", consultationForm);
             setActiveSection(model, "consultations");
             return "customer/consultation-new";
