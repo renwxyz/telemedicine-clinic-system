@@ -42,7 +42,7 @@
             <hr class="border-stone-200">
             <div class="flex justify-between text-sm">
                 <span class="text-stone-500">Total Pembayaran:</span>
-                <span class="font-bold text-orange-600 text-lg">Rp 50.000</span>
+                <span class="font-bold text-orange-600 text-lg" th:text="${'Rp ' + #numbers.formatInteger(consultation.doctor != null ? consultation.doctor.consultationFee : 0.0, 0, 'COMMA')}">Rp 50.000</span>
             </div>
         </div>
 

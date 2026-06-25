@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 public class Doctor extends User {
@@ -28,6 +29,18 @@ public class Doctor extends User {
 
     @Column
     private LocalDateTime credentialSentAt;
+
+    @Column(nullable = false)
+    private boolean practiceActive = true;
+
+    @Column(nullable = false)
+    private Double balance = 0.0;
+
+    @Column(nullable = false)
+    private Double consultationFee = 250000.0;
+
+    @Column
+    private String sipDocumentPath;
 
 
     // No-args constructor for JPA
@@ -179,5 +192,41 @@ public class Doctor extends User {
 
     public boolean hasReceivedCredential() {
         return credentialSentAt != null;
+    }
+
+    public boolean isPracticeActive() {
+        return practiceActive;
+    }
+
+    public void setPracticeActive(boolean practiceActive) {
+        this.practiceActive = practiceActive;
+    }
+
+    public boolean isPracticeActiveNow() {
+        return this.isActive() && this.isApprovedPartner() && this.practiceActive;
+    }
+
+    public Double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(Double balance) {
+        this.balance = balance;
+    }
+
+    public Double getConsultationFee() {
+        return consultationFee;
+    }
+
+    public void setConsultationFee(Double consultationFee) {
+        this.consultationFee = consultationFee;
+    }
+
+    public String getSipDocumentPath() {
+        return sipDocumentPath;
+    }
+
+    public void setSipDocumentPath(String sipDocumentPath) {
+        this.sipDocumentPath = sipDocumentPath;
     }
 }

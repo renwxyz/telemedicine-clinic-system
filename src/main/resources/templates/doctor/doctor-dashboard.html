@@ -1,344 +1,280 @@
 <!doctype html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard Dokter - KlinikKu</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="bg-[#FDF3F0] font-['Plus_Jakarta_Sans'] text-stone-800">
-    <!-- Navbar -->
-    <div
-      th:replace="~{fragments/doctor-navbar :: doctorNavbar('dashboard')}"
-    ></div>
 
-    <main class="pt-24 pb-16 max-w-7xl mx-auto px-6">
-      <div
-        class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4"
-      >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Dokter - KlinikKu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-[#FDF3F0] font-['Plus_Jakarta_Sans'] text-stone-800">
+  <!-- Navbar -->
+  <div th:replace="~{fragments/doctor-navbar :: doctorNavbar('dashboard')}"></div>
+
+  <main class="pt-24 pb-16 max-w-7xl mx-auto px-6">
+    <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-extrabold text-stone-900 mb-1"
+          th:text="${doctor != null} ? 'Selamat Datang, ' + ${doctor.name} + ' 👋' : 'Selamat Datang'">
+          Selamat Datang,
+        </h1>
+        <p class="text-stone-500 font-medium">
+          Ringkasan aktivitas dan antrean pasien Anda hari ini.
+        </p>
+      </div>
+      <p class="text-sm font-bold text-stone-400 bg-white px-4 py-2 rounded-lg border border-stone-200 shadow-sm"
+        id="current-date" th:text="${currentDate}">
+        Senin, 29 Mei 2026
+      </p>
+    </div>
+
+    <!-- Status Praktik Banner -->
+    <div id="dashboard-status-banner"
+      th:class="${doctor != null and doctor.practiceActive} ? 
+                     'mb-8 bg-emerald-50 border border-emerald-200 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-center gap-4 transition-all duration-300' : 
+                     'mb-8 bg-stone-100 border border-stone-200 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-center gap-4 transition-all duration-300'">
+
+      <div class="flex items-center gap-4">
+        <!-- Icon -->
+        <div id="banner-icon-bg"
+          th:class="${doctor != null and doctor.practiceActive} ? 
+                         'w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0' : 
+                         'w-12 h-12 rounded-full bg-stone-200 flex items-center justify-center text-stone-500 shrink-0'">
+          <!-- SVG Online -->
+          <svg id="banner-icon-online"
+            th:class="${doctor != null and doctor.practiceActive} ? 'w-6 h-6' : 'w-6 h-6 hidden'" fill="none"
+            stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <!-- SVG Offline -->
+          <svg id="banner-icon-offline"
+            th:class="${doctor != null and doctor.practiceActive} ? 'w-6 h-6 hidden' : 'w-6 h-6'" fill="none"
+            stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+          </svg>
+        </div>
+
         <div>
-          <h1
-            class="text-3xl font-extrabold text-stone-900 mb-1"
-            th:text="${doctor != null} ? 'Selamat Datang, ' + ${doctor.name} + ' 👋' : 'Selamat Datang'"
-          >
-            Selamat Datang,
-          </h1>
-          <p class="text-stone-500 font-medium">
-            Ringkasan aktivitas dan antrean pasien Anda hari ini.
+          <h3 class="font-extrabold text-stone-900 text-lg">
+            Status Praktik: <span id="banner-status-title"
+              th:text="${doctor != null and doctor.practiceActive} ? 'Aktif (Online)' : 'Tidak Aktif (Offline)'"
+              th:class="${doctor != null and doctor.practiceActive} ? 'text-emerald-600' : 'text-stone-500'">Aktif
+              (Online)</span>
+          </h3>
+          <p id="banner-status-desc" class="text-sm text-stone-500 font-medium"
+            th:text="${doctor != null and doctor.practiceActive} ? 'Anda sedang online dan siap menerima konsultasi dari pasien.' : 'Anda sedang offline. Pasien tidak dapat memulai konsultasi baru dengan Anda.'">
+            Anda sedang online dan siap menerima konsultasi dari pasien.
           </p>
         </div>
-        <p
-          class="text-sm font-bold text-stone-400 bg-white px-4 py-2 rounded-lg border border-stone-200 shadow-sm"
-          id="current-date"
-        >
-          Senin, 29 Mei 2026
+      </div>
+
+      <button id="dashboard-toggle-btn"
+        th:class="${doctor != null and doctor.practiceActive} ? 
+                          'bg-stone-800 hover:bg-stone-950 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm shadow-sm shrink-0' : 
+                          'bg-[#D53E0F] hover:bg-[#5E0006] text-white font-bold px-5 py-2.5 rounded-xl transition text-sm shadow-sm shrink-0'"
+        th:text="${doctor != null and doctor.practiceActive} ? 'Ubah ke Offline' : 'Aktifkan Praktik'">
+        Ubah ke Offline
+      </button>
+    </div>
+
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div
+        class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 relative overflow-hidden group hover:border-[#D53E0F] transition-all">
+        <div
+          class="absolute -right-6 -top-6 w-24 h-24 bg-orange-50 rounded-full opacity-50 group-hover:scale-110 transition-transform">
+        </div>
+        <div class="flex items-center justify-between mb-4 relative z-10">
+          <h3 class="text-stone-500 font-bold text-sm uppercase tracking-wider">
+            Pasien Ditangani
+          </h3>
+          <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center text-[#D53E0F]">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="text-4xl font-extrabold text-stone-900 mb-1 relative z-10" th:text="${totalPatients}">
+          0
+        </div>
+
+      </div>
+
+      <div
+        class="bg-gradient-to-br from-[#D53E0F] to-[#8c2505] rounded-2xl shadow-md p-6 relative overflow-hidden group">
+        <div
+          class="absolute -right-4 -bottom-4 w-32 h-32 bg-white/10 rounded-full group-hover:scale-110 transition-transform">
+        </div>
+        <div class="flex items-center justify-between mb-4 relative z-10">
+          <h3 class="text-white/80 font-bold text-sm uppercase tracking-wider">
+            Antrean Menunggu
+          </h3>
+          <div class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center text-white">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="text-4xl font-extrabold text-white mb-1 relative z-10" th:text="${waitingQueue}">
+          0
+        </div>
+        <p class="text-xs text-orange-100 font-medium relative z-10">
+          Harap segera direspons
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div
+        class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 relative overflow-hidden group hover:border-[#D53E0F] transition-all">
         <div
-          class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 relative overflow-hidden group hover:border-[#D53E0F] transition-all"
-        >
-          <div
-            class="absolute -right-6 -top-6 w-24 h-24 bg-orange-50 rounded-full opacity-50 group-hover:scale-110 transition-transform"
-          ></div>
-          <div class="flex items-center justify-between mb-4 relative z-10">
-            <h3
-              class="text-stone-500 font-bold text-sm uppercase tracking-wider"
-            >
-              Pasien Ditangani
-            </h3>
-            <div
-              class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center text-[#D53E0F]"
-            >
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0z"
-                ></path>
-              </svg>
-            </div>
-          </div>
-          <div
-  class="text-4xl font-extrabold text-stone-900 mb-1 relative z-10"
-  th:text="${totalPatients}"
->
-  0
-</div>
-          <p
-            class="text-xs text-green-500 font-bold flex items-center gap-1 relative z-10"
-          >
-            <svg
-              class="w-3 h-3"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-              ></path>
+          class="absolute -right-6 -top-6 w-24 h-24 bg-green-50 rounded-full opacity-50 group-hover:scale-110 transition-transform">
+        </div>
+        <div class="flex items-center justify-between mb-4 relative z-10">
+          <h3 class="text-stone-500 font-bold text-sm uppercase tracking-wider">
+            Saldo Dompet
+          </h3>
+          <div class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center text-green-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
             </svg>
-            +12% dari bulan lalu
-          </p>
+          </div>
         </div>
-
-        <div
-          class="bg-gradient-to-br from-[#D53E0F] to-[#8c2505] rounded-2xl shadow-md p-6 relative overflow-hidden group"
-        >
-          <div
-            class="absolute -right-4 -bottom-4 w-32 h-32 bg-white/10 rounded-full group-hover:scale-110 transition-transform"
-          ></div>
-          <div class="flex items-center justify-between mb-4 relative z-10">
-            <h3
-              class="text-white/80 font-bold text-sm uppercase tracking-wider"
-            >
-              Antrean Menunggu
-            </h3>
-            <div
-              class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center text-white"
-            >
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                ></path>
-              </svg>
-            </div>
-          </div>
-         <div
-  class="text-4xl font-extrabold text-white mb-1 relative z-10"
-  th:text="${waitingQueue}"
->
-  0
-</div>
-          <p class="text-xs text-orange-100 font-medium relative z-10">
-            Harap segera direspons
-          </p>
+        <div class="text-3xl font-extrabold text-stone-900 mb-1 relative z-10"
+          th:text="'Rp ' + ${#numbers.formatInteger(doctor != null ? doctor.balance : 0, 0, 'POINT')}">
+          Rp 0
         </div>
+        <a th:href="@{/doctor/earnings}" class="text-xs text-[#D53E0F] font-bold hover:underline relative z-10">Tarik
+          Dana & Atur Tarif &rarr;</a>
+      </div>
+    </div>
 
-        <div
-          class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 relative overflow-hidden group hover:border-green-500 transition-all"
-        >
-          <div
-            class="absolute -right-6 -top-6 w-24 h-24 bg-green-50 rounded-full opacity-50 group-hover:scale-110 transition-transform"
-          ></div>
-          <div class="flex items-center justify-between mb-4 relative z-10">
-            <h3
-              class="text-stone-500 font-bold text-sm uppercase tracking-wider"
-            >
-              Pendapatan (Bulan Ini)
-            </h3>
-            <div
-              class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center text-green-600"
-            >
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                ></path>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-1 space-y-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6">
+          <h2 class="text-lg font-bold text-stone-900 mb-4">Aksi Cepat</h2>
+          <a th:href="@{/doctor/live-konsultasi}"
+            class="w-full bg-[#D53E0F] text-white font-bold py-3.5 px-4 rounded-xl hover:bg-[#5E0006] transition shadow-md shadow-orange-200 flex items-center justify-between mb-3">
+            <span class="flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z">
+                </path>
               </svg>
-            </div>
-          </div>
-          <div
-            class="text-3xl font-extrabold text-stone-900 mb-1 relative z-10"
-          >
-            Rp 8.750k
-          </div>
-          <a
-            th:href="@{/doctor/earnings}"
-            class="text-xs text-blue-500 font-bold hover:underline relative z-10"
-            >Lihat Detail Keuangan &rarr;</a
-          >
+              Buka Live Konsultasi</span>
+            <span class="bg-white text-[#D53E0F] text-xs px-2 py-1 rounded-md" th:text="${waitingQueue} + ' Antrean'">0
+              Antrean</span>
+          </a>
+          <a th:href="@{/doctor/profile}"
+            class="w-full bg-stone-50 border border-stone-200 text-stone-700 font-bold py-3.5 px-4 rounded-xl hover:bg-stone-100 transition flex items-center gap-2">
+            <svg class="w-5 h-5 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+            Pengaturan Profil
+          </a>
+          <a th:href="@{/doctor/earnings}"
+            class="w-full bg-stone-50 border border-stone-200 text-stone-700 font-bold py-3.5 px-4 rounded-xl hover:bg-stone-100 transition flex items-center gap-2 mt-3">
+            <svg class="w-5 h-5 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+              </path>
+            </svg>
+            Tarik Saldo & Tarif
+          </a>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-1 space-y-6">
-          <div
-            class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6"
-          >
-            <h2 class="text-lg font-bold text-stone-900 mb-4">Aksi Cepat</h2>
-            <a
-              th:href="@{/doctor/live-konsultasi}"
-              class="w-full bg-[#D53E0F] text-white font-bold py-3.5 px-4 rounded-xl hover:bg-[#5E0006] transition shadow-md shadow-orange-200 flex items-center justify-between mb-3"
-            >
-              <span class="flex items-center gap-2"
-                ><svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                  ></path>
-                </svg>
-                Buka Live Konsultasi</span
-              >
-              <span
-  class="bg-white text-[#D53E0F] text-xs px-2 py-1 rounded-md"
-  th:text="${waitingQueue} + ' Antrean'"
->
-  0 Antrean
-</span>
-            </a>
-            <a
-              th:href="@{/doctor/profile}"
-              class="w-full bg-stone-50 border border-stone-200 text-stone-700 font-bold py-3.5 px-4 rounded-xl hover:bg-stone-100 transition flex items-center gap-2"
-            >
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                ></path>
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                ></path>
-              </svg>
-              Atur Jam Praktik
-            </a>
-          </div>
+      <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
+        <div class="px-6 py-5 border-b border-stone-100 flex justify-between items-center">
+          <h2 class="text-lg font-bold text-stone-900">
+            Riwayat Konsultasi Hari Ini
+          </h2>
         </div>
-
-        <div
-          class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden"
-        >
-          <div
-            class="px-6 py-5 border-b border-stone-100 flex justify-between items-center"
-          >
-            <h2 class="text-lg font-bold text-stone-900">
-              Riwayat Konsultasi Hari Ini
-            </h2>
-            <a href="#" class="text-sm font-bold text-[#D53E0F] hover:underline"
-              >Lihat Semua</a
-            >
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr
-                  class="bg-stone-50 text-stone-500 text-xs uppercase tracking-wider"
-                >
-                  <th class="px-6 py-4 font-bold">Pasien</th>
-                  <th class="px-6 py-4 font-bold">Waktu</th>
-                  <th class="px-6 py-4 font-bold">Resep</th>
-                  <th class="px-6 py-4 font-bold text-right">Status</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-stone-100 text-sm">
-                <tr class="hover:bg-stone-50 transition cursor-pointer">
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                      <div
-                        class="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center font-bold text-stone-600 text-xs"
-                      >
-                        SR
-                      </div>
-                      <span class="font-bold text-stone-900">Siti Rahayu</span>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-stone-50 text-stone-500 text-xs uppercase tracking-wider">
+                <th class="px-6 py-4 font-bold">Pasien</th>
+                <th class="px-6 py-4 font-bold">Waktu</th>
+                <th class="px-6 py-4 font-bold">Resep</th>
+                <th class="px-6 py-4 font-bold text-right">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-stone-100 text-sm">
+              <!-- Jika tidak ada riwayat konsultasi -->
+              <tr th:if="${#lists.isEmpty(todayConsultations)}">
+                <td colspan="4" class="px-6 py-10 text-center text-stone-400 font-medium">
+                  Belum ada riwayat konsultasi hari ini.
+                </td>
+              </tr>
+              <!-- Iterasi riwayat konsultasi -->
+              <tr th:each="consultation : ${todayConsultations}" 
+                  class="hover:bg-stone-50 transition cursor-pointer"
+                  th:onclick="'window.location.href=\'/doctor/live-konsultasi/\' + ' + ${consultation.id}">
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-8 h-8 rounded-full bg-[#FAD5C8] flex items-center justify-center font-bold text-[#D53E0F] text-xs"
+                      th:text="${consultation.customer != null and consultation.customer.name != null and consultation.customer.name.length() >= 2 ? #strings.toUpperCase(consultation.customer.name.substring(0,2)) : 'PS'}">
+                      PS
                     </div>
-                  </td>
-                  <td class="px-6 py-4 text-stone-500">10:30 WIB</td>
-                  <td class="px-6 py-4">
-                    <span
-                      class="bg-blue-50 text-blue-600 font-bold px-2 py-1 rounded text-xs"
-                      >Ya (2 Obat)</span
-                    >
-                  </td>
-                  <td class="px-6 py-4 text-right">
-                    <span
-                      class="bg-green-100 text-green-700 font-bold px-3 py-1 rounded-full text-xs"
-                      >Selesai</span
-                    >
-                  </td>
-                </tr>
-                <tr class="hover:bg-stone-50 transition cursor-pointer">
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                      <div
-                        class="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center font-bold text-stone-600 text-xs"
-                      >
-                        BS
-                      </div>
-                      <span class="font-bold text-stone-900">Budi Santoso</span>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 text-stone-500">09:15 WIB</td>
-                  <td class="px-6 py-4">
-                    <span
-                      class="bg-stone-100 text-stone-500 font-bold px-2 py-1 rounded text-xs"
-                      >Tidak</span
-                    >
-                  </td>
-                  <td class="px-6 py-4 text-right">
-                    <span
-                      class="bg-green-100 text-green-700 font-bold px-3 py-1 rounded-full text-xs"
-                      >Selesai</span
-                    >
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                    <span class="font-bold text-stone-900"
+                      th:text="${consultation.customer != null ? consultation.customer.name : 'Pasien'}">Nama
+                      Pasien</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-stone-500"
+                  th:text="${consultation.createdAt != null ? #temporals.format(consultation.createdAt, 'HH:mm') + ' WIB' : '-'}">
+                  10:30 WIB</td>
+                <td class="px-6 py-4">
+                  <a th:if="${consultation.prescription}"
+                    th:href="@{/doctor/live-konsultasi/{id}(id=${consultation.id})}"
+                    class="inline-block bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold px-2.5 py-1 rounded text-xs transition-colors"
+                    onclick="event.stopPropagation();"
+                    th:text="${prescriptionMedicinesMap != null and prescriptionMedicinesMap.get(consultation.id) != null ? prescriptionMedicinesMap.get(consultation.id) : 'Ya (Lihat Resep)'}">Ya (Lihat Resep)</a>
+                  <span th:unless="${consultation.prescription}"
+                    class="bg-stone-100 text-stone-500 font-bold px-2.5 py-1 rounded text-xs">Tidak</span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <span th:if="${consultation.status != null and consultation.status.name() == 'COMPLETED'}"
+                    class="bg-green-100 text-green-700 font-bold px-3 py-1 rounded-full text-xs">Selesai</span>
+                  <span th:if="${consultation.status != null and consultation.status.name() == 'IN_PROGRESS'}"
+                    class="bg-orange-100 text-orange-700 font-bold px-3 py-1 rounded-full text-xs">Berjalan</span>
+                  <span th:if="${consultation.status != null and consultation.status.name() == 'PENDING'}"
+                    class="bg-yellow-100 text-yellow-700 font-bold px-3 py-1 rounded-full text-xs">Menunggu</span>
+                  <span th:if="${consultation.status != null and consultation.status.name() == 'CANCELLED'}"
+                    class="bg-red-100 text-red-700 font-bold px-3 py-1 rounded-full text-xs">Dibatalkan</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
-    </main>
+    </div>
+  </main>
 
-    <script>
-      const statusToggle = document.getElementById("global-status");
-      const statusText = document.getElementById("status-text");
+  <!-- Script untuk Sinkronisasi Banner Dashboard dengan Navbar Toggle -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const dashboardToggleBtn = document.getElementById('dashboard-toggle-btn');
+      const globalStatus = document.getElementById('global-status');
 
-      statusToggle.addEventListener("change", (e) => {
-        if (e.target.checked) {
-          statusText.textContent = "Praktik Aktif";
-          statusText.classList.remove("text-stone-400");
-          statusText.classList.add("text-stone-700");
-        } else {
-          statusText.textContent = "Offline (Darurat)";
-          statusText.classList.remove("text-stone-700");
-          statusText.classList.add("text-stone-400");
-        }
-      });
-    </script>
-  </body>
+      if (dashboardToggleBtn && globalStatus) {
+        dashboardToggleBtn.addEventListener('click', () => {
+          // Trigger checkbox di navbar dan jalankan event change
+          globalStatus.checked = !globalStatus.checked;
+          globalStatus.dispatchEvent(new Event('change'));
+        });
+      }
+    });
+  </script>
+</body>
+
 </html>

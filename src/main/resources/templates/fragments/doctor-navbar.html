@@ -1,70 +1,106 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <body>
     <!-- Ini adalah Fragment Navbar Dokter yang bisa dipanggil dari mana saja -->
-    <nav th:fragment="doctorNavbar(activePage)" class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-stone-200 shadow-sm z-50 transition-all">
+    <nav th:fragment="doctorNavbar(activePage)"
+        class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-stone-200 shadow-sm z-50 transition-all">
         <div class="max-w-screen-2xl mx-auto px-6 py-3 flex justify-between items-center">
-            
+
             <!-- Logo Area -->
             <div class="flex items-center gap-2">
                 <div class="w-8 h-8 rounded-full bg-[#FAD5C8] flex items-center justify-center">
-                    <svg class="w-5 h-5 text-[#D53E0F]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <svg class="w-5 h-5 text-[#D53E0F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
                 </div>
-                <div class="text-xl font-extrabold text-stone-900 tracking-tight hidden sm:block">KlinikKu <span class="text-[#D53E0F]">Dokter</span></div>
+                <div class="text-xl font-extrabold text-stone-900 tracking-tight hidden sm:block">KlinikKu <span
+                        class="text-[#D53E0F]">Dokter</span></div>
             </div>
-            
+
             <!-- Dinamic Navigation Links -->
             <div class="hidden md:flex gap-6 items-center">
-                <a th:href="@{/doctor/dashboard}" 
-                   class="font-bold pb-1 transition-all"
-                   th:classappend="${activePage == 'dashboard'} ? 'text-[#D53E0F] border-b-2 border-[#D53E0F]' : 'text-stone-500 hover:text-[#D53E0F]'">
-                   Dashboard
-                </a>
-                
-                <a th:href="@{/doctor/antrean}" 
-                   class="font-bold pb-1 transition-all"
-                   th:classappend="${activePage == 'antrean'} ? 'text-[#D53E0F] border-b-2 border-[#D53E0F]' : 'text-stone-500 hover:text-[#D53E0F]'">
-                   Antrean
-                </a>
-                
-                <a th:href="@{/doctor/live-konsultasi}" 
-                   class="font-bold pb-1 transition-all"
-                   th:classappend="${activePage == 'live'} ? 'text-[#D53E0F] border-b-2 border-[#D53E0F]' : 'text-stone-500 hover:text-[#D53E0F]'">
-                   Live Konsultasi
+                <a th:href="@{/doctor/dashboard}" class="font-bold pb-1 transition-all"
+                    th:classappend="${activePage == 'dashboard'} ? 'text-[#D53E0F] border-b-2 border-[#D53E0F]' : 'text-stone-500 hover:text-[#D53E0F]'">
+                    Dashboard
                 </a>
 
-                <a th:href="@{/doctor/earnings}" 
-                   class="font-bold pb-1 transition-all"
-                   th:classappend="${activePage == 'keuangan'} ? 'text-[#D53E0F] border-b-2 border-[#D53E0F]' : 'text-stone-500 hover:text-[#D53E0F]'">
-                   Keuangan
+                <a th:href="@{/doctor/antrean}" class="font-bold pb-1 transition-all"
+                    th:classappend="${activePage == 'antrean'} ? 'text-[#D53E0F] border-b-2 border-[#D53E0F]' : 'text-stone-500 hover:text-[#D53E0F]'">
+                    Antrean
+                </a>
+
+                <a th:href="@{/doctor/live-konsultasi}" class="font-bold pb-1 transition-all"
+                    th:classappend="${activePage == 'live'} ? 'text-[#D53E0F] border-b-2 border-[#D53E0F]' : 'text-stone-500 hover:text-[#D53E0F]'">
+                    Live Konsultasi
+                </a>
+
+                <a th:href="@{/doctor/earnings}" class="font-bold pb-1 transition-all"
+                    th:classappend="${activePage == 'keuangan'} ? 'text-[#D53E0F] border-b-2 border-[#D53E0F]' : 'text-stone-500 hover:text-[#D53E0F]'">
+                    Keuangan
                 </a>
             </div>
 
             <!-- Right Area (Toggle & Profile) -->
             <div class="flex items-center gap-5">
                 <!-- Global Online/Offline Toggle -->
-                <div class="hidden lg:flex items-center gap-2 bg-stone-100 px-3 py-1.5 rounded-full border border-stone-200">
-                    <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-                        <input type="checkbox" id="global-status" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer checked:right-0 checked:border-green-500 transition-all duration-300" checked/>
-                        <label for="global-status" class="toggle-label block overflow-hidden h-5 rounded-full bg-green-400 cursor-pointer transition-all duration-300"></label>
-                    </div>
-                    <span class="text-xs font-bold text-stone-700" id="status-text">Praktik Aktif</span>
+                <div
+                    class="hidden lg:flex items-center gap-2 bg-stone-100 px-3 py-1.5 rounded-full border border-stone-200">
+                    <input type="hidden" id="csrf-token" th:value="${_csrf.token}" />
+                    <input type="hidden" id="csrf-header" th:value="${_csrf.headerName}" />
+
+                    <label class="relative inline-flex items-center cursor-pointer select-none">
+                        <input type="checkbox" id="global-status" class="sr-only peer"
+                            th:checked="${doctor != null and doctor.practiceActive}" />
+                        <div id="toggle-track"
+                            class="relative w-9 h-5 bg-stone-300 rounded-full peer peer-focus:outline-none transition-all duration-300 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500">
+                        </div>
+                        <span class="ml-2 text-xs font-bold transition-all"
+                            th:classappend="${doctor == null or doctor.practiceActive} ? 'text-stone-700' : 'text-stone-400'"
+                            id="status-text"
+                            th:text="${doctor == null or doctor.practiceActive} ? 'Praktik Aktif' : 'Offline'">Praktik
+                            Aktif</span>
+                    </label>
                 </div>
 
-                <!-- Notifications -->
-                <button class="relative text-stone-500 hover:text-[#D53E0F] transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">3</span>
-                </button>
 
-                <!-- Profile Button -->
-                <a th:href="@{/doctor/profile}" 
-                   class="flex items-center gap-2 hover:bg-stone-50 p-1.5 rounded-xl transition cursor-pointer"
-                   th:classappend="${activePage == 'profil'} ? 'ring-2 ring-[#D53E0F] ring-offset-2' : ''">
-                    <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-[#D53E0F] to-[#ff7a55] flex items-center justify-center text-white font-bold text-sm shadow-md">
-                        AF <!-- Nanti bisa diubah dinamis th:text -->
+                <!-- Profile Button Dropdown -->
+                <div class="relative group">
+                    <button
+                        class="flex items-center gap-2 hover:bg-stone-50 p-1.5 rounded-xl transition cursor-pointer focus:outline-none"
+                        th:classappend="${activePage == 'profil'} ? 'ring-2 ring-[#D53E0F] ring-offset-2' : ''">
+                        <div
+                            class="w-9 h-9 rounded-full bg-gradient-to-tr from-[#D53E0F] to-[#ff7a55] flex items-center justify-center text-white font-bold text-sm shadow-md overflow-hidden shrink-0">
+                            <img th:if="${doctor != null and doctor.profilePhotoPath != null and !doctor.profilePhotoPath.isEmpty()}"
+                                th:src="@{${doctor.profilePhotoPath}}" class="w-full h-full object-cover"
+                                alt="Profile Photo">
+                            <span
+                                th:unless="${doctor != null and doctor.profilePhotoPath != null and !doctor.profilePhotoPath.isEmpty()}"
+                                th:text="${doctor != null and doctor.name != null and doctor.name.length() >= 2 ? #strings.toUpperCase(doctor.name.substring(0,2)) : 'DR'}">
+                                DR
+                            </span>
+                        </div>
+                    </button>
+
+                    <!-- Dropdown Menu Wrapper -->
+                    <div class="absolute right-0 top-full pt-2 w-48 hidden group-hover:block transition-all z-50">
+                        <div class="bg-white rounded-xl shadow-lg border border-stone-200 py-1 overflow-hidden">
+                            <a th:href="@{/doctor/profile}"
+                                class="flex items-center gap-2 px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50 font-bold transition">
+                                👤 Profile Saya
+                            </a>
+                            <hr class="border-stone-100 my-1" />
+                            <form th:action="@{/auth/logout}" method="post" class="block">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <button type="submit"
+                                    class="w-full text-left flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 font-bold transition">
+                                    🚪 Logout
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                </a>
+                </div>
             </div>
         </div>
 
@@ -73,19 +109,93 @@
             document.addEventListener('DOMContentLoaded', () => {
                 const statusToggle = document.getElementById('global-status');
                 const statusText = document.getElementById('status-text');
-                if(statusToggle && statusText) {
+                const csrfTokenEl = document.getElementById('csrf-token');
+                const csrfHeaderEl = document.getElementById('csrf-header');
+
+                if (statusToggle && statusText) {
                     statusToggle.addEventListener('change', (e) => {
-                        if(e.target.checked) {
-                            statusText.textContent = "Praktik Aktif";
-                            statusText.classList.replace("text-stone-400", "text-stone-700");
-                        } else {
-                            statusText.textContent = "Offline (Darurat)";
-                            statusText.classList.replace("text-stone-700", "text-stone-400");
-                        }
+                        const token = csrfTokenEl ? csrfTokenEl.value : '';
+                        const header = csrfHeaderEl ? csrfHeaderEl.value : '';
+
+                        fetch('/doctor/status/toggle', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                [header]: token
+                            }
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data.success) {
+                                    statusText.classList.remove('text-stone-700', 'text-stone-400');
+                                    if (data.practiceActive) {
+                                        statusText.textContent = "Praktik Aktif";
+                                        statusText.classList.add('text-stone-700');
+                                    } else {
+                                        statusText.textContent = "Offline";
+                                        statusText.classList.add('text-stone-400');
+                                    }
+
+                                    // Update dashboard banner if it exists on page
+                                    const banner = document.getElementById('dashboard-status-banner');
+                                    const bannerIconBg = document.getElementById('banner-icon-bg');
+                                    const bannerIconOnline = document.getElementById('banner-icon-online');
+                                    const bannerIconOffline = document.getElementById('banner-icon-offline');
+                                    const bannerStatusTitle = document.getElementById('banner-status-title');
+                                    const bannerStatusDesc = document.getElementById('banner-status-desc');
+                                    const bannerToggleBtn = document.getElementById('dashboard-toggle-btn');
+
+                                    if (banner) {
+                                        if (data.practiceActive) {
+                                            banner.className = 'mb-8 bg-emerald-50 border border-emerald-200 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-center gap-4 transition-all duration-300';
+                                            if (bannerIconBg) bannerIconBg.className = 'w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0';
+                                            if (bannerIconOnline) bannerIconOnline.classList.remove('hidden');
+                                            if (bannerIconOffline) bannerIconOffline.classList.add('hidden');
+                                            if (bannerStatusTitle) {
+                                                bannerStatusTitle.textContent = 'Aktif (Online)';
+                                                bannerStatusTitle.className = 'text-emerald-600';
+                                            }
+                                            if (bannerStatusDesc) bannerStatusDesc.textContent = 'Anda sedang online dan siap menerima konsultasi dari pasien.';
+                                            if (bannerToggleBtn) {
+                                                bannerToggleBtn.className = 'bg-stone-800 hover:bg-stone-950 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm shadow-sm shrink-0';
+                                                bannerToggleBtn.textContent = 'Ubah ke Offline';
+                                            }
+                                        } else {
+                                            banner.className = 'mb-8 bg-stone-100 border border-stone-200 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-center gap-4 transition-all duration-300';
+                                            if (bannerIconBg) bannerIconBg.className = 'w-12 h-12 rounded-full bg-stone-200 flex items-center justify-center text-stone-500 shrink-0';
+                                            if (bannerIconOnline) bannerIconOnline.classList.add('hidden');
+                                            if (bannerIconOffline) bannerIconOffline.classList.remove('hidden');
+                                            if (bannerStatusTitle) {
+                                                bannerStatusTitle.textContent = 'Tidak Aktif (Offline)';
+                                                bannerStatusTitle.className = 'text-stone-500';
+                                            }
+                                            if (bannerStatusDesc) bannerStatusDesc.textContent = 'Anda sedang offline. Pasien tidak dapat memulai konsultasi baru dengan Anda.';
+                                            if (bannerToggleBtn) {
+                                                bannerToggleBtn.className = 'bg-[#D53E0F] hover:bg-[#5E0006] text-white font-bold px-5 py-2.5 rounded-xl transition text-sm shadow-sm shrink-0';
+                                                bannerToggleBtn.textContent = 'Aktifkan Praktik';
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    statusToggle.checked = !statusToggle.checked;
+                                    alert("Gagal mengubah status praktik.");
+                                }
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                statusToggle.checked = !statusToggle.checked;
+                                alert("Terjadi kesalahan jaringan.");
+                            });
                     });
                 }
             });
         </script>
     </nav>
 </body>
+
 </html>
