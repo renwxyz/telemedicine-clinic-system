@@ -92,7 +92,10 @@ public class MidtransService {
             String uniqueOrderId = "CONS-" + consultation.getId() + "-" + System.currentTimeMillis();
             transactionDetails.put("order_id", uniqueOrderId);
             
-            transactionDetails.put("gross_amount", 50000);
+            double fee = consultation.getDoctor() != null && consultation.getDoctor().getConsultationFee() != null
+                    ? consultation.getDoctor().getConsultationFee()
+                    : 50000.0;
+            transactionDetails.put("gross_amount", (int) fee);
             requestBody.set("transaction_details", transactionDetails);
 
             ObjectNode customerDetails = objectMapper.createObjectNode();
