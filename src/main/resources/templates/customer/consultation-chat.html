@@ -193,7 +193,8 @@
         var stompClient = null;
 
         function connect() {
-            var socket = new SockJS('/ws-chat');
+            var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            var socket = new WebSocket(protocol + '//' + window.location.host + '/ws-chat');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function (frame) {
                 stompClient.subscribe('/topic/consultation/' + consultationId, function (message) {
