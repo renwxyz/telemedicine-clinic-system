@@ -38,7 +38,7 @@
     <!-- Navbar -->
     <div th:replace="~{fragments/customer-navbar :: customerNavbar('consultations')}"></div>
 
-    <div class="h-screen pt-[72px] sm:pt-[80px] flex flex-col w-full bg-white">
+    <div class="h-[100dvh] pt-[72px] sm:pt-[80px] flex flex-col w-full bg-white relative z-10">
         <div class="w-full h-full flex flex-col overflow-hidden">
             <!-- HEADER CHAT -->
             <div
@@ -92,7 +92,7 @@
             </div>
 
             <!-- INPUT AREA -->
-            <div id="chat-input-area" class="border-t border-stone-200 py-4 px-4 sm:px-6 md:px-12 bg-white"
+            <div id="chat-input-area" class="border-t border-stone-200 pt-4 pb-8 sm:pb-4 px-4 sm:px-6 md:px-12 bg-white relative z-40"
                 th:if="${consultation.status.name() == 'IN_PROGRESS'}">
                 <form id="chat-form" class="flex gap-2">
                     <input type="hidden" name="${_csrf.parameterName}" th:value="${_csrf.token}" />
@@ -193,8 +193,7 @@
         var stompClient = null;
 
         function connect() {
-            var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            var socket = new WebSocket(protocol + '//' + window.location.host + '/ws-chat');
+            var socket = new SockJS('/ws-chat');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function (frame) {
                 stompClient.subscribe('/topic/consultation/' + consultationId, function (message) {

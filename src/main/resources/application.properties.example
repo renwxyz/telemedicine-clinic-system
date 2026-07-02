@@ -21,6 +21,7 @@ spring.mail.properties.mail.smtp.starttls.enable=true
 app.mail.from=noreply@telemedclinic.com
 server.address=0.0.0.0
 server.port=8080
+server.forward-headers-strategy=framework
 
 # Midtrans Configuration
 midtrans.server.key=your_midtrans_server_key

@@ -18,7 +18,7 @@
     <div th:replace="~{fragments/doctor-navbar :: doctorNavbar('live')}"></div>
 
 
-    <div th:unless="${noActiveSession}" class="h-screen pt-[60px] pb-4 px-4 flex gap-4 max-w-screen-2xl mx-auto">
+    <div th:unless="${noActiveSession}" class="h-[100dvh] pt-[60px] pb-4 px-4 flex gap-4 max-w-screen-2xl mx-auto relative z-10">
         
         <div class="w-full lg:w-[55%] bg-white rounded-2xl shadow-sm border border-stone-200 flex flex-col overflow-hidden">
             <div class="bg-white border-b border-stone-100 p-4 flex justify-between items-center z-10 shadow-sm">
@@ -56,7 +56,7 @@
                 </div>
             </div>
 
-            <div class="border-t border-stone-200 p-4 bg-white" th:if="${consultation.status.name() == 'IN_PROGRESS'}">
+            <div class="border-t border-stone-200 pt-4 pb-8 sm:pb-4 px-4 bg-white relative z-40" th:if="${consultation.status.name() == 'IN_PROGRESS'}">
                 <form id="chat-form" class="flex gap-2 w-full">
                     <button type="button" class="p-3 text-stone-400 hover:text-[#D53E0F] transition bg-stone-50 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg></button>
                     <input type="text" id="chat-input" placeholder="Ketik pesan untuk pasien..." class="flex-1 px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-[#D53E0F] focus:border-transparent outline-none text-sm font-medium">
@@ -153,8 +153,7 @@
 
       function connect() {
           if (!consultationId) return;
-          var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-          var socket = new WebSocket(protocol + '//' + window.location.host + '/ws-chat');
+          var socket = new SockJS('/ws-chat');
           stompClient = Stomp.over(socket);
           stompClient.connect({}, function (frame) {
               stompClient.subscribe('/topic/consultation/' + consultationId, function (message) {
