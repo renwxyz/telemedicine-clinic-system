@@ -180,11 +180,17 @@
             const containers = document.querySelectorAll('.custom-timer-container');
 
             containers.forEach(container => {
-                const createdTimeStr = container.getAttribute('data-created'); // Mengambil LocalDateTime format dari Spring
+                const createdTimeStr = container.getAttribute('data-created'); 
                 if (!createdTimeStr) return;
 
-                const createdAt = new Date(createdTimeStr);
-                // Kita set batas waktu bayar adalah 30 Menit sejak dibuat
+                // Treat the created time as local time in both Java and JS by manually parsing parts
+                // Spring LocalDateTime format: 2026-07-02T18:55:15.123
+                const [datePart, timePart] = createdTimeStr.split('T');
+                const [year, month, day] = datePart.split('-');
+                const [hour, minute, second] = timePart.split('.')[0].split(':');
+                
+                // Construct Date object in browser's local time (assuming server and browser are in the same time concept for this app)
+                const createdAt = new Date(year, month - 1, day, hour, minute, second);
                 const expiryTime = new Date(createdAt.getTime() + (30 * 60 * 1000));
                 const timerDisplay = container.querySelector('.countdown-timer');
 
