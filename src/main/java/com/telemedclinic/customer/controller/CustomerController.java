@@ -841,7 +841,10 @@ public class CustomerController {
             com.telemedclinic.consultation.model.Consultation consultation = opt.get();
             try {
                 // Panggil API Status Midtrans Sandbox
-                String orderId = "CONS-" + consultation.getId();
+                String orderId = consultation.getMidtransOrderId();
+                if (orderId == null || orderId.isBlank()) {
+                    orderId = "CONS-" + consultation.getId();
+                }
                 String authString = midtransServerKey + ":";
                 String encodedAuth = Base64.getEncoder().encodeToString(authString.getBytes());
                 

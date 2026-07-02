@@ -48,6 +48,9 @@ public class Consultation {
     @Column(length = 255)
     private String snapToken;
 
+    @Column(name = "midtrans_order_id", length = 255)
+    private String midtransOrderId;
+
     public Consultation() {}
 
     public Consultation(Customer customer, Doctor doctor, String complaint, String additionalInfo) {
@@ -135,5 +138,13 @@ public class Consultation {
 
     public void setSnapToken(String snapToken) {
         this.snapToken = snapToken;
+    }
+
+    public String getMidtransOrderId() {
+        return midtransOrderId;
+    }
+
+    public void setMidtransOrderId(String midtransOrderId) {
+        this.midtransOrderId = midtransOrderId;
     }
 }

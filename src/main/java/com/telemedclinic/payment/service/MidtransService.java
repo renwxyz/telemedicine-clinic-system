@@ -91,6 +91,7 @@ public class MidtransService {
             
             String uniqueOrderId = "CONS-" + consultation.getId() + "-" + System.currentTimeMillis();
             transactionDetails.put("order_id", uniqueOrderId);
+            consultation.setMidtransOrderId(uniqueOrderId);
             
             double fee = consultation.getDoctor() != null && consultation.getDoctor().getConsultationFee() != null
                     ? consultation.getDoctor().getConsultationFee()
